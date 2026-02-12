@@ -1,0 +1,103 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+}
+
+.background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+.fondo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(0.6) contrast(1.1);
+}
+
+.vignette {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.9) 100%);
+}
+
+.main-layout {
+    position: relative;
+    z-index: 10;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 10%;
+}
+
+h1 {
+    font-size: 4.5rem;
+    font-weight: 200;
+    letter-spacing: 12px;
+    margin: 0 0 50px 0;
+    text-transform: uppercase;
+    color: #f0f0f0;
+}
+
+.menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.menu-item {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 1.4rem;
+    text-align: left;
+    cursor: pointer;
+    letter-spacing: 4px;
+    transition: 0.4s ease;
+    width: fit-content;
+    outline: none;
+}
+
+/* Efecto Hollow Knight al pasar el ratón */
+.menu-item:hover {
+    color: white;
+    padding-left: 25px;
+    text-shadow: 0 0 10px white;
+}
+
+.version-info {
+    position: absolute;
+    bottom: 30px;
+    right: 40px;
+    opacity: 0.5;
+    font-size: 0.9rem;
+}
+
+/* Animaciones de entrada */
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInAnim 1.2s forwards ease-out;
+}
+
+@keyframes fadeInAnim {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

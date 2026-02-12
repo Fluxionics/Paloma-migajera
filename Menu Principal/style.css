@@ -1,60 +1,78 @@
-body {
+body, html {
     margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: #000;
+    font-family: 'Verdana', sans-serif; /* Puedes cambiarla por una pixel font */
     overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Busca una pixel font luego */
-    color: white;
 }
 
-.bg-image {
-    width: 100vw;
-    height: 100vh;
+.background-img {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    filter: brightness(0.6); /* Oscurece un poco para que resalte el texto */
-    position: absolute;
+    z-index: -2;
+    filter: saturate(0.8) brightness(0.5); /* Estilo apagado tipo Hollow Knight */
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 40%, black 150%);
     z-index: -1;
 }
 
-.menu-ui {
-    padding: 100px;
+.menu-container {
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 80vh;
+    padding-left: 10%; /* Alineado a la izquierda como HK */
+    color: white;
 }
 
 h1 {
-    font-size: 4rem;
-    letter-spacing: 5px;
-    text-transform: uppercase;
+    font-size: 3.5rem;
+    font-weight: 200;
+    letter-spacing: 8px;
+    margin-bottom: 50px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.3);
 }
 
-.buttons {
+.menu-options {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    align-items: flex-start;
+    gap: 15px;
 }
 
-.menu-btn {
+.btn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1.5rem;
+    color: #aaa;
+    text-align: left;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
     cursor: pointer;
-    transition: 0.3s;
-    padding-left: 0;
+    transition: all 0.4s ease;
+    width: fit-content;
 }
 
-.menu-btn:hover {
-    color: white;
-    padding-left: 20px; /* Efecto de desplazamiento lateral */
-    text-shadow: 0 0 10px white;
+.btn:hover {
+    color: #fff;
+    padding-left: 25px; /* Pequeño desplazamiento al pasar el mouse */
+    text-shadow: 0 0 10px #fff;
 }
 
-.footer {
+.info-bar {
     position: absolute;
     bottom: 20px;
-    right: 30px;
-    font-size: 0.8rem;
-    opacity: 0.5;
+    right: 40px;
+    opacity: 0.6;
+    font-size: 0.9rem;
 }

@@ -1,33 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <title>Menú Principal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="background-container">
-        <img src="../paloma.JPG" class="bg-image">
-    </div>
+    <div class="overlay"></div>
+    <img src="fondo.jpg" class="background-img" alt="Fondo">
 
-    <div class="menu-ui">
-        <h1 id="game-title">Cargando...</h1>
-        
-        <nav class="buttons">
-            <button class="menu-btn">COMENZAR</button>
-            <button class="menu-btn">OPCIONES</button>
-            <button class="menu-btn">CRÉDITOS</button>
-            <button class="menu-btn">SALIR</button>
+    <main class="menu-container">
+        <section class="header">
+            <h1 id="titulo-juego">Cargando título...</h1>
+        </section>
+
+        <nav class="menu-options">
+            <button class="btn">NUEVA PARTIDA</button>
+            <button class="btn">OPCIONES</button>
+            <button class="btn">SALIR</button>
         </nav>
 
-        <div class="footer">
-            <span id="game-version">v0.0.0</span>
-        </div>
-    </div>
+        <footer class="info-bar">
+            <p id="version-texto">v0.0.0</p>
+        </footer >
+    </main>
 
-    <script src="config.js"></script>
+    <script src="../config.js"></script>
     <script>
-        // Inyectar los datos del JS a la pantalla
-        document.getElementById('game-title').innerText = gameConfig.nombre;
-        document.getElementById('game-version').innerText = gameConfig.version;
+        // Aplicar los datos de config.js al HTML
+        document.getElementById('titulo-juego').textContent = gameConfig.nombre;
+        document.getElementById('version-texto').textContent = gameConfig.version;
     </script>
 </body>
 </html>

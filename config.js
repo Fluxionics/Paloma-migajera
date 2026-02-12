@@ -1,5 +1,7 @@
 const gameConfig = {
-    nombre: "Paloma Migajera",
+    nombre: "PALOMA MIGAJERA",
     version: "v1.0.2",
-    autor: "Gullermo Rafael - Francisco David"
+    estado: "Alpha", // O "Beta", "Demo", etc.
+    desarrollador: "Guillermo R. - Francisco D."
+    
 };

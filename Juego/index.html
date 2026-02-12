@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Selección de Vuelo - Paloma Migajera</title>
+    <link rel="stylesheet" href="style-juego.css">
+</head>
+<body>
+
+    <div class="background-master">
+        <img src="fondo.jpg" class="bg-img">
+        <div class="vignette"></div>
+        <div id="crumbs-container"></div>
+    </div>
+
+    <main class="ui-container">
+        <h2 class="fade-in">PARTIDAS GUARDADAS</h2>
+        
+        <div class="slots-wrapper" id="slots-list">
+            </div>
+
+        <button class="back-btn fade-in" onclick="window.location.href='../Menu Principal/index.html'">
+            VOLVER AL MENÚ
+        </button>
+    </main>
+
+    <script src="../config.js"></script>
+    <script>
+        // Crear migajas de pan cayendo
+        function spawnCrumbs() {
+            const container = document.getElementById('crumbs-container');
+            for (let i = 0; i < 35; i++) {
+                const crumb = document.createElement('div');
+                crumb.className = 'crumb';
+                crumb.style.left = Math.random() * 100 + 'vw';
+                crumb.style.width = crumb.style.height = (Math.random() * 3 + 2) + 'px';
+                crumb.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                crumb.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(crumb);
+            }
+        }
+
+        function cargarSlots() {
+            const container = document.getElementById('slots-list');
+            container.innerHTML = '';
+            for (let i = 1; i <= 3; i++) {
+                const data = JSON.parse(localStorage.getItem(`paloma_save_${i}`));
+                const slot = document.createElement('div');
+                slot.className = `save-slot fade-in ${!data ? 'empty' : ''}`;
+                slot.style.animationDelay = (i * 0.2) + 's';
+                
+                if (data) {
+                    slot.innerHTML = `
+                        <div class="slot-info">
+                            <span class="slot-title">Vuelo ${i}</span>
+                            <span class="slot-date">${data.fecha}</span>
+                        </div>
+                        <button class="del-btn" onclick="borrarPartida(event, ${i})">×</button>`;
+                    // AL HACER CLIC: MANDA AL GAMEPLAY REAL
+                    slot.onclick = () => window.location.href = 'Gameplay/index.html';
+                } else {
+                    slot.innerHTML = `<span>[ INICIAR NUEVO VIAJE ]</span>`;
+                    slot.onclick = () => nuevaPartida(i);
+                }
+                container.appendChild(slot);
+            }
+        }
+
+        function nuevaPartida(id) {
+            const data = { fecha: new Date().toLocaleDateString(), progreso: 0 };
+            localStorage.setItem(`paloma_save_${id}`, JSON.stringify(data));
+            cargarSlots();
+        }
+
+        function borrarPartida(e, id) {
+            e.stopPropagation();
+            if(confirm("¿Borrar este progreso?")) {
+                localStorage.removeItem(`paloma_save_${id}`);
+                cargarSlots();
+            }
+        }
+
+        window.onload = () => { cargarSlots(); spawnCrumbs(); };
+    </script>
+</body>
+</html>

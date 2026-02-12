@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Paloma Migajera - Gameplay</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; }
+        canvas { display: block; image-rendering: pixelated; width: 100vw; height: 100vh; }
+        #mapa-ui { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); z-index: 10; justify-content: center; align-items: center; 
+        }
+        #mapa-ui img { max-width: 80%; border: 4px solid #fff; }
+    </style>
+</head>
+<body>
+
+    <div id="mapa-ui"><img src="mapa.jpg"></div>
+    <canvas id="gameCanvas"></canvas>
+    <canvas id="collisionCanvas" style="display:none;"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const cCanvas = document.getElementById('collisionCanvas');
+        const cCtx = cCanvas.getContext('2d');
+
+        // --- CARGA DE ASSETS ---
+        const assets = {
+            fondo: new Image(),
+            visual: new Image(),
+            colisionJPG: new Image(), // Cambiado de SVG a JPG
+            pJPG: new Image(),
+            pCaminando: new Image(),
+            pDescanso: new Image(),
+            pMirando: new Image()
+        };
+
+        // Configuración de rutas
+        assets.fondo.src = 'fondo.jpg';
+        assets.visual.src = 'terreno_visual.jpg';
+        assets.colisionJPG.src = 'terreno_colision.jpg'; // Tu nuevo archivo de colisión
+        assets.pJPG.src = 'paloma.jpg';
+        assets.pCaminando.src = 'Caminando.gif';
+        assets.pDescanso.src = 'Descanso.gif';
+        assets.pMirando.src = 'Visualisando_Mapa.gif';
+
+        const p = { 
+            x: 100, y: 100, w: 75, h: 75, 
+            vx: 0, vy: 0, dir: 1, 
+            movido: false, mirando: false, sprite: null 
+        };
+        const cam = { x: 0 };
+        const keys = {};
+
+        window.onkeydown = (e) => { 
+            keys[e.code] = true; 
+            if(e.code === 'KeyM') p.mirando = !p.mirando;
+        };
+        window.onkeyup = (e) => keys[e.code] = false;
+
+        // --- LÓGICA DE DETECCIÓN DE COLOR ---
+        function checkPixel(x, y) {
+            if (x < 0 || x >= cCanvas.width || y < 0 || y >= cCanvas.height) return false;
+            
+            // Obtenemos el color del píxel en el canvas oculto
+            const data = cCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
+            
+            // Si el color es negro (R, G, B menores a 50)
+            return (data[0] < 50 && data[1] < 50 && data[2] < 50);
+        }
+
+        function update() {
+            if (p.mirando) {
+                p.sprite = assets.pMirando;
+                document.getElementById('mapa-ui').style.display = 'flex';
+                p.vx = 0;
+            } else {
+                document.getElementById('mapa-ui').style.display = 'none';
+                
+                // Gravedad
+                p.vy += 0.8;
+
+                // Movimiento horizontal
+                if (keys['ArrowRight'] || keys['KeyD']) {
+                    p.vx = 5; p.dir = 1; p.movido = true;
+                    p.sprite = assets.pCaminando;
+                } else if (keys['ArrowLeft'] || keys['KeyA']) {
+                    p.vx = -5; p.dir = -1; p.movido = true;
+                    p.sprite = assets.pCaminando;
+                } else {
+                    p.vx = 0;
+                    p.sprite = p.movido ? assets.pDescanso : assets.pJPG;
+                }
+
+                // --- COLISIÓN FRONTAL ---
+                // Verifica si hay un borde negro frente a la paloma
+                let headX = p.x + (p.dir === 1 ? p.w : 0);
+                if (!checkPixel(headX + p.vx, p.y + p.h - 15)) {
+                    p.x += p.vx;
+                }
+
+                // --- COLISIÓN VERTICAL ---
+                p.y += p.vy;
+                if (checkPixel(p.x + p.w / 2, p.y + p.h)) {
+                    p.vy = 0;
+                    // Empujar hacia arriba si se hunde en el negro
+                    while (checkPixel(p.x + p.w / 2, p.y + p.h - 1)) {
+                        p.y--;
+                    }
+                    // Saltar
+                    if (keys['Space'] || keys['KeyW']) p.vy = -14;
+                }
+            }
+            cam.x = p.x - canvas.width / 2;
+        }
+
+        function draw() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Fondo
+            ctx.drawImage(assets.fondo, 0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(-cam.x, 0);
+
+            // Terreno Visual
+            ctx.drawImage(assets.visual, 0, 0);
+
+            // Paloma
+            ctx.save();
+            if (p.dir === -1) {
+                ctx.translate(p.x + p.w, p.y);
+                ctx.scale(-1, 1);
+                ctx.drawImage(p.sprite || assets.pJPG, 0, 0, p.w, p.h);
+            } else {
+                ctx.drawImage(p.sprite || assets.pJPG, p.x, p.y, p.w, p.h);
+            }
+            ctx.restore();
+            ctx.restore();
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        // Carga y arranque
+        let cargados = 0;
+        Object.values(assets).forEach(img => {
+            img.onload = () => {
+                cargados++;
+                if (cargados === Object.keys(assets).length) {
+                    // Preparamos el mapa de colisiones
+                    cCanvas.width = assets.visual.width;
+                    cCanvas.height = assets.visual.height;
+                    cCtx.drawImage(assets.colisionJPG, 0, 0);
+                    loop();
+                }
+            };
+        });
+    </script>
+</body>
+</html>

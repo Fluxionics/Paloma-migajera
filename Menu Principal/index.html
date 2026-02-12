@@ -1,1 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-container">
+        <img src="../paloma.JPG" class="bg-image">
+    </div>
 
+    <div class="menu-ui">
+        <h1 id="game-title">Cargando...</h1>
+        
+        <nav class="buttons">
+            <button class="menu-btn">COMENZAR</button>
+            <button class="menu-btn">OPCIONES</button>
+            <button class="menu-btn">CRÉDITOS</button>
+            <button class="menu-btn">SALIR</button>
+        </nav>
+
+        <div class="footer">
+            <span id="game-version">v0.0.0</span>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        // Inyectar los datos del JS a la pantalla
+        document.getElementById('game-title').innerText = gameConfig.nombre;
+        document.getElementById('game-version').innerText = gameConfig.version;
+    </script>
+</body>
+</html>

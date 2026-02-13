@@ -6,7 +6,7 @@
 
 | Dato | Detalle |
 | :--- | :--- |
-| **Creador** | Guillermo R. - Francisco D.|
+| **Creador** | Guillermo R. - Francisco D. Daila J.|
 | **Versión Actual** | v1.0.2 |
 | **Estado** | Alpha |
 | **Tecnologías** | HTML5, CSS3, JavaScript |

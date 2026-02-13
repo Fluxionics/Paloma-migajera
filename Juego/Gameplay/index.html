@@ -2,20 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Paloma Migajera - Full Game</title>
+    <title>Paloma Migajera - Capas Corregidas</title>
     <style>
         body, html { margin: 0; padding: 0; overflow: hidden; background: #000; }
-        canvas { 
-            display: block; 
-            image-rendering: pixelated; 
-            width: 100vw; 
-            height: 100vh; 
-        }
+        canvas { display: block; image-rendering: pixelated; width: 100vw; height: 100vh; }
         #mapa-ui { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; 
         }
-        #mapa-ui img { max-width: 90%; max-height: 90%; border: 3px solid white; }
     </style>
 </head>
 <body>
@@ -31,18 +25,19 @@
         const cCtx = cCanvas.getContext('2d');
 
         const assets = {
-            visual: new Image(),
-            colision: new Image(),
+            fondo: new Image(),    // La imagen de atrás (paisaje)
+            visual: new Image(),   // El suelo con color
+            colision: new Image(), // La imagen blanco y negro
             pJPG: new Image(),
             pCaminando: new Image(),
             pDescanso: new Image(),
             pMirando: new Image()
         };
 
-        // Evitar errores de seguridad al leer píxeles
         Object.values(assets).forEach(img => img.crossOrigin = "anonymous");
 
-        // CARGA DE ARCHIVOS
+        // ASIGNACIÓN DE ARCHIVOS
+        assets.fondo.src = 'fondo.jpg';
         assets.visual.src = 'terreno_visual.jpg';
         assets.colision.src = 'terreno_colision.jpg'; 
         assets.pJPG.src = 'paloma.jpg';
@@ -51,25 +46,22 @@
         assets.pMirando.src = 'Visualisando_Mapa.gif';
 
         const p = { 
-            x: 100, y: 0, w: 90, h: 90, 
+            x: 150, y: 50, w: 90, h: 90, 
             vx: 0, vy: 0, dir: 1, 
             movido: false, mirando: false, sprite: null 
         };
         const cam = { x: 0 };
         const keys = {};
 
-        window.onkeydown = (e) => { 
-            keys[e.code] = true; 
-            if(e.code === 'KeyM') p.mirando = !p.mirando;
-        };
+        window.onkeydown = (e) => { keys[e.code] = true; if(e.code === 'KeyM') p.mirando = !p.mirando; };
         window.onkeyup = (e) => keys[e.code] = false;
 
-        // FUNCIÓN DE COLISIÓN (Píxel Negro = Suelo/Pared)
-        function checkPixel(x, y) {
-            if (x < 0 || x >= cCanvas.width || y >= cCanvas.height || y < 0) return false;
-            const data = cCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
-            // Detecta si es negro (R,G,B bajos) y no es transparente
-            return (data[0] < 50 && data[1] < 50 && data[2] < 50 && data[3] > 0);
+        function esSuelo(x, y) {
+            if (x < 0 || x >= cCanvas.width || y < 0 || y >= cCanvas.height) return false;
+            // Lee la imagen terreno_colision.jpg
+            const pixel = cCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
+            // Detecta si el píxel es negro (R < 100)
+            return (pixel[0] < 100 && pixel[3] > 0);
         }
 
         function update() {
@@ -79,9 +71,8 @@
                 p.vx = 0;
             } else {
                 document.getElementById('mapa-ui').style.display = 'none';
-                p.vy += 0.8; // Gravedad
+                p.vy += 0.8;
 
-                // Movimiento
                 if (keys['ArrowRight'] || keys['KeyD']) {
                     p.vx = 6; p.dir = 1; p.movido = true;
                     p.sprite = assets.pCaminando;
@@ -93,32 +84,25 @@
                     p.sprite = p.movido ? assets.pDescanso : assets.pJPG;
                 }
 
-                // Colisión Lateral
-                let frontX = p.x + (p.dir === 1 ? p.w : 0) + p.vx;
-                if (!checkPixel(frontX, p.y + p.h / 2)) {
+                // Colisión lateral
+                if (!esSuelo(p.x + (p.dir === 1 ? p.w : 0) + p.vx, p.y + p.h - 20)) {
                     p.x += p.vx;
                 }
 
                 p.y += p.vy;
 
-                // Colisión de Suelo
-                // Revisamos tres puntos abajo (izquierda, centro, derecha) para que no se caiga
-                let pieIzquierda = checkPixel(p.x + 10, p.y + p.h);
-                let pieCentro = checkPixel(p.x + p.w / 2, p.y + p.h);
-                let pieDerecha = checkPixel(p.x + p.w - 10, p.y + p.h);
+                // Colisión de suelo (revisa toda la base)
+                let toca = false;
+                for(let i=0; i<=p.w; i+=p.w/2) {
+                    if(esSuelo(p.x + i, p.y + p.h)) { toca = true; break; }
+                }
 
-                if (pieIzquierda || pieCentro || pieDerecha) {
+                if (toca) {
                     p.vy = 0;
-                    // Ajuste para que no se hunda
-                    while (checkPixel(p.x + p.w / 2, p.y + p.h - 1)) {
-                        p.y--;
-                    }
-                    if (keys['Space'] || keys['KeyW'] || keys['ArrowUp']) {
-                        p.vy = -16; // Fuerza de salto
-                    }
+                    while (esSuelo(p.x + p.w/2, p.y + p.h - 1)) p.y--;
+                    if (keys['Space'] || keys['KeyW']) p.vy = -16;
                 }
             }
-            // Cámara sigue a la paloma
             cam.x = p.x - canvas.width / 2;
             if (cam.x < 0) cam.x = 0;
         }
@@ -128,21 +112,24 @@
             canvas.height = window.innerHeight;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            // 1. DIBUJAR FONDO (Estático o con poco movimiento)
+            ctx.drawImage(assets.fondo, 0, 0, canvas.width, canvas.height);
+
             ctx.save();
             ctx.translate(-cam.x, 0);
 
-            // 1. DIBUJAR TERRENO VISUAL
+            // 2. DIBUJAR TERRENO VISUAL (El que camina)
             ctx.drawImage(assets.visual, 0, 0);
 
-            // 2. DIBUJAR PALOMA
+            // 3. DIBUJAR PALOMA
             ctx.save();
-            let imgToDraw = p.sprite || assets.pJPG;
+            let img = p.sprite || assets.pJPG;
             if (p.dir === -1) {
                 ctx.translate(p.x + p.w, p.y);
                 ctx.scale(-1, 1);
-                ctx.drawImage(imgToDraw, 0, 0, p.w, p.h);
+                ctx.drawImage(img, 0, 0, p.w, p.h);
             } else {
-                ctx.drawImage(imgToDraw, p.x, p.y, p.w, p.h);
+                ctx.drawImage(img, p.x, p.y, p.w, p.h);
             }
             ctx.restore();
             ctx.restore();
@@ -154,14 +141,11 @@
             requestAnimationFrame(loop);
         }
 
-        // ESPERAR A QUE TODAS LAS IMÁGENES CARGUEN
         let cargados = 0;
-        const total = Object.keys(assets).length;
         Object.values(assets).forEach(img => {
             img.onload = () => {
                 cargados++;
-                if (cargados === total) {
-                    // El canvas de colisión debe ser del tamaño de la imagen original
+                if (cargados === Object.keys(assets).length) {
                     cCanvas.width = assets.visual.width;
                     cCanvas.height = assets.visual.height;
                     cCtx.drawImage(assets.colision, 0, 0);
@@ -172,3 +156,5 @@
     </script>
 </body>
 </html>
+</html>
+

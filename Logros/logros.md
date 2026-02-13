@@ -41,7 +41,6 @@ Este documento detalla el sistema de logros diseñado para *Paloma Migajera*, ma
 ## 🛠️ Logros Técnicos (Meta)
 *Relacionados con la interacción con el desarrollo del proyecto.*
 
-1.  **Configurador**: Modifica exitosamente una variable en el archivo `config.js`.
 2.  **Alpha Tester**: Juega durante más de 5 horas en la versión `1.0.2`.
 3.  **Limpieza de Código**: Encuentra y activa el modo depuración secreto (Debug Mode).
 

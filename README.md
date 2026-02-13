@@ -6,7 +6,7 @@
 
 | Dato | Detalle |
 | :--- | :--- |
-| **Creador** | Guillermo R. - Francisco D. Daila J.|
+| **Creador** | Guillermo R. - Francisco D. - Daila J.|
 | **Versión Actual** | v1.0.2 |
 | **Estado** | Alpha |
 | **Tecnologías** | HTML5, CSS3, JavaScript |
@@ -42,7 +42,7 @@
 ---
 
 ## 🛠️ Roadmap (Próximos pasos)
-- [ ] Implementar mecánicas de vuelo en la carpeta `/Juego`.
+- [ 🎉] Implementar mecánicas de vuelo en la carpeta `/Juego`.
 - [ ] Añadir efectos de sonido al pasar el ratón por los botones del menú.
 - [ ] Crear el panel de Ajustes para volumen y controles.
 

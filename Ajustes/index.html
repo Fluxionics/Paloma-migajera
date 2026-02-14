@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - Paloma Migajera</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="background-container">
+        <img src="../Menu Principal/fondo.jpg" class="fondo-img" onerror="this.style.display='none';">
+        <div class="vignette"></div>
+    </div>
+
+    <div class="settings-container">
+        <h1 class="fade-in">CONFIGURACIÓN</h1>
+
+        <!-- SECCIÓN DE AUDIO -->
+        <div class="settings-section fade-in" style="animation-delay: 0.2s;">
+            <h2>🔊 Audio</h2>
+            
+            <div class="setting-item">
+                <label for="volumen-musica">Volumen Música</label>
+                <div class="slider-container">
+                    <input type="range" id="volumen-musica" min="0" max="100" value="70">
+                    <span class="slider-value">70%</span>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <label for="volumen-efectos">Volumen Efectos</label>
+                <div class="slider-container">
+                    <input type="range" id="volumen-efectos" min="0" max="100" value="80">
+                    <span class="slider-value">80%</span>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <label for="volumen-ambiente">Volumen Ambiente</label>
+                <div class="slider-container">
+                    <input type="range" id="volumen-ambiente" min="0" max="100" value="60">
+                    <span class="slider-value">60%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DE GRÁFICOS -->
+        <div class="settings-section fade-in" style="animation-delay: 0.4s;">
+            <h2>🎨 Gráficos</h2>
+            
+            <div class="setting-item">
+                <label for="calidad">Calidad Visual</label>
+                <select id="calidad">
+                    <option value="baja">Baja (Mejor rendimiento)</option>
+                    <option value="media" selected>Media</option>
+                    <option value="alta">Alta (Mejor visual)</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="particulas" checked>
+                    Efectos de Partículas (migajas)
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="pantalla-completa">
+                    Pantalla Completa
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="vsync" checked>
+                    VSync (Sincronización Vertical)
+                </label>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DE CONTROLES -->
+        <div class="settings-section fade-in" style="animation-delay: 0.6s;">
+            <h2>🎮 Controles</h2>
+            
+            <div class="controls-grid">
+                <div class="control-item">
+                    <span>Mover Izquierda:</span>
+                    <button class="key-btn" data-action="izquierda">A / ←</button>
+                </div>
+                <div class="control-item">
+                    <span>Mover Derecha:</span>
+                    <button class="key-btn" data-action="derecha">D / →</button>
+                </div>
+                <div class="control-item">
+                    <span>Saltar:</span>
+                    <button class="key-btn" data-action="saltar">ESPACIO / W</button>
+                </div>
+                <div class="control-item">
+                    <span>Abrir Mapa:</span>
+                    <button class="key-btn" data-action="mapa">M</button>
+                </div>
+                <div class="control-item">
+                    <span>Pausa:</span>
+                    <button class="key-btn" data-action="pausa">ESC</button>
+                </div>
+                <div class="control-item">
+                    <span>Habilidad Especial:</span>
+                    <button class="key-btn" data-action="habilidad">SHIFT</button>
+                </div>
+            </div>
+
+            <button class="reset-controls-btn">Restaurar Controles por Defecto</button>
+        </div>
+
+        <!-- SECCIÓN DE JUEGO -->
+        <div class="settings-section fade-in" style="animation-delay: 0.8s;">
+            <h2>⚙️ Juego</h2>
+            
+            <div class="setting-item">
+                <label for="idioma">Idioma</label>
+                <select id="idioma">
+                    <option value="es" selected>Español</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="auto-guardar" checked>
+                    Auto-Guardado
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="tutoriales" checked>
+                    Mostrar Tutoriales
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="subtitulos" checked>
+                    Subtítulos
+                </label>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DE DATOS -->
+        <div class="settings-section fade-in danger-section" style="animation-delay: 1s;">
+            <h2>🗑️ Gestión de Datos</h2>
+            
+            <div class="data-info">
+                <p>Espacio usado: <span id="datos-usados">0 KB</span></p>
+                <p>Partidas guardadas: <span id="partidas-count">0</span></p>
+            </div>
+
+            <button class="danger-btn" onclick="borrarTodosDatos()">
+                ⚠️ BORRAR TODOS LOS DATOS
+            </button>
+        </div>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="settings-section fade-in" style="animation-delay: 1.2s;">
+            <h2>📊 Estadísticas</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Tiempo Total:</span>
+                    <span class="stat-value" id="tiempo-total">0h 0m</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Migajas Recolectadas:</span>
+                    <span class="stat-value" id="migajas-total">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Logros Desbloqueados:</span>
+                    <span class="stat-value" id="logros-total">0 / 20</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Muertes:</span>
+                    <span class="stat-value" id="muertes-total">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="action-buttons fade-in" style="animation-delay: 1.4s;">
+            <button class="btn-secondary" onclick="resetearAjustes()">Restaurar Predeterminados</button>
+            <button class="btn-primary" onclick="guardarAjustes()">Guardar Cambios</button>
+            <button class="btn-back" onclick="window.location.href='../Menu Principal/index.html'">Volver al Menú</button>
+        </div>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="ajustes.js"></script>
+</body>
+</html>

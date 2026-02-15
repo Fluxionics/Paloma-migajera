@@ -1,0 +1,821 @@
+/* ========================================
+   ESTILOS SISTEMA DE USUARIOS
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #000;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* ========================================
+   FONDO
+   ======================================== */
+
+.background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+.fondo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.4);
+}
+
+.vignette {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.95) 100%);
+}
+
+/* ========================================
+   CONTAINER PRINCIPAL
+   ======================================== */
+
+.main-container {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ========================================
+   PANTALLAS
+   ======================================== */
+
+.pantalla {
+    display: none;
+    width: 100%;
+    max-width: 1200px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.pantalla.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 1s ease-out forwards;
+    opacity: 0;
+}
+
+/* ========================================
+   TÍTULOS
+   ======================================== */
+
+.titulo-principal {
+    font-size: 4rem;
+    font-weight: 200;
+    letter-spacing: 12px;
+    text-align: center;
+    margin-bottom: 60px;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(255,255,255,0.5);
+}
+
+.titulo-seccion {
+    font-size: 2.5rem;
+    font-weight: 200;
+    letter-spacing: 6px;
+    text-align: center;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+}
+
+.subtitulo {
+    text-align: center;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+/* ========================================
+   MENÚ INICIO
+   ======================================== */
+
+.menu-inicio {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   BOTONES
+   ======================================== */
+
+.btn-principal, .btn-secundario, .btn-volver, .btn-peligro, .btn-jugar {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.btn-principal {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+}
+
+.btn-principal:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: white;
+    box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.btn-jugar {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border: 2px solid #4CAF50;
+    color: white;
+    font-size: 1.3rem;
+    padding: 20px 40px;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.btn-jugar:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+.btn-secundario {
+    background: rgba(100,100,100,0.2);
+    border: 2px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.7);
+}
+
+.btn-secundario:hover {
+    background: rgba(100,100,100,0.3);
+    color: white;
+}
+
+.btn-peligro {
+    background: rgba(255,50,50,0.1);
+    border: 2px solid rgba(255,50,50,0.5);
+    color: rgba(255,100,100,0.9);
+}
+
+.btn-peligro:hover {
+    background: rgba(255,50,50,0.2);
+    border-color: rgba(255,50,50,0.8);
+    box-shadow: 0 0 15px rgba(255,50,50,0.4);
+}
+
+.btn-volver {
+    background: none;
+    border: 2px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.6);
+    padding: 12px 25px;
+    margin-top: 30px;
+}
+
+.btn-volver:hover {
+    border-color: rgba(255,255,255,0.5);
+    color: white;
+}
+
+/* ========================================
+   LISTA DE USUARIOS
+   ======================================== */
+
+.lista-usuarios {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.card-usuario {
+    background: rgba(255,255,255,0.03);
+    border: 2px solid rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.card-usuario:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.usuario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.usuario-header h3 {
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+.usuario-info {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    color: rgba(255,255,255,0.7);
+}
+
+.usuario-fecha {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+}
+
+/* ========================================
+   BADGES
+   ======================================== */
+
+.badge-dificultad {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.badge-dificultad.facil {
+    background: #4CAF50;
+    color: white;
+}
+
+.badge-dificultad.normal {
+    background: #2196F3;
+    color: white;
+}
+
+.badge-dificultad.medio {
+    background: #FF9800;
+    color: white;
+}
+
+.badge-dificultad.dificil {
+    background: #FF5722;
+    color: white;
+}
+
+.badge-dificultad.extremo {
+    background: #9C27B0;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.badge-dificultad.pesadilla {
+    background: #000;
+    border: 2px solid #fff;
+    color: #fff;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ========================================
+   FORMULARIO CREAR USUARIO
+   ======================================== */
+
+.form-crear {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 30px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 4px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.form-group input:focus {
+    border-color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.1);
+}
+
+.hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+/* ========================================
+   SELECTOR DE DIFICULTAD
+   ======================================== */
+
+.dificultades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.card-dificultad {
+    background: rgba(255,255,255,0.03);
+    border: 3px solid rgba(255,255,255,0.2);
+    padding: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.card-dificultad:hover {
+    background: rgba(255,255,255,0.08);
+    transform: scale(1.05);
+}
+
+.card-dificultad.selected {
+    border-width: 4px;
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 0 20px currentColor;
+}
+
+.dificultad-emoji {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.card-dificultad h4 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+.dificultad-desc {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 15px;
+    min-height: 40px;
+}
+
+.dificultad-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+}
+
+.muerte-permanente {
+    color: #ff4444;
+    font-weight: bold;
+    animation: pulse 1.5s infinite;
+}
+
+/* ========================================
+   PERFIL
+   ======================================== */
+
+.perfil-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.perfil-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.seccion-perfil {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 25px;
+    border-radius: 8px;
+}
+
+.seccion-perfil h3 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+}
+
+.stat-label {
+    color: rgba(255,255,255,0.7);
+}
+
+.stat-value {
+    font-weight: 600;
+    color: #4CAF50;
+}
+
+.mundos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.mundo-card {
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+.mundo-card.bloqueado {
+    opacity: 0.3;
+    background: rgba(100,100,100,0.2);
+}
+
+.mundo-card.desbloqueado {
+    background: rgba(33, 150, 243, 0.2);
+    border-color: rgba(33, 150, 243, 0.5);
+}
+
+.mundo-card.completado {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: rgba(76, 175, 80, 0.5);
+}
+
+.mundo-numero {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.mundo-status {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 5px;
+}
+
+.mundo-tiempo {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+}
+
+.habilidades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.habilidad-item {
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    border-left: 4px solid rgba(255,255,255,0.2);
+}
+
+.habilidad-item.desbloqueado {
+    border-left-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.habilidad-item.bloqueado {
+    opacity: 0.5;
+}
+
+.perfil-acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* ========================================
+   TABLAS
+   ======================================== */
+
+.tabla-ranking, .tabla-hall-of-fame {
+    overflow-x: auto;
+}
+
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tabla thead {
+    background: rgba(255,255,255,0.1);
+}
+
+.tabla th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: 2px;
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+}
+
+.tabla td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.tabla tbody tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.tabla .rank {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #FFD700;
+    text-align: center;
+}
+
+.tabla tbody tr:nth-child(1) .rank {
+    color: #FFD700;
+    text-shadow: 0 0 10px #FFD700;
+}
+
+.tabla tbody tr:nth-child(2) .rank {
+    color: #C0C0C0;
+}
+
+.tabla tbody tr:nth-child(3) .rank {
+    color: #CD7F32;
+}
+
+/* ========================================
+   IMPORTAR
+   ======================================== */
+
+.importar-content {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.file-drop-zone {
+    border: 3px dashed rgba(255,255,255,0.3);
+    padding: 60px 40px;
+    border-radius: 8px;
+    margin: 30px 0;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.file-drop-zone:hover, .file-drop-zone.drag-over {
+    border-color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.05);
+}
+
+.drop-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.import-info {
+    text-align: left;
+    background: rgba(255,255,255,0.03);
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.import-info h4 {
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+}
+
+.import-info ul {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.import-info li {
+    margin: 8px 0;
+    color: rgba(255,255,255,0.8);
+}
+
+.warning {
+    color: #FF9800;
+    margin-top: 15px;
+    font-weight: 500;
+}
+
+/* ========================================
+   MODAL
+   ======================================== */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, rgba(20,20,30,0.95), rgba(10,10,20,0.95));
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 40px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-content h3 {
+    font-size: 2rem;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-content p {
+    text-align: center;
+    margin-bottom: 30px;
+    color: rgba(255,255,255,0.7);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+/* ========================================
+   NOTIFICACIONES
+   ======================================== */
+
+.notificacion {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 30px;
+    border-radius: 4px;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    z-index: 2000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notificacion.success {
+    background: rgba(76, 175, 80, 0.9);
+    border: 2px solid #4CAF50;
+}
+
+.notificacion.error {
+    background: rgba(244, 67, 54, 0.9);
+    border: 2px solid #F44336;
+}
+
+.notificacion.info {
+    background: rgba(33, 150, 243, 0.9);
+    border: 2px solid #2196F3;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   MENSAJE VACÍO
+   ======================================== */
+
+.mensaje-vacio {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(255,255,255,0.5);
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .titulo-principal {
+        font-size: 2.5rem;
+        letter-spacing: 6px;
+    }
+
+    .titulo-seccion {
+        font-size: 1.8rem;
+        letter-spacing: 4px;
+    }
+
+    .lista-usuarios {
+        grid-template-columns: 1fr;
+    }
+
+    .dificultades-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mundos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .perfil-acciones {
+        gap: 10px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
+}

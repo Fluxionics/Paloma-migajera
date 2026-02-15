@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selección de Usuario - Paloma Migajera</title>
+    <link rel="stylesheet" href="style-usuarios.css">
+</head>
+<body>
+
+    <div class="background-container">
+        <img src="Menu Principal/fondo.jpg" class="fondo-img" onerror="this.style.display='none';">
+        <div class="vignette"></div>
+    </div>
+
+    <div class="main-container">
+        <!-- PANTALLA DE INICIO -->
+        <div id="pantalla-inicio" class="pantalla active">
+            <h1 class="titulo-principal fade-in">PALOMA MIGAJERA</h1>
+            
+            <div class="menu-inicio fade-in" style="animation-delay: 0.3s;">
+                <button class="btn-principal" onclick="mostrarPantalla('seleccion-usuario')">
+                    SELECCIONAR USUARIO
+                </button>
+                <button class="btn-principal" onclick="mostrarPantalla('crear-usuario')">
+                    NUEVO USUARIO
+                </button>
+                <button class="btn-principal" onclick="mostrarPantalla('ranking')">
+                    RANKING
+                </button>
+                <button class="btn-principal" onclick="mostrarPantalla('hall-of-fame')">
+                    HALL OF FAME
+                </button>
+                <button class="btn-secundario" onclick="mostrarPantalla('importar')">
+                    IMPORTAR PROGRESO
+                </button>
+            </div>
+        </div>
+
+        <!-- SELECCIÓN DE USUARIO -->
+        <div id="pantalla-seleccion-usuario" class="pantalla">
+            <h2 class="titulo-seccion">SELECCIONAR USUARIO</h2>
+            
+            <div id="lista-usuarios" class="lista-usuarios">
+                <!-- Se llena dinámicamente -->
+            </div>
+
+            <button class="btn-volver" onclick="mostrarPantalla('inicio')">← VOLVER</button>
+        </div>
+
+        <!-- CREAR USUARIO -->
+        <div id="pantalla-crear-usuario" class="pantalla">
+            <h2 class="titulo-seccion">NUEVO USUARIO</h2>
+            
+            <div class="form-crear">
+                <div class="form-group">
+                    <label>Nombre de Usuario:</label>
+                    <input type="text" id="input-username" placeholder="3-20 caracteres" maxlength="20">
+                    <span class="hint">Usa letras, números y guiones</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Selecciona Dificultad:</label>
+                    <div class="dificultades-grid" id="selector-dificultad">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn-principal" onclick="crearUsuarioNuevo()">
+                        CREAR USUARIO
+                    </button>
+                    <button class="btn-secundario" onclick="mostrarPantalla('inicio')">
+                        CANCELAR
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PERFIL DE USUARIO -->
+        <div id="pantalla-perfil" class="pantalla">
+            <div class="perfil-header">
+                <h2 id="perfil-username" class="titulo-seccion">USUARIO</h2>
+                <span id="perfil-dificultad" class="badge-dificultad">NORMAL</span>
+            </div>
+
+            <div class="perfil-content">
+                <!-- Estadísticas -->
+                <div class="seccion-perfil">
+                    <h3>📊 Estadísticas</h3>
+                    <div class="stats-grid" id="perfil-stats">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Mundos -->
+                <div class="seccion-perfil">
+                    <h3>🗺️ Mundos</h3>
+                    <div class="mundos-grid" id="perfil-mundos">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Habilidades -->
+                <div class="seccion-perfil">
+                    <h3>✨ Habilidades Desbloqueadas</h3>
+                    <div class="habilidades-grid" id="perfil-habilidades">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="perfil-acciones">
+                    <button class="btn-jugar" onclick="iniciarJuego()">
+                        🎮 JUGAR
+                    </button>
+                    <button class="btn-principal" onclick="exportarProgreso()">
+                        💾 EXPORTAR PROGRESO
+                    </button>
+                    <button class="btn-principal" onclick="cambiarDificultad()">
+                        ⚙️ CAMBIAR DIFICULTAD
+                    </button>
+                    <button class="btn-peligro" onclick="eliminarUsuarioActual()">
+                        🗑️ ELIMINAR USUARIO
+                    </button>
+                    <button class="btn-secundario" onclick="cerrarSesion()">
+                        ← CERRAR SESIÓN
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RANKING -->
+        <div id="pantalla-ranking" class="pantalla">
+            <h2 class="titulo-seccion">🏆 RANKING GENERAL</h2>
+            
+            <div class="tabla-ranking" id="tabla-ranking">
+                <!-- Se llena dinámicamente -->
+            </div>
+
+            <button class="btn-volver" onclick="mostrarPantalla('inicio')">← VOLVER</button>
+        </div>
+
+        <!-- HALL OF FAME (Modo Extremo) -->
+        <div id="pantalla-hall-of-fame" class="pantalla">
+            <h2 class="titulo-seccion">💀 HALL OF FAME - MODO EXTREMO</h2>
+            <p class="subtitulo">Los valientes que murieron en el intento</p>
+            
+            <div class="tabla-hall-of-fame" id="tabla-hall-of-fame">
+                <!-- Se llena dinámicamente -->
+            </div>
+
+            <button class="btn-volver" onclick="mostrarPantalla('inicio')">← VOLVER</button>
+        </div>
+
+        <!-- IMPORTAR -->
+        <div id="pantalla-importar" class="pantalla">
+            <h2 class="titulo-seccion">📥 IMPORTAR PROGRESO</h2>
+            
+            <div class="importar-content">
+                <p>Selecciona un archivo de progreso exportado:</p>
+                
+                <div class="file-drop-zone" id="drop-zone">
+                    <div class="drop-icon">📁</div>
+                    <p>Arrastra el archivo aquí o haz click para seleccionar</p>
+                    <input type="file" id="input-import" accept=".json" style="display: none;">
+                </div>
+
+                <div class="import-info">
+                    <h4>Formatos aceptados:</h4>
+                    <ul>
+                        <li>✅ Archivo de usuario individual (.json)</li>
+                        <li>✅ Archivo de múltiples usuarios (.json)</li>
+                    </ul>
+                    <p class="warning">⚠️ Si importas un usuario que ya existe, se sobrescribirá</p>
+                </div>
+            </div>
+
+            <button class="btn-volver" onclick="mostrarPantalla('inicio')">← VOLVER</button>
+        </div>
+
+        <!-- MODAL CAMBIAR DIFICULTAD -->
+        <div id="modal-cambiar-dificultad" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Cambiar Dificultad</h3>
+                <p>⚠️ Advertencia: Cambiar la dificultad ajustará tu vida máxima y el comportamiento de los enemigos.</p>
+                
+                <div class="dificultades-grid" id="selector-dificultad-cambio">
+                    <!-- Se llena dinámicamente -->
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-principal" onclick="confirmarCambioDificultad()">CAMBIAR</button>
+                    <button class="btn-secundario" onclick="cerrarModal('cambiar-dificultad')">CANCELAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="sistema-usuarios.js"></script>
+    <script>
+        // ========================================
+        // VARIABLES GLOBALES
+        // ========================================
+        
+        let dificultadSeleccionada = 'normal';
+        let nuevaDificultad = null;
+
+        // ========================================
+        // NAVEGACIÓN
+        // ========================================
+
+        function mostrarPantalla(nombre) {
+            document.querySelectorAll('.pantalla').forEach(p => {
+                p.classList.remove('active');
+            });
+            
+            const pantalla = document.getElementById(`pantalla-${nombre}`);
+            if (pantalla) {
+                pantalla.classList.add('active');
+                
+                // Cargar contenido según pantalla
+                switch(nombre) {
+                    case 'seleccion-usuario':
+                        cargarListaUsuarios();
+                        break;
+                    case 'crear-usuario':
+                        cargarSelectorDificultad();
+                        break;
+                    case 'ranking':
+                        cargarRanking();
+                        break;
+                    case 'hall-of-fame':
+                        cargarHallOfFame();
+                        break;
+                    case 'perfil':
+                        cargarPerfil();
+                        break;
+                }
+            }
+        }
+
+        // ========================================
+        // USUARIOS
+        // ========================================
+
+        function cargarListaUsuarios() {
+            const container = document.getElementById('lista-usuarios');
+            const usuarios = Object.values(PALOMA_USUARIOS.usuarios);
+            
+            if (usuarios.length === 0) {
+                container.innerHTML = '<p class="mensaje-vacio">No hay usuarios creados. ¡Crea uno nuevo!</p>';
+                return;
+            }
+
+            container.innerHTML = usuarios.map(u => `
+                <div class="card-usuario" onclick="seleccionarUsuario('${u.username}')">
+                    <div class="usuario-header">
+                        <h3>👤 ${u.username}</h3>
+                        <span class="badge-dificultad ${u.dificultad}">${u.dificultad.toUpperCase()}</span>
+                    </div>
+                    <div class="usuario-info">
+                        <span>🗺️ Mundo ${u.mundoActual}</span>
+                        <span>🍞 ${u.stats.migajasRecolectadas} migajas</span>
+                        <span>⏱️ ${formatearTiempo(u.stats.tiempoJugado)}</span>
+                    </div>
+                    <div class="usuario-fecha">
+                        Último acceso: ${new Date(u.ultimoAcceso).toLocaleDateString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function seleccionarUsuario(username) {
+            const resultado = PALOMA_USUARIOS.iniciarSesion(username);
+            if (resultado.success) {
+                mostrarPantalla('perfil');
+            } else {
+                alert(resultado.error);
+            }
+        }
+
+        function crearUsuarioNuevo() {
+            const username = document.getElementById('input-username').value.trim();
+            
+            if (!username) {
+                alert('Por favor ingresa un nombre de usuario');
+                return;
+            }
+
+            const resultado = PALOMA_USUARIOS.crearUsuario(username, dificultadSeleccionada);
+            
+            if (resultado.success) {
+                PALOMA_USUARIOS.iniciarSesion(username);
+                mostrarNotificacion(`¡Usuario ${username} creado!`, 'success');
+                setTimeout(() => mostrarPantalla('perfil'), 1000);
+            } else {
+                alert(resultado.error);
+            }
+        }
+
+        function eliminarUsuarioActual() {
+            if (!PALOMA_USUARIOS.usuarioActual) return;
+            
+            const username = PALOMA_USUARIOS.usuarioActual.username;
+            const confirmacion = prompt(
+                `⚠️ ¿Estás seguro de eliminar el usuario "${username}"?\n\n` +
+                `Escribe "${username}" para confirmar:`
+            );
+            
+            const resultado = PALOMA_USUARIOS.eliminarUsuario(username, confirmacion);
+            
+            if (resultado.success) {
+                mostrarNotificacion('Usuario eliminado', 'success');
+                mostrarPantalla('inicio');
+            } else {
+                alert(resultado.error || 'Cancelado');
+            }
+        }
+
+        function cerrarSesion() {
+            PALOMA_USUARIOS.cerrarSesion();
+            mostrarPantalla('inicio');
+        }
+
+        // ========================================
+        // DIFICULTAD
+        // ========================================
+
+        function cargarSelectorDificultad(containerId = 'selector-dificultad') {
+            const dificultades = [
+                { id: 'facil', emoji: '😊', color: '#4CAF50' },
+                { id: 'normal', emoji: '😐', color: '#2196F3' },
+                { id: 'medio', emoji: '😬', color: '#FF9800' },
+                { id: 'dificil', emoji: '😰', color: '#FF5722' },
+                { id: 'extremo', emoji: '💀', color: '#9C27B0' },
+                { id: 'pesadilla', emoji: '👹', color: '#000000' }
+            ];
+
+            const container = document.getElementById(containerId);
+            container.innerHTML = dificultades.map(d => {
+                const config = PALOMA_USUARIOS.obtenerConfigDificultad(d.id);
+                return `
+                    <div class="card-dificultad ${d.id === dificultadSeleccionada ? 'selected' : ''}" 
+                         onclick="seleccionarDificultad('${d.id}', '${containerId}')"
+                         style="border-color: ${d.color}">
+                        <div class="dificultad-emoji" style="background: ${d.color}">${d.emoji}</div>
+                        <h4>${config.nombre}</h4>
+                        <p class="dificultad-desc">${config.descripcion}</p>
+                        <div class="dificultad-stats">
+                            <span>Vida: ${(config.multiplicadorVida * 100).toFixed(0)}%</span>
+                            <span>Daño: ${(config.multiplicadorDanio * 100).toFixed(0)}%</span>
+                            ${config.muertesPermanentes ? '<span class="muerte-permanente">💀 MUERTE PERMANENTE</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function seleccionarDificultad(dificultad, containerId = 'selector-dificultad') {
+            if (containerId === 'selector-dificultad') {
+                dificultadSeleccionada = dificultad;
+            } else {
+                nuevaDificultad = dificultad;
+            }
+            
+            const container = document.getElementById(containerId);
+            container.querySelectorAll('.card-dificultad').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            const selected = Array.from(container.querySelectorAll('.card-dificultad'))
+                .find(card => card.textContent.includes(dificultad));
+            if (selected) selected.classList.add('selected');
+        }
+
+        function cambiarDificultad() {
+            nuevaDificultad = PALOMA_USUARIOS.usuarioActual.dificultad;
+            cargarSelectorDificultad('selector-dificultad-cambio');
+            document.getElementById('modal-cambiar-dificultad').style.display = 'flex';
+        }
+
+        function confirmarCambioDificultad() {
+            if (nuevaDificultad) {
+                PALOMA_USUARIOS.cambiarDificultad(nuevaDificultad);
+                mostrarNotificacion('Dificultad cambiada', 'success');
+                cerrarModal('cambiar-dificultad');
+                cargarPerfil();
+            }
+        }
+
+        // ========================================
+        // PERFIL
+        // ========================================
+
+        function cargarPerfil() {
+            const usuario = PALOMA_USUARIOS.usuarioActual;
+            if (!usuario) return;
+
+            document.getElementById('perfil-username').textContent = usuario.username;
+            document.getElementById('perfil-dificultad').textContent = usuario.dificultad.toUpperCase();
+            document.getElementById('perfil-dificultad').className = `badge-dificultad ${usuario.dificultad}`;
+
+            // Estadísticas
+            const stats = usuario.stats;
+            document.getElementById('perfil-stats').innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-label">⏱️ Tiempo Jugado:</span>
+                    <span class="stat-value">${formatearTiempo(stats.tiempoJugado)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">💀 Muertes:</span>
+                    <span class="stat-value">${stats.muertes}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">🍞 Migajas:</span>
+                    <span class="stat-value">${stats.migajasRecolectadas}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">⚔️ Enemigos:</span>
+                    <span class="stat-value">${stats.enemigosD errotados}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">🦘 Saltos:</span>
+                    <span class="stat-value">${stats.saltosRealizados}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">📏 Distancia:</span>
+                    <span class="stat-value">${Math.floor(stats.distanciaRecorrida)}m</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">🔥 Racha Actual:</span>
+                    <span class="stat-value">${stats.rachaActual}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">🏆 Mejor Racha:</span>
+                    <span class="stat-value">${stats.mejorRacha}</span>
+                </div>
+            `;
+
+            // Mundos
+            document.getElementById('perfil-mundos').innerHTML = Object.entries(usuario.mundos).map(([num, mundo]) => `
+                <div class="mundo-card ${mundo.desbloqueado ? 'desbloqueado' : 'bloqueado'} ${mundo.completado ? 'completado' : ''}">
+                    <div class="mundo-numero">Mundo ${num}</div>
+                    <div class="mundo-status">
+                        ${mundo.completado ? '✅ Completado' : mundo.desbloqueado ? '🔓 Disponible' : '🔒 Bloqueado'}
+                    </div>
+                    ${mundo.mejorTiempo ? `<div class="mundo-tiempo">⏱️ ${formatearTiempo(mundo.mejorTiempo)}</div>` : ''}
+                </div>
+            `).join('');
+
+            // Habilidades
+            const habilidadesNombres = {
+                dobleSalto: 'Doble Salto',
+                dash: 'Dash Aéreo',
+                palomaduken: 'Palomaduken',
+                planeo: 'Planeo',
+                picado: 'Picado'
+            };
+
+            document.getElementById('perfil-habilidades').innerHTML = Object.entries(usuario.habilidades)
+                .map(([key, desbloqueado]) => `
+                    <div class="habilidad-item ${desbloqueado ? 'desbloqueado' : 'bloqueado'}">
+                        ${desbloqueado ? '✅' : '🔒'} ${habilidadesNombres[key]}
+                    </div>
+                `).join('');
+        }
+
+        // ========================================
+        // EXPORTAR / IMPORTAR
+        // ========================================
+
+        function exportarProgreso() {
+            const resultado = PALOMA_USUARIOS.exportarProgreso();
+            if (resultado.success) {
+                mostrarNotificacion('Progreso exportado', 'success');
+            }
+        }
+
+        // Importar
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById('drop-zone');
+            const inputFile = document.getElementById('input-import');
+
+            dropZone.addEventListener('click', () => inputFile.click());
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                
+                const file = e.dataTransfer.files[0];
+                await procesarImportacion(file);
+            });
+
+            inputFile.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                await procesarImportacion(file);
+            });
+        });
+
+        async function procesarImportacion(file) {
+            if (!file) return;
+
+            const resultado = await PALOMA_USUARIOS.importarProgreso(file);
+            
+            if (resultado.success) {
+                if (resultado.tipo === 'usuario') {
+                    mostrarNotificacion(`Usuario ${resultado.username} importado`, 'success');
+                } else {
+                    mostrarNotificacion(`${resultado.count} usuarios importados`, 'success');
+                }
+                mostrarPantalla('inicio');
+            } else {
+                alert('Error: ' + resultado.error);
+            }
+        }
+
+        // ========================================
+        // RANKING Y HALL OF FAME
+        // ========================================
+
+        function cargarRanking() {
+            const ranking = PALOMA_USUARIOS.obtenerRanking();
+            const container = document.getElementById('tabla-ranking');
+
+            if (ranking.length === 0) {
+                container.innerHTML = '<p class="mensaje-vacio">No hay usuarios en el ranking</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Usuario</th>
+                            <th>Dificultad</th>
+                            <th>Puntuación</th>
+                            <th>Migajas</th>
+                            <th>Enemigos</th>
+                            <th>Mundo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${ranking.map((u, i) => `
+                            <tr>
+                                <td class="rank">${i + 1}</td>
+                                <td>${u.username}</td>
+                                <td><span class="badge-dificultad ${u.dificultad}">${u.dificultad}</span></td>
+                                <td>${u.puntuacion.toLocaleString()}</td>
+                                <td>${u.migajas}</td>
+                                <td>${u.enemigos}</td>
+                                <td>Mundo ${u.mundoActual}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function cargarHallOfFame() {
+            const hallOfFame = PALOMA_USUARIOS.obtenerHallOfFame();
+            const container = document.getElementById('tabla-hall-of-fame');
+
+            if (hallOfFame.length === 0) {
+                container.innerHTML = '<p class="mensaje-vacio">Nadie ha muerto en Modo Extremo... todavía 💀</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="tabla hall-of-fame-table">
+                    <thead>
+                        <tr>
+                            <th>💀</th>
+                            <th>Usuario</th>
+                            <th>Sobrevivió</th>
+                            <th>Mundo Alcanzado</th>
+                            <th>Migajas</th>
+                            <th>Puntuación</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${hallOfFame.map((entry, i) => `
+                            <tr>
+                                <td class="rank">${i + 1}</td>
+                                <td><strong>${entry.username}</strong></td>
+                                <td>${formatearTiempo(entry.tiempoSobrevivido)}</td>
+                                <td>Mundo ${entry.mundoAlcanzado}</td>
+                                <td>${entry.migajas}</td>
+                                <td>${entry.puntuacion.toLocaleString()}</td>
+                                <td>${new Date(entry.fecha).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // ========================================
+        // UTILIDADES
+        // ========================================
+
+        function formatearTiempo(minutos) {
+            const horas = Math.floor(minutos / 60);
+            const mins = minutos % 60;
+            return horas > 0 ? `${horas}h ${mins}m` : `${mins}m`;
+        }
+
+        function mostrarNotificacion(mensaje, tipo = 'info') {
+            const notif = document.createElement('div');
+            notif.className = `notificacion ${tipo}`;
+            notif.textContent = mensaje;
+            document.body.appendChild(notif);
+
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        function cerrarModal(id) {
+            document.getElementById(`modal-${id}`).style.display = 'none';
+        }
+
+        function iniciarJuego() {
+            // Guardar progreso antes de iniciar
+            PALOMA_USUARIOS.guardarProgreso();
+            
+            // Ir a selección de mundo
+            window.location.href = 'Juego/index.html';
+        }
+
+        // ========================================
+        // INICIALIZACIÓN
+        // ========================================
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (PALOMA_USUARIOS.usuarioActual) {
+                mostrarPantalla('perfil');
+            } else {
+                mostrarPantalla('inicio');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -3,286 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Paloma Migajera - Gameplay</title>
-    <style>
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            background: #000; 
-            font-family: 'Segoe UI', sans-serif;
-        }
-        canvas { 
-            display: block; 
-            image-rendering: pixelated; 
-            width: 100vw; 
-            height: 100vh; 
-        }
-        
-        /* ========== HUD ========== */
-        #hud {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 50;
-            padding: 20px;
-            pointer-events: none;
-        }
-
-        .hud-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .hud-section {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px 20px;
-            border-radius: 8px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .vida-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .vida-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .vida-bar {
-            width: 200px;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .vida-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff4444, #ff6666);
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px rgba(255, 100, 100, 0.5);
-        }
-
-        .vida-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 0.75rem;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px black;
-        }
-
-        .energia-container {
-            margin-top: 10px;
-        }
-
-        .energia-bar {
-            width: 200px;
-            height: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(100, 150, 255, 0.5);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .energia-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4488ff, #66aaff);
-            transition: width 0.2s ease;
-            box-shadow: 0 0 10px rgba(100, 150, 255, 0.5);
-        }
-
-        .migajas-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.5rem;
-            color: #e3c18d;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px black;
-        }
-
-        .migajas-icon {
-            font-size: 2rem;
-        }
-
-        /* ========== MENÚ DE PAUSA ========== */
-        #menu-pausa {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .pausa-content {
-            text-align: center;
-            color: white;
-        }
-
-        .pausa-content h1 {
-            font-size: 4rem;
-            font-weight: 200;
-            letter-spacing: 10px;
-            margin-bottom: 50px;
-            text-transform: uppercase;
-        }
-
-        .pausa-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .pausa-btn {
-            background: none;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: rgba(255, 255, 255, 0.7);
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            letter-spacing: 3px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            pointer-events: auto;
-        }
-
-        .pausa-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: white;
-            color: white;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-        }
-
-        /* ========== MAPA UI ========== */
-        #mapa-ui { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.95); 
-            z-index: 100; 
-            justify-content: center; 
-            align-items: center;
-            flex-direction: column;
-        }
-
-        #mapa-ui h2 {
-            color: white;
-            font-size: 2rem;
-            font-weight: 200;
-            letter-spacing: 8px;
-            margin-bottom: 20px;
-        }
-
-        #mapa-ui img {
-            max-width: 90%;
-            max-height: 70%;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-        }
-
-        #mapa-ui .mapa-hint {
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 20px;
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-        }
-
-        /* ========== LOADING ========== */
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: black;
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 1.2rem;
-            letter-spacing: 4px;
-            opacity: 0.7;
-        }
-
-        /* ========== NOTIFICACIONES ========== */
-        .notificacion-juego {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 15px 30px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            font-size: 1rem;
-            letter-spacing: 2px;
-            z-index: 80;
-            animation: slideUp 0.5s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translate(-50%, 50px);
-                opacity: 0;
-            }
-            to {
-                transform: translate(-50%, 0);
-                opacity: 1;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="gameplay.css">
 </head>
 <body>
 
-    <!-- LOADING SCREEN -->
     <div id="loading-screen">
         <div class="loading-spinner"></div>
         <div class="loading-text">CARGANDO MUNDO...</div>
     </div>
 
-    <!-- HUD -->
     <div id="hud">
         <div class="hud-top">
             <div class="hud-section">
@@ -306,32 +35,48 @@
                 <span id="migajas-count">0</span>
             </div>
         </div>
+
+        <div class="usuario-info">
+            <div id="usuario-nombre-hud">Usuario</div>
+            <div id="mundo-actual-hud">Mundo 1</div>
+            <span id="dificultad-hud" class="badge-dif-hud">NORMAL</span>
+        </div>
     </div>
 
-    <!-- MAPA UI -->
     <div id="mapa-ui">
         <h2>MAPA DEL MUNDO</h2>
         <img src="mapa.jpg" onerror="this.src='fondo.jpg'">
         <div class="mapa-hint">Presiona M para cerrar</div>
     </div>
 
-    <!-- MENÚ DE PAUSA -->
     <div id="menu-pausa">
         <div class="pausa-content">
             <h1>PAUSA</h1>
             <div class="pausa-menu">
                 <button class="pausa-btn" onclick="reanudarJuego()">Continuar</button>
                 <button class="pausa-btn" onclick="reiniciarNivel()">Reiniciar Nivel</button>
-                <button class="pausa-btn" onclick="window.location.href='../index.html'">Guardar y Salir</button>
+                <button class="pausa-btn" onclick="guardarYSalir()">Guardar y Salir</button>
             </div>
         </div>
     </div>
 
-    <!-- CANVAS -->
+    <div id="game-over-screen">
+        <div class="game-over-content">
+            <h1>GAME OVER</h1>
+            <div id="game-over-mensaje"></div>
+            <div class="game-over-stats" id="game-over-stats"></div>
+            <div>
+                <button class="game-over-btn" id="btn-respawn" onclick="respawnJugador()">Continuar (Checkpoint)</button>
+                <button class="game-over-btn" onclick="volverMenu()">Volver al Menú</button>
+            </div>
+        </div>
+    </div>
+
     <canvas id="gameCanvas"></canvas>
     <canvas id="collisionCanvas" style="display:none;"></canvas>
 
     <script src="../../config.js"></script>
-    <script src="gameplay.js"></script>
+    <script src="../../sistema-usuarios.js"></script>
+    <script src="gameplay-completo.js"></script>
 </body>
 </html>

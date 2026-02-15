@@ -1,68 +1,35 @@
-// ========================================
-// GAMEPLAY MEJORADO - PALOMA MIGAJERA
-// ========================================
-
+// GAMEPLAY COMPLETO INTEGRADO CON SISTEMA DE USUARIOS
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const cCanvas = document.getElementById('collisionCanvas');
 const cCtx = cCanvas.getContext('2d');
 
-// ========================================
-// SISTEMA DE JUEGO
-// ========================================
+// VERIFICAR USUARIO
+if (!window.PALOMA_USUARIOS || !window.PALOMA_USUARIOS.usuarioActual) {
+    alert('No hay sesión activa. Redirigiendo...');
+    window.location.href = '../../seleccion-usuario.html';
+}
 
+const usuario = window.PALOMA_USUARIOS.usuarioActual;
+const mundoActual = parseInt(localStorage.getItem('paloma_mundo_actual')) || 1;
+const config = usuario.configuracionDificultad;
+
+// ESTADO DEL JUEGO
 const gameState = {
     pausado: false,
     cargando: true,
     mostrandoMapa: false,
+    muerto: false,
     tiempoInicio: Date.now(),
-    tiempoJugado: 0
+    tiempoUltimoGuardado: Date.now()
 };
 
-const playerStats = {
-    vidaMax: 100,
-    vidaActual: 100,
-    energiaMax: 100,
-    energiaActual: 100,
-    migajasRecolectadas: 0,
-    muertes: 0
-};
-
-// ========================================
-// ASSETS
-// ========================================
-
-const assets = {
-    fondo: new Image(),
-    visual: new Image(),
-    colision: new Image(),
-    pJPG: new Image(),
-    pCaminando: new Image(),
-    pDescanso: new Image(),
-    pMirando: new Image()
-};
-
-Object.values(assets).forEach(img => img.crossOrigin = "anonymous");
-
-assets.fondo.src = 'fondo.jpg';
-assets.visual.src = 'terreno_visual.jpg';
-assets.colision.src = 'terreno_colision.jpg';
-assets.pJPG.src = 'paloma.jpg';
-assets.pCaminando.src = 'Caminando.gif';
-assets.pDescanso.src = 'Descanso.gif';
-assets.pMirando.src = 'Visualisando_Mapa.gif';
-
-// ========================================
 // JUGADOR
-// ========================================
-
 const p = {
-    x: 150,
-    y: 50,
-    w: 90,
-    h: 90,
-    vx: 0,
-    vy: 0,
+    x: usuario.checkpoint.x || 150,
+    y: usuario.checkpoint.y || 50,
+    w: 90, h: 90,
+    vx: 0, vy: 0,
     dir: 1,
     movido: false,
     mirando: false,
@@ -74,60 +41,77 @@ const p = {
     gravedad: 0.8
 };
 
-// ========================================
-// CÁMARA
-// ========================================
-
-const cam = {
-    x: 0,
-    y: 0,
-    suavizado: 0.1
+// ASSETS
+const assets = {
+    fondo: new Image(),
+    visual: new Image(),
+    colision: new Image(),
+    pJPG: new Image(),
+    pCaminando: new Image(),
+    pDescanso: new Image(),
+    pMirando: new Image()
 };
 
-// ========================================
-// CONTROLES
-// ========================================
+Object.values(assets).forEach(img => img.crossOrigin = "anonymous");
+assets.fondo.src = 'fondo.jpg';
+assets.visual.src = 'terreno_visual.jpg';
+assets.colision.src = 'terreno_colision.jpg';
+assets.pJPG.src = 'paloma.jpg';
+assets.pCaminando.src = 'Caminando.gif';
+assets.pDescanso.src = 'Descanso.gif';
+assets.pMirando.src = 'Visualisando_Mapa.gif';
 
+const cam = { x: 0, y: 0, suavizado: 0.1 };
 const keys = {};
-let configuracion = null;
 
+// HUD INICIAL
+document.getElementById('usuario-nombre-hud').textContent = usuario.username;
+document.getElementById('mundo-actual-hud').textContent = `Mundo ${mundoActual}`;
+document.getElementById('dificultad-hud').textContent = usuario.dificultad.toUpperCase();
+document.getElementById('dificultad-hud').className = `badge-dif-hud ${usuario.dificultad}`;
+
+// CONTROLES
 window.onkeydown = (e) => {
     if (gameState.pausado && e.code !== 'Escape') return;
+    if (gameState.muerto) return;
     
     keys[e.code] = true;
     
-    // Mapa
     if (e.code === 'KeyM') {
         p.mirando = !p.mirando;
         gameState.mostrandoMapa = p.mirando;
     }
     
-    // Pausa
     if (e.code === 'Escape') {
         togglePausa();
     }
 };
 
-window.onkeyup = (e) => {
-    keys[e.code] = false;
-};
+window.onkeyup = (e) => keys[e.code] = false;
 
-// ========================================
 // COLISIONES
-// ========================================
-
 function esSuelo(x, y) {
     if (x < 0 || x >= cCanvas.width || y < 0 || y >= cCanvas.height) return false;
     const pixel = cCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
     return (pixel[0] < 100 && pixel[3] > 0);
 }
 
-// ========================================
-// ACTUALIZACIÓN
-// ========================================
-
+// UPDATE
 function update() {
-    if (gameState.pausado || gameState.cargando) return;
+    if (gameState.pausado || gameState.cargando || gameState.muerto) return;
+    
+    // Actualizar tiempo
+    const tiempoActual = Date.now();
+    const deltaTiempo = (tiempoActual - gameState.tiempoInicio) / 60000; // minutos
+    usuario.stats.tiempoJugado += deltaTiempo / 60;
+    gameState.tiempoInicio = tiempoActual;
+    
+    // Auto-guardar cada 60 segundos
+    if (tiempoActual - gameState.tiempoUltimoGuardado > 60000) {
+        PALOMA_USUARIOS.guardarProgreso();
+        gameState.tiempoUltimoGuardado = tiempoActual;
+        mostrarNotificacion('Progreso guardado');
+    }
     
     // MODO MAPA
     if (p.mirando) {
@@ -158,12 +142,16 @@ function update() {
         p.sprite = p.movido ? assets.pDescanso : assets.pJPG;
     }
     
+    // Actualizar distancia recorrida
+    if (p.vx !== 0) {
+        usuario.stats.distanciaRecorrida += Math.abs(p.vx) / 60;
+    }
+    
     // COLISIÓN LATERAL
     if (!esSuelo(p.x + (p.dir === 1 ? p.w : 0) + p.vx, p.y + p.h - 20)) {
         p.x += p.vx;
     }
     
-    // MOVIMIENTO VERTICAL
     p.y += p.vy;
     
     // COLISIÓN DE SUELO
@@ -180,60 +168,50 @@ function update() {
         p.enSuelo = true;
         p.saltosRestantes = 1;
         
-        // Ajustar posición en el suelo
         while (esSuelo(p.x + p.w / 2, p.y + p.h - 1)) p.y--;
         
         // SALTO
-        if (keys['Space'] || keys['KeyW']) {
+        if (keys['Space'] || keys['KeyW'] || keys['ArrowUp']) {
             p.vy = p.fuerzaSalto;
             p.enSuelo = false;
             consumirEnergia(5);
+            usuario.stats.saltosRealizados++;
         }
     } else {
         p.enSuelo = false;
     }
     
-    // DOBLE SALTO (si está desbloqueado)
-    if ((keys['Space'] || keys['KeyW']) && !p.enSuelo && p.saltosRestantes > 0) {
-        // Placeholder para cuando implementen habilidades
-        // p.vy = p.fuerzaSalto * 0.8;
-        // p.saltosRestantes--;
-    }
-    
     // REGENERACIÓN DE ENERGÍA
-    if (playerStats.energiaActual < playerStats.energiaMax) {
-        playerStats.energiaActual += 0.2;
+    if (usuario.energia < usuario.energiaMax) {
+        let regen = 0.2;
+        if (config.regeneracionVida && usuario.vida < usuario.vidaMax) {
+            usuario.vida += 0.1;
+        }
+        usuario.energia += regen;
         actualizarHUD();
     }
     
-    // ACTUALIZAR CÁMARA
-    actualizarCamara();
-    
     // LÍMITES DEL MUNDO
     if (p.y > canvas.height + 200) {
-        morir();
+        registrarMuerte();
     }
+    
+    actualizarCamara();
 }
 
-// ========================================
-// DIBUJO
-// ========================================
-
+// DRAW
 function draw() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 1. FONDO
     ctx.drawImage(assets.fondo, 0, 0, canvas.width, canvas.height);
     
     ctx.save();
     ctx.translate(-cam.x, -cam.y);
     
-    // 2. TERRENO VISUAL
     ctx.drawImage(assets.visual, 0, 0);
     
-    // 3. JUGADOR
     ctx.save();
     let img = p.sprite || assets.pJPG;
     if (p.dir === -1) {
@@ -244,24 +222,17 @@ function draw() {
         ctx.drawImage(img, p.x, p.y, p.w, p.h);
     }
     ctx.restore();
-    
     ctx.restore();
 }
 
-// ========================================
-// LOOP PRINCIPAL
-// ========================================
-
+// LOOP
 function loop() {
     update();
     draw();
     requestAnimationFrame(loop);
 }
 
-// ========================================
 // CÁMARA
-// ========================================
-
 function actualizarCamara() {
     const targetX = p.x - canvas.width / 2;
     const targetY = p.y - canvas.height / 2;
@@ -269,62 +240,51 @@ function actualizarCamara() {
     cam.x += (targetX - cam.x) * cam.suavizado;
     cam.y += (targetY - cam.y) * cam.suavizado;
     
-    // Límites de la cámara
     if (cam.x < 0) cam.x = 0;
     if (cam.y < 0) cam.y = 0;
 }
 
-// ========================================
 // HUD
-// ========================================
-
 function actualizarHUD() {
-    // Vida
-    const vidaPorcentaje = (playerStats.vidaActual / playerStats.vidaMax) * 100;
+    const vidaPorcentaje = (usuario.vida / usuario.vidaMax) * 100;
     document.getElementById('vida-fill').style.width = vidaPorcentaje + '%';
     document.getElementById('vida-text').textContent = 
-        `${Math.ceil(playerStats.vidaActual)} / ${playerStats.vidaMax}`;
+        `${Math.ceil(usuario.vida)} / ${usuario.vidaMax}`;
     
-    // Energía
-    const energiaPorcentaje = (playerStats.energiaActual / playerStats.energiaMax) * 100;
+    const energiaPorcentaje = (usuario.energia / usuario.energiaMax) * 100;
     document.getElementById('energia-fill').style.width = energiaPorcentaje + '%';
     
-    // Migajas
-    document.getElementById('migajas-count').textContent = playerStats.migajasRecolectadas;
+    document.getElementById('migajas-count').textContent = usuario.stats.migajasRecolectadas;
 }
 
 function recibirDanio(cantidad) {
-    playerStats.vidaActual -= cantidad;
-    if (playerStats.vidaActual < 0) playerStats.vidaActual = 0;
+    const danioReal = cantidad * config.multiplicadorDanio;
+    usuario.vida -= danioReal;
+    if (usuario.vida < 0) usuario.vida = 0;
     actualizarHUD();
     
-    // Efecto visual de daño
     canvas.style.filter = 'brightness(1.5) saturate(1.5)';
-    setTimeout(() => {
-        canvas.style.filter = 'none';
-    }, 100);
+    setTimeout(() => canvas.style.filter = 'none', 100);
     
-    if (playerStats.vidaActual <= 0) {
-        morir();
+    if (usuario.vida <= 0) {
+        registrarMuerte();
     }
 }
 
 function consumirEnergia(cantidad) {
-    playerStats.energiaActual -= cantidad;
-    if (playerStats.energiaActual < 0) playerStats.energiaActual = 0;
+    usuario.energia -= cantidad;
+    if (usuario.energia < 0) usuario.energia = 0;
     actualizarHUD();
 }
 
 function recolectarMigaja() {
-    playerStats.migajasRecolectadas++;
+    usuario.stats.migajasRecolectadas++;
+    PALOMA_USUARIOS.actualizarEstadistica('migajasRecolectadas', 1);
     actualizarHUD();
-    mostrarNotificacion('¡Migaja recolectada!');
+    mostrarNotificacion('¡Migaja +1!');
 }
 
-// ========================================
-// SISTEMA DE PAUSA
-// ========================================
-
+// PAUSA
 function togglePausa() {
     gameState.pausado = !gameState.pausado;
     document.getElementById('menu-pausa').style.display = 
@@ -337,95 +297,124 @@ function reanudarJuego() {
 }
 
 function reiniciarNivel() {
-    p.x = 150;
-    p.y = 50;
+    p.x = usuario.checkpoint.x;
+    p.y = usuario.checkpoint.y;
     p.vx = 0;
     p.vy = 0;
-    playerStats.vidaActual = playerStats.vidaMax;
-    playerStats.energiaActual = playerStats.energiaMax;
+    usuario.vida = usuario.vidaMax;
+    usuario.energia = usuario.energiaMax;
     actualizarHUD();
     reanudarJuego();
-    mostrarNotificacion('Nivel reiniciado');
 }
 
-// ========================================
-// MUERTE Y RESPAWN
-// ========================================
+function guardarYSalir() {
+    PALOMA_USUARIOS.actualizarCheckpoint(mundoActual, 1, p.x, p.y);
+    PALOMA_USUARIOS.guardarProgreso();
+    window.location.href = '../index.html';
+}
 
-function morir() {
-    playerStats.muertes++;
-    mostrarNotificacion('¡Has muerto! Respawneando...', 'error');
+// MUERTE
+function registrarMuerte() {
+    if (gameState.muerto) return;
+    gameState.muerto = true;
+    
+    usuario.stats.rachaActual = 0;
+    const resultado = PALOMA_USUARIOS.registrarMuerte();
+    
+    if (resultado.tipo === 'permanente') {
+        // MODO EXTREMO - MUERTE PERMANENTE
+        mostrarGameOverExtremo(resultado);
+    } else {
+        // MODOS NORMALES
+        mostrarGameOverNormal(resultado);
+    }
+}
+
+function mostrarGameOverExtremo(resultado) {
+    const screen = document.getElementById('game-over-screen');
+    document.getElementById('game-over-mensaje').innerHTML = `
+        <h2 style="color:#9C27B0; font-size:2rem; margin:20px 0;">
+            MODO EXTREMO - MUERTE PERMANENTE
+        </h2>
+        <p style="font-size:1.2rem; color:rgba(255,255,255,0.8);">
+            Tu valentía será recordada en el Hall of Fame
+        </p>
+    `;
+    
+    document.getElementById('game-over-stats').innerHTML = `
+        <div class="game-over-stat">⏱️ Tiempo Sobrevivido: ${formatearTiempo(resultado.tiempoSobrevivido)}</div>
+        <div class="game-over-stat">🍞 Migajas Recolectadas: ${resultado.stats.migajasRecolectadas}</div>
+        <div class="game-over-stat">⚔️ Enemigos Derrotados: ${resultado.stats.enemigosD errotados}</div>
+        <div class="game-over-stat">🗺️ Mundo Alcanzado: Mundo ${mundoActual}</div>
+    `;
+    
+    document.getElementById('btn-respawn').style.display = 'none';
+    screen.style.display = 'flex';
     
     setTimeout(() => {
-        reiniciarNivel();
-    }, 2000);
+        window.location.href = '../../seleccion-usuario.html';
+    }, 10000);
 }
 
-// ========================================
-// NOTIFICACIONES
-// ========================================
+function mostrarGameOverNormal(resultado) {
+    const screen = document.getElementById('game-over-screen');
+    document.getElementById('game-over-mensaje').innerHTML = `
+        <p style="font-size:1.1rem; color:rgba(255,255,255,0.7); margin:20px 0;">
+            Regresas al checkpoint
+        </p>
+    `;
+    
+    document.getElementById('game-over-stats').innerHTML = `
+        <div class="game-over-stat">💀 Muertes Totales: ${usuario.stats.muertes}</div>
+        <div class="game-over-stat">📍 Checkpoint: Mundo ${resultado.checkpoint.mundo}</div>
+    `;
+    
+    screen.style.display = 'flex';
+}
 
-function mostrarNotificacion(mensaje, tipo = 'info') {
+function respawnJugador() {
+    const cp = usuario.checkpoint;
+    p.x = cp.x;
+    p.y = cp.y;
+    p.vx = 0;
+    p.vy = 0;
+    usuario.vida = usuario.vidaMax;
+    usuario.energia = usuario.energiaMax;
+    actualizarHUD();
+    
+    gameState.muerto = false;
+    document.getElementById('game-over-screen').style.display = 'none';
+}
+
+function volverMenu() {
+    PALOMA_USUARIOS.guardarProgreso();
+    window.location.href = '../index.html';
+}
+
+// NOTIFICACIONES
+function mostrarNotificacion(mensaje) {
     const notif = document.createElement('div');
     notif.className = 'notificacion-juego';
     notif.textContent = mensaje;
-    
-    if (tipo === 'error') {
-        notif.style.borderColor = 'rgba(255, 50, 50, 0.5)';
-        notif.style.background = 'rgba(50, 0, 0, 0.9)';
-    }
-    
     document.body.appendChild(notif);
     
-    setTimeout(() => {
-        notif.style.animation = 'slideDown 0.5s ease-out';
-        setTimeout(() => notif.remove(), 500);
-    }, 2500);
+    setTimeout(() => notif.remove(), 2500);
 }
 
-// ========================================
-// GUARDADO AUTOMÁTICO
-// ========================================
-
-function guardarProgreso() {
-    const saveData = {
-        posicion: { x: p.x, y: p.y },
-        vida: playerStats.vidaActual,
-        energia: playerStats.energiaActual,
-        migajas: playerStats.migajasRecolectadas,
-        muertes: playerStats.muertes,
-        tiempoJugado: gameState.tiempoJugado,
-        fecha: new Date().toLocaleDateString()
-    };
-    
-    const currentSave = localStorage.getItem('paloma_current_save') || '1';
-    localStorage.setItem(`paloma_save_${currentSave}`, JSON.stringify(saveData));
-    
-    mostrarNotificacion('Progreso guardado automáticamente');
+function formatearTiempo(minutos) {
+    const h = Math.floor(minutos / 60);
+    const m = Math.floor(minutos % 60);
+    const s = Math.floor((minutos % 1) * 60);
+    return h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`;
 }
 
-// Guardar cada 60 segundos
-setInterval(() => {
-    if (!gameState.pausado && !gameState.cargando) {
-        const settings = JSON.parse(localStorage.getItem('paloma_settings'));
-        if (settings && settings.juego.autoGuardar) {
-            guardarProgreso();
-        }
-    }
-}, 60000);
-
-// ========================================
-// CARGA DE ASSETS
-// ========================================
-
+// CARGA
 let cargados = 0;
 const totalAssets = Object.keys(assets).length;
 
 Object.values(assets).forEach(img => {
     img.onload = () => {
         cargados++;
-        
-        // Actualizar loading
         const loadingText = document.querySelector('.loading-text');
         loadingText.textContent = `CARGANDO... ${Math.floor((cargados / totalAssets) * 100)}%`;
         
@@ -435,67 +424,36 @@ Object.values(assets).forEach(img => {
     };
     
     img.onerror = () => {
-        console.error('Error cargando imagen:', img.src);
+        console.warn('Error cargando:', img.src);
         cargados++;
-        if (cargados === totalAssets) {
-            iniciarJuego();
-        }
+        if (cargados === totalAssets) iniciarJuego();
     };
 });
 
 function iniciarJuego() {
-    // Configurar canvas de colisión
     cCanvas.width = assets.visual.width;
     cCanvas.height = assets.visual.height;
     cCtx.drawImage(assets.colision, 0, 0);
     
-    // Cargar configuración
-    configuracion = JSON.parse(localStorage.getItem('paloma_settings'));
+    // Aplicar multiplicador de vida según dificultad
+    usuario.vidaMax = Math.floor(100 * config.multiplicadorVida);
+    usuario.vida = usuario.vidaMax;
     
-    // Cargar progreso guardado si existe
-    cargarProgreso();
-    
-    // Ocultar loading
     setTimeout(() => {
         document.getElementById('loading-screen').style.display = 'none';
         gameState.cargando = false;
-        mostrarNotificacion('¡Bienvenido de vuelta!');
+        mostrarNotificacion('¡Mundo ' + mundoActual + ' cargado!');
     }, 500);
     
-    // Iniciar HUD
     actualizarHUD();
-    
-    // Iniciar loop
     loop();
 }
 
-function cargarProgreso() {
-    const currentSave = localStorage.getItem('paloma_current_save') || '1';
-    const savedData = localStorage.getItem(`paloma_save_${currentSave}`);
-    
-    if (savedData) {
-        const data = JSON.parse(savedData);
-        if (data.posicion) {
-            p.x = data.posicion.x;
-            p.y = data.posicion.y;
-        }
-        if (data.vida) playerStats.vidaActual = data.vida;
-        if (data.energia) playerStats.energiaActual = data.energia;
-        if (data.migajas) playerStats.migajasRecolectadas = data.migajas;
-        if (data.muertes) playerStats.muertes = data.muertes;
-        if (data.tiempoJugado) gameState.tiempoJugado = data.tiempoJugado;
-    }
-}
-
-// ========================================
-// INICIALIZACIÓN
-// ========================================
-
-console.log('🕊️ Gameplay Mejorado de Paloma Migajera cargado');
-
-// Manejar pérdida de foco
+// Detectar pérdida de foco
 window.addEventListener('blur', () => {
-    if (!gameState.pausado && !gameState.cargando) {
+    if (!gameState.pausado && !gameState.cargando && !gameState.muerto) {
         togglePausa();
     }
 });
+
+console.log('🎮 Gameplay cargado - Usuario:', usuario.username, '- Dificultad:', usuario.dificultad);

@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajustes — Paloma Migajera</title>
+  <link rel="stylesheet" href="../shared/global.css">
+  <style>
+    body { overflow-y: auto; overflow-x: hidden; }
+
+    .settings-layout {
+      display: flex;
+      min-height: 100%;
+    }
+
+    /* ---- Sidebar ---- */
+    .sidebar {
+      width: 200px;
+      min-height: 100vh;
+      background: rgba(10,10,15,0.9);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 0;
+      position: sticky;
+      top: 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo {
+      text-align: center;
+      padding: 0 16px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-logo .icon { font-size: 1.8rem; display: block; }
+    .sidebar-logo .title {
+      font-family: var(--font-title);
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-family: var(--font-title);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border-left: 2px solid transparent;
+      transition: all 0.2s;
+      background: transparent;
+      border-right: none;
+      border-top: none;
+      border-bottom: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .sidebar-item:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+    .sidebar-item.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: rgba(232,200,96,0.04);
+    }
+
+    .sidebar-icon { font-size: 0.9rem; width: 16px; text-align: center; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ---- Contenido principal ---- */
+    .settings-main {
+      flex: 1;
+      padding: 40px 48px;
+      max-width: 760px;
+    }
+
+    .page-header {
+      margin-bottom: 40px;
+    }
+
+    .page-title {
+      font-family: var(--font-title);
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: var(--text-hi);
+      display: block;
+    }
+
+    .page-subtitle {
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* ---- Secciones ---- */
+    .section {
+      display: none;
+      animation: fadeUp 0.3s var(--ease) forwards;
+    }
+    .section.active { display: block; }
+
+    /* ---- Setting Row ---- */
+    .s-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      gap: 24px;
+    }
+    .s-row:last-child { border-bottom: none; }
+
+    .s-label {
+      flex: 1;
+    }
+    .s-label strong {
+      display: block;
+      font-family: var(--font-title);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      font-weight: 400;
+    }
+    .s-label small {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .s-control { flex-shrink: 0; }
+
+    /* ---- Slider ---- */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 140px;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(232,200,96,0.4);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+    }
+
+    .slider-val {
+      font-family: var(--font-title);
+      font-size: 0.65rem;
+      color: var(--accent);
+      width: 36px;
+      text-align: right;
+    }
+
+    /* ---- Toggle switch ---- */
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 22px;
+      cursor: pointer;
+    }
+    .toggle input { display: none; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      transition: background 0.25s;
+    }
+    .toggle input:checked + .toggle-track { background: rgba(232,200,96,0.3); border-color: var(--accent); }
+    .toggle-thumb {
+      position: absolute;
+      width: 16px; height: 16px;
+      background: var(--text-dim);
+      border-radius: 50%;
+      top: 2px; left: 3px;
+      transition: transform 0.25s var(--ease), background 0.25s;
+    }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(22px); background: var(--accent); }
+
+    /* ---- Select ---- */
+    select {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      font-family: var(--font-title);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      outline: none;
+      border-radius: 1px;
+      transition: border-color 0.2s;
+    }
+    select:focus { border-color: var(--accent); }
+    select option { background: #1a1a28; }
+
+    /* ---- Teclas ---- */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+    }
+
+    .ctrl-label {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .key-badge {
+      font-family: var(--font-title);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 70px;
+      text-align: center;
+    }
+    .key-badge:hover   { border-color: var(--accent); color: var(--accent); }
+    .key-badge.waiting { border-color: #f0a020; color: #f0a020; background: rgba(240,160,32,0.1); animation: pulse 0.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    /* ---- Estadísticas ---- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .stat-card {
+      padding: 18px 20px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-top-color: var(--accent); }
+
+    .stat-card-label {
+      font-family: var(--font-title);
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .stat-card-value {
+      font-family: var(--font-title);
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--text-hi);
+      letter-spacing: 0.05em;
+    }
+
+    /* ---- Zona de peligro ---- */
+    .danger-zone {
+      margin-top: 24px;
+      padding: 20px;
+      border: 1px solid rgba(192,64,64,0.3);
+      background: rgba(192,64,64,0.04);
+    }
+    .danger-zone h4 {
+      font-family: var(--font-title);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--danger);
+      margin-bottom: 12px;
+    }
+
+    /* ---- Panel wrapper ---- */
+    .s-panel {
+      padding: 0 20px;
+      background: rgba(21,21,31,0.6);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .s-panel-title {
+      font-family: var(--font-title);
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      color: var(--accent);
+      text-transform: uppercase;
+      padding: 12px 0 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+
+    /* ---- Action buttons ---- */
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer">
+    <div class="bg-gradient"></div>
+    <div class="bg-grain"></div>
+  </div>
+  <canvas id="particles" class="particles-canvas"></canvas>
+
+  <div class="page settings-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="icon">🕊️</span>
+        <span class="title">Paloma Migajera</span>
+      </div>
+
+      <button class="sidebar-item active" onclick="showSection('audio', this)">
+        <span class="sidebar-icon">🔊</span> Audio
+      </button>
+      <button class="sidebar-item" onclick="showSection('graficos', this)">
+        <span class="sidebar-icon">🎨</span> Gráficos
+      </button>
+      <button class="sidebar-item" onclick="showSection('controles', this)">
+        <span class="sidebar-icon">🎮</span> Controles
+      </button>
+      <button class="sidebar-item" onclick="showSection('juego', this)">
+        <span class="sidebar-icon">⚙️</span> Juego
+      </button>
+      <button class="sidebar-item" onclick="showSection('estadisticas', this)">
+        <span class="sidebar-icon">📊</span> Estadísticas
+      </button>
+      <button class="sidebar-item" onclick="showSection('datos', this)">
+        <span class="sidebar-icon">🗄️</span> Datos
+      </button>
+
+      <div class="sidebar-footer">
+        <button class="btn" style="width:100%;font-size:0.6rem;" onclick="goTo('../menu/index.html')">← Volver</button>
+      </div>
+    </aside>
+
+    <!-- Contenido -->
+    <main class="settings-main">
+      <div class="page-header fade-up">
+        <span class="page-title" id="section-title">Audio</span>
+        <span class="page-subtitle" id="section-sub">Ajusta los volúmenes del juego.</span>
+      </div>
+
+      <!-- AUDIO -->
+      <div class="section active" id="sec-audio">
+        <div class="s-panel">
+          <div class="s-panel-title">Volúmenes</div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>Música</strong>
+              <small>Melodía ambiente del juego</small>
+            </div>
+            <div class="s-control slider-wrap">
+              <input type="range" id="vol-musica" min="0" max="100">
+              <span class="slider-val" id="vv-musica">70%</span>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>Efectos de Sonido</strong>
+              <small>Ataques, saltos, colisiones</small>
+            </div>
+            <div class="s-control slider-wrap">
+              <input type="range" id="vol-efectos" min="0" max="100">
+              <span class="slider-val" id="vv-efectos">80%</span>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>Ambiente</strong>
+              <small>Sonidos de la ciudad</small>
+            </div>
+            <div class="s-control slider-wrap">
+              <input type="range" id="vol-ambiente" min="0" max="100">
+              <span class="slider-val" id="vv-ambiente">60%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRÁFICOS -->
+      <div class="section" id="sec-graficos">
+        <div class="s-panel">
+          <div class="s-panel-title">Rendimiento</div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>Calidad Visual</strong>
+              <small>Afecta partículas y sombras</small>
+            </div>
+            <div class="s-control">
+              <select id="g-calidad">
+                <option value="baja">Baja</option>
+                <option value="media" selected>Media</option>
+                <option value="alta">Alta</option>
+              </select>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>Partículas de Migas</strong>
+              <small>Efectos visuales de migas flotantes</small>
+            </div>
+            <div class="s-control">
+              <label class="toggle">
+                <input type="checkbox" id="g-particulas" checked>
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>VSync</strong>
+              <small>Sincronización vertical</small>
+            </div>
+            <div class="s-control">
+              <label class="toggle">
+                <input type="checkbox" id="g-vsync" checked>
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>Pantalla Completa</strong>
+            </div>
+            <div class="s-control">
+              <label class="toggle">
+                <input type="checkbox" id="g-fullscreen">
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLES -->
+      <div class="section" id="sec-controles">
+        <div class="s-panel">
+          <div class="s-panel-title">Asignación de Teclas</div>
+          <div style="padding: 16px 0;">
+            <div class="controls-grid" id="controls-grid"></div>
+          </div>
+          <div class="s-row" style="border-top: 1px solid var(--border);">
+            <span style="font-style:italic;color:var(--text-dim);font-size:0.85rem;">Haz clic en una tecla para reasignarla.</span>
+            <button class="btn" onclick="resetControls()">Restaurar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- JUEGO -->
+      <div class="section" id="sec-juego">
+        <div class="s-panel">
+          <div class="s-panel-title">Preferencias</div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>Idioma</strong>
+            </div>
+            <div class="s-control">
+              <select id="j-idioma">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>Auto-Guardado</strong>
+              <small>Guarda el progreso cada 5 minutos</small>
+            </div>
+            <div class="s-control">
+              <label class="toggle">
+                <input type="checkbox" id="j-autosave" checked>
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>Tutoriales</strong>
+            </div>
+            <div class="s-control">
+              <label class="toggle">
+                <input type="checkbox" id="j-tutoriales" checked>
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-label">
+              <strong>Subtítulos</strong>
+            </div>
+            <div class="s-control">
+              <label class="toggle">
+                <input type="checkbox" id="j-subtitulos" checked>
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTADÍSTICAS -->
+      <div class="section" id="sec-estadisticas">
+        <div class="stats-grid" id="stats-grid"></div>
+      </div>
+
+      <!-- DATOS -->
+      <div class="section" id="sec-datos">
+        <div class="s-panel">
+          <div class="s-panel-title">Almacenamiento</div>
+          <div class="s-row">
+            <span class="s-label"><strong>Espacio Usado</strong></span>
+            <span id="d-size" style="font-family:var(--font-title);font-size:0.7rem;color:var(--text-hi);">—</span>
+          </div>
+          <div class="s-row">
+            <span class="s-label"><strong>Partidas Guardadas</strong></span>
+            <span id="d-saves" style="font-family:var(--font-title);font-size:0.7rem;color:var(--text-hi);">—</span>
+          </div>
+        </div>
+        <div class="danger-zone">
+          <h4>⚠️ ZONA DE PELIGRO</h4>
+          <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:16px;font-style:italic;">
+            Estas acciones son irreversibles. No se puede deshacer.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-danger" onclick="clearSave()">Borrar Partida</button>
+            <button class="btn btn-danger" onclick="clearAll()">Borrar Todo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action bar -->
+      <div class="action-bar">
+        <button class="btn btn-primary" onclick="saveSettings()">Guardar Cambios</button>
+        <button class="btn" onclick="resetAll()">Restaurar Todo</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="../shared/utils.js"></script>
+  <script>
+    let cfg = getCfg();
+
+    const SECTIONS = {
+      audio:       { title: 'Audio',       sub: 'Ajusta los volúmenes del juego.' },
+      graficos:    { title: 'Gráficos',    sub: 'Calidad visual y rendimiento.' },
+      controles:   { title: 'Controles',   sub: 'Asigna teclas a cada acción.' },
+      juego:       { title: 'Juego',       sub: 'Preferencias generales.' },
+      estadisticas:{ title: 'Estadísticas',sub: 'Tu progreso acumulado.' },
+      datos:       { title: 'Datos',       sub: 'Gestión de archivos guardados.' },
+    };
+
+    const CTRL_LABELS = {
+      izquierda: 'Mover Izquierda',
+      derecha:   'Mover Derecha',
+      saltar:    'Saltar',
+      dash:      'Dash / Esquivar',
+      ataque:    'Atacar',
+      especial:  'Palomaduken',
+      mapa:      'Mapa',
+      inventario:'Inventario',
+      pausa:     'Pausa',
+    };
+
+    const KEY_NAMES = {
+      Space:'ESPACIO', Escape:'ESC', ArrowUp:'↑', ArrowDown:'↓',
+      ArrowLeft:'←', ArrowRight:'→', ShiftLeft:'SHIFT-I', ShiftRight:'SHIFT-D',
+    };
+    function fmtKey(code) {
+      if (KEY_NAMES[code]) return KEY_NAMES[code];
+      if (code.startsWith('Key'))    return code.slice(3);
+      if (code.startsWith('Digit'))  return code.slice(5);
+      return code;
+    }
+
+    function showSection(id, btn) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+      document.getElementById('sec-' + id).classList.add('active');
+      btn.classList.add('active');
+      document.getElementById('section-title').textContent = SECTIONS[id].title;
+      document.getElementById('section-sub').textContent   = SECTIONS[id].sub;
+    }
+
+    // ---- Sliders ----
+    function initSlider(id, valId, cfgPath) {
+      const el = document.getElementById(id);
+      const vl = document.getElementById(valId);
+      const [cat, key] = cfgPath.split('.');
+      el.value = cfg[cat][key];
+      vl.textContent = el.value + '%';
+      el.addEventListener('input', () => {
+        vl.textContent = el.value + '%';
+        cfg[cat][key] = +el.value;
+      });
+    }
+
+    // ---- Toggles ----
+    function initToggle(id, cfgPath) {
+      const el = document.getElementById(id);
+      const [cat, key] = cfgPath.split('.');
+      el.checked = cfg[cat][key];
+      el.addEventListener('change', () => { cfg[cat][key] = el.checked; });
+    }
+
+    // ---- Controles grid ----
+    function renderControls() {
+      const grid = document.getElementById('controls-grid');
+      grid.innerHTML = '';
+      for (const [action, label] of Object.entries(CTRL_LABELS)) {
+        const row = document.createElement('div');
+        row.className = 'ctrl-row';
+        row.innerHTML = `
+          <span class="ctrl-label">${label}</span>
+          <button class="key-badge" data-action="${action}">${fmtKey(cfg.controles[action])}</button>
+        `;
+        grid.appendChild(row);
+      }
+      grid.querySelectorAll('.key-badge').forEach(btn => {
+        btn.addEventListener('click', () => rebind(btn));
+      });
+    }
+
+    let waitingBtn = null;
+    function rebind(btn) {
+      if (waitingBtn) { waitingBtn.classList.remove('waiting'); waitingBtn.textContent = fmtKey(cfg.controles[waitingBtn.dataset.action]); }
+      waitingBtn = btn;
+      btn.classList.add('waiting');
+      btn.textContent = '...';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!waitingBtn) return;
+      e.preventDefault();
+      const action = waitingBtn.dataset.action;
+      cfg.controles[action] = e.code;
+      waitingBtn.textContent = fmtKey(e.code);
+      waitingBtn.classList.remove('waiting');
+      waitingBtn = null;
+      toast('Tecla actualizada', 'success');
+    });
+
+    function resetControls() {
+      cfg.controles = defaultCfg().controles;
+      renderControls();
+      toast('Controles restaurados', 'info');
+    }
+
+    // ---- Estadísticas ----
+    function renderStats() {
+      const save = getSave();
+      const s = save.estadisticas;
+      const items = [
+        ['Tiempo Jugado',       formatTime(s.tiempoJugado)],
+        ['Migajas Recolectadas',s.migajasTotal],
+        ['Muertes',             s.muertes],
+        ['Logros',              `${s.logros} / 20`],
+        ['Nivel Actual',        save.nivel],
+        ['Migajas Guardadas',   save.migajas],
+      ];
+      const grid = document.getElementById('stats-grid');
+      grid.innerHTML = items.map(([l,v]) => `
+        <div class="stat-card">
+          <span class="stat-card-label">${l}</span>
+          <span class="stat-card-value">${v}</span>
+        </div>
+      `).join('');
+    }
+
+    // ---- Datos ----
+    function renderDatos() {
+      let size = 0;
+      for (const k in localStorage) {
+        if (localStorage.hasOwnProperty(k)) size += k.length + (localStorage[k]||'').length;
+      }
+      document.getElementById('d-size').textContent  = (size/1024).toFixed(2) + ' KB';
+      document.getElementById('d-saves').textContent = localStorage.getItem(SAVE_KEY) ? '1' : '0';
+    }
+
+    function clearSave() {
+      if (!confirm('¿Borrar la partida guardada?')) return;
+      localStorage.removeItem(SAVE_KEY);
+      toast('Partida borrada', 'error');
+      renderDatos();
+    }
+
+    function clearAll() {
+      const t = prompt('Escribe BORRAR TODO para confirmar:');
+      if (t === 'BORRAR TODO') {
+        localStorage.clear();
+        toast('Todos los datos eliminados', 'error');
+        setTimeout(() => goTo('../menu/index.html'), 1200);
+      } else {
+        toast('Cancelado', 'info');
+      }
+    }
+
+    // ---- Guardar / Resetear ----
+    function saveSettings() {
+      // Leer select
+      cfg.graficos.calidad = document.getElementById('g-calidad').value;
+      cfg.juego.idioma     = document.getElementById('j-idioma').value;
+      setCfg(cfg);
+      toast('Configuración guardada', 'success');
+    }
+
+    function resetAll() {
+      if (!confirm('¿Restaurar todos los ajustes a los valores por defecto?')) return;
+      cfg = defaultCfg();
+      setCfg(cfg);
+      toast('Ajustes restaurados', 'info');
+      setTimeout(() => location.reload(), 600);
+    }
+
+    // ---- Init ----
+    document.addEventListener('DOMContentLoaded', () => {
+      initSlider('vol-musica',   'vv-musica',   'audio.musica');
+      initSlider('vol-efectos',  'vv-efectos',  'audio.efectos');
+      initSlider('vol-ambiente', 'vv-ambiente', 'audio.ambiente');
+      initToggle('g-particulas', 'graficos.particulas');
+      initToggle('g-vsync',      'graficos.vsync');
+      initToggle('g-fullscreen', 'graficos.pantallaCompleta');
+      initToggle('j-autosave',   'juego.autoGuardar');
+      initToggle('j-tutoriales', 'juego.tutoriales');
+      initToggle('j-subtitulos', 'juego.subtitulos');
+      document.getElementById('g-calidad').value = cfg.graficos.calidad;
+      document.getElementById('j-idioma').value  = cfg.juego.idioma;
+      renderControls();
+      renderStats();
+      renderDatos();
+
+      document.getElementById('g-fullscreen').addEventListener('change', e => {
+        if (e.target.checked) document.documentElement.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      });
+    });
+  </script>
+</body>
+</html>

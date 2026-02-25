@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habilidades — Paloma Migajera</title>
+  <link rel="stylesheet" href="../shared/global.css">
+  <style>
+    body { overflow-y: auto; overflow-x: hidden; }
+
+    .hab-layout {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ---- Header ---- */
+    .hab-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+    .hab-title {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: var(--text-hi);
+    }
+    .hab-sub {
+      font-style: italic;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    /* ---- Tabs ---- */
+    .tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab-btn {
+      font-family: var(--font-title);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      margin-bottom: -1px;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ---- Tab content ---- */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeUp 0.3s var(--ease) forwards; }
+
+    /* ---- Habilidades de movimiento ---- */
+    .mov-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .mov-card {
+      padding: 20px;
+      background: rgba(21,21,31,0.7);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--border);
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .mov-card.unlocked { border-top-color: var(--accent); }
+    .mov-card.locked   { opacity: 0.5; filter: grayscale(0.5); }
+    .mov-card:hover.unlocked { background: rgba(232,200,96,0.04); }
+
+    .mov-card-icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .mov-card-name {
+      font-family: var(--font-title);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      color: var(--text-hi);
+      margin-bottom: 6px;
+    }
+    .mov-card-tech {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--accent2);
+      margin-bottom: 8px;
+    }
+    .mov-card-desc {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      font-style: italic;
+      line-height: 1.5;
+    }
+    .mov-card-unlock {
+      margin-top: 10px;
+      font-family: var(--font-title);
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+    .mov-card-unlock.done { color: var(--success); }
+
+    .lock-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.3);
+      font-size: 1.5rem;
+      pointer-events: none;
+    }
+
+    /* ---- Habilidades activas ---- */
+    .active-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .active-card {
+      padding: 20px 22px;
+      background: rgba(21,21,31,0.7);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2);
+    }
+
+    .active-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .active-icon { font-size: 1.6rem; }
+    .active-name {
+      font-family: var(--font-title);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      color: var(--text-hi);
+    }
+    .active-cost {
+      margin-left: auto;
+      font-family: var(--font-title);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      background: rgba(232,200,96,0.1);
+      border: 1px solid rgba(232,200,96,0.3);
+      padding: 3px 8px;
+    }
+    .active-desc {
+      font-size: 0.87rem;
+      color: var(--text-dim);
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    /* ---- Amuletos (Plumas de Poder) ---- */
+    .amuleto-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 24px;
+    }
+
+    .amuleto-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .amuleto-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: rgba(21,21,31,0.6);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .amuleto-item:hover { border-color: var(--accent); background: rgba(232,200,96,0.04); }
+    .amuleto-item.equipped {
+      border-color: var(--accent);
+      background: rgba(232,200,96,0.06);
+    }
+    .amuleto-item.equipped::after {
+      content: '✓ EQUIPADO';
+      position: absolute;
+      right: 16px;
+      font-family: var(--font-title);
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+    }
+
+    .amuleto-icon { font-size: 1.4rem; width: 32px; text-align: center; }
+    .amuleto-info { flex: 1; }
+    .amuleto-name {
+      font-family: var(--font-title);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      color: var(--text-hi);
+      margin-bottom: 2px;
+    }
+    .amuleto-desc { font-size: 0.82rem; color: var(--text-dim); font-style: italic; }
+
+    /* Ranuras de amuletos equipados */
+    .equipped-panel {
+      background: rgba(21,21,31,0.7);
+      border: 1px solid var(--border);
+      padding: 20px;
+    }
+    .equipped-title {
+      font-family: var(--font-title);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .amuleto-slot {
+      aspect-ratio: 1;
+      border: 1px dashed var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      background: rgba(0,0,0,0.2);
+      transition: all 0.2s;
+    }
+    .amuleto-slot.filled {
+      border-style: solid;
+      border-color: var(--accent);
+      background: rgba(232,200,96,0.06);
+    }
+    .slots-count {
+      font-family: var(--font-title);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer">
+    <div class="bg-gradient"></div>
+    <div class="bg-grain"></div>
+  </div>
+  <canvas id="particles" class="particles-canvas"></canvas>
+
+  <div class="page">
+    <div class="hab-layout">
+
+      <div class="hab-header fade-up">
+        <div>
+          <div class="hab-title">Habilidades</div>
+          <div class="hab-sub">Maniobras de vuelo, cantos del viento y plumas de poder.</div>
+        </div>
+        <button class="btn" onclick="goTo('../menu/index.html')">← Menú</button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('movimiento', this)">🦅 Movimiento</button>
+        <button class="tab-btn" onclick="showTab('activas', this)">⚡ Activas</button>
+        <button class="tab-btn" onclick="showTab('amuletos', this)">🪶 Plumas de Poder</button>
+      </div>
+
+      <!-- MOVIMIENTO -->
+      <div class="tab-panel active" id="tab-movimiento">
+        <div class="mov-grid" id="mov-grid"></div>
+      </div>
+
+      <!-- ACTIVAS -->
+      <div class="tab-panel" id="tab-activas">
+        <div class="active-grid" id="active-grid"></div>
+      </div>
+
+      <!-- AMULETOS -->
+      <div class="tab-panel" id="tab-amuletos">
+        <div class="amuleto-layout">
+          <div class="amuleto-list" id="amuleto-list"></div>
+          <div>
+            <div class="equipped-panel">
+              <div class="equipped-title">— Plumas Equipadas —</div>
+              <div class="slot-grid" id="slot-grid"></div>
+              <div class="slots-count" id="slots-count">0 / 3 ranuras</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../shared/utils.js"></script>
+  <script>
+    let save = getSave();
+
+    // ---- Datos de habilidades ----
+    const MOVIMIENTO = [
+      {
+        id: 'dobleSalto', icon: '🦅', name: 'Ascenso Térmico',
+        tech: 'double_jump',
+        desc: 'Aprovecha una corriente de aire para elevarte una segunda vez en el aire.',
+        unlock: 'Tras derrotar al Cuervo de la Chimenea.',
+      },
+      {
+        id: 'dash', icon: '💨', name: 'Impulso de Pluma',
+        tech: 'dash_air',
+        desc: 'Un rápido desplazamiento lateral. Invencible durante el dash.',
+        unlock: 'Encontrado en el Nido del Halcón.',
+      },
+      {
+        id: 'picado', icon: '☄️', name: 'Picado Balístico',
+        tech: 'ground_pound',
+        desc: 'Cae a gran velocidad. Destruye maderas podridas y aturde enemigos.',
+        unlock: 'Alcantarillas de Migas.',
+      },
+      {
+        id: 'planeo', icon: '🌬️', name: 'Planeo Silencioso',
+        tech: 'glide_mode',
+        desc: 'Mantén ESPACIO en el aire para descender lentamente y en silencio.',
+        unlock: 'Regalo de la Lechuza Sabia.',
+      },
+    ];
+
+    const ACTIVAS = [
+      {
+        icon: '🔊', name: 'Arpegio de Choque', cost: '15 Energía',
+        desc: 'Lanza una onda sonora que aturde a enemigos pequeños y activa interruptores lejanos.',
+      },
+      {
+        icon: '🛡️', name: 'Escudo de Plumón', cost: '25 Energía',
+        desc: 'Crea un torbellino de plumas que bloquea proyectiles durante 2 segundos.',
+      },
+      {
+        icon: '💥', name: 'PALOMADUKEN', cost: '20 Energía',
+        desc: 'Concentra energía en un proyectil devastador de migas comprimidas. Pulsa [X].',
+      },
+      {
+        icon: '⚡', name: 'Rayo de Migaja', cost: '40 Energía',
+        desc: 'Picotazo frontal devastador que atraviesa armaduras y múltiples enemigos.',
+      },
+    ];
+
+    const AMULETOS = [
+      { id:'plomo',   icon:'🪨', name:'Pluma de Plomo',    desc:'Caes más rápido, inmune al empuje del viento fuerte.' },
+      { id:'iman',    icon:'🧲', name:'Miga Imán',         desc:'Atraes automáticamente las migajas cercanas.' },
+      { id:'gorrion', icon:'❤️', name:'Corazón de Gorrión',desc:'+1 de vida máxima, pero reduce tu velocidad de planeo.' },
+      { id:'ciudad',  icon:'🏙️', name:'Canto de Ciudad',   desc:'Los NPCs humanos te tiran más migajas de lo normal.' },
+      { id:'sombra',  icon:'🌑', name:'Pluma Sombría',     desc:'Invisibilidad breve al hacer dash en la oscuridad.' },
+      { id:'veloz',   icon:'⚡', name:'Pluma Veloz',       desc:'Incrementa la velocidad de movimiento en un 20%.' },
+    ];
+
+    // ---- Render Movimiento ----
+    function renderMovimiento() {
+      const grid = document.getElementById('mov-grid');
+      grid.innerHTML = MOVIMIENTO.map(h => {
+        const unlocked = save.habilidades[h.id];
+        return `
+          <div class="mov-card ${unlocked ? 'unlocked' : 'locked'}">
+            <span class="mov-card-icon">${h.icon}</span>
+            <div class="mov-card-name">${h.name}</div>
+            <div class="mov-card-tech">${h.tech}</div>
+            <div class="mov-card-desc">${h.desc}</div>
+            <div class="mov-card-unlock ${unlocked ? 'done' : ''}">
+              ${unlocked ? '✓ DESBLOQUEADA' : '🔒 ' + h.unlock}
+            </div>
+            ${!unlocked ? '<div class="lock-overlay">🔒</div>' : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ---- Render Activas ----
+    function renderActivas() {
+      const grid = document.getElementById('active-grid');
+      grid.innerHTML = ACTIVAS.map(a => `
+        <div class="active-card">
+          <div class="active-header">
+            <span class="active-icon">${a.icon}</span>
+            <span class="active-name">${a.name}</span>
+            <span class="active-cost">${a.cost}</span>
+          </div>
+          <div class="active-desc">${a.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    // ---- Render Amuletos ----
+    function renderAmuletos() {
+      const list = document.getElementById('amuleto-list');
+      list.innerHTML = AMULETOS.map(a => {
+        const eq = save.amuletosEquipados.includes(a.id);
+        return `
+          <div class="amuleto-item ${eq ? 'equipped' : ''}" onclick="toggleAmuleto('${a.id}')">
+            <span class="amuleto-icon">${a.icon}</span>
+            <div class="amuleto-info">
+              <div class="amuleto-name">${a.name}</div>
+              <div class="amuleto-desc">${a.desc}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      renderSlots();
+    }
+
+    function renderSlots() {
+      const grid = document.getElementById('slot-grid');
+      const slots = [];
+      for (let i = 0; i < 3; i++) {
+        const id = save.amuletosEquipados[i];
+        const am = id ? AMULETOS.find(a => a.id === id) : null;
+        slots.push(`
+          <div class="amuleto-slot ${am ? 'filled' : ''}">
+            ${am ? am.icon : ''}
+          </div>
+        `);
+      }
+      grid.innerHTML = slots.join('');
+      document.getElementById('slots-count').textContent =
+        `${save.amuletosEquipados.length} / 3 ranuras usadas`;
+    }
+
+    function toggleAmuleto(id) {
+      const idx = save.amuletosEquipados.indexOf(id);
+      if (idx >= 0) {
+        save.amuletosEquipados.splice(idx, 1);
+        toast('Pluma desequipada', 'info');
+      } else {
+        if (save.amuletosEquipados.length >= 3) {
+          toast('Máximo 3 plumas equipadas', 'error');
+          return;
+        }
+        save.amuletosEquipados.push(id);
+        toast('Pluma equipada', 'success');
+      }
+      setSave(save);
+      renderAmuletos();
+    }
+
+    // ---- Tabs ----
+    function showTab(id, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // ---- Dev: desbloquear todo para pruebas ----
+    function unlockAll() {
+      for (const k in save.habilidades) save.habilidades[k] = true;
+      setSave(save);
+      renderMovimiento();
+      toast('Todas las habilidades desbloqueadas', 'success');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMovimiento();
+      renderActivas();
+      renderAmuletos();
+    });
+  </script>
+</body>
+</html>

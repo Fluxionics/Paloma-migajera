@@ -1,0 +1,44 @@
+MIT License
+
+Copyright (c) 2025 Guillermo R., Francisco D., Daila J. y contribuidores de la comunidad
+
+Se concede permiso, de forma gratuita, a cualquier persona que obtenga una
+copia de este software y los archivos de documentación asociados (el "Software"),
+para utilizar el Software sin restricciones, incluyendo sin limitación los
+derechos de usar, copiar, modificar, fusionar, publicar, distribuir,
+sublicenciar y/o vender copias del Software, y para permitir a las personas
+a quienes se les proporcione el Software que lo hagan, sujeto a las
+siguientes condiciones:
+
+El aviso de copyright anterior y este aviso de permiso se incluirán en todas
+las copias o porciones sustanciales del Software.
+
+EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO, EXPRESA
+O IMPLÍCITA, INCLUYENDO PERO NO LIMITADO A LAS GARANTÍAS DE COMERCIABILIDAD,
+APTITUD PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN. EN NINGÚN CASO LOS
+AUTORES O TITULARES DEL COPYRIGHT SERÁN RESPONSABLES DE NINGUNA RECLAMACIÓN,
+DAÑO U OTRA RESPONSABILIDAD, YA SEA EN UNA ACCIÓN DE CONTRATO, AGRAVIO O DE
+OTRO MODO, QUE SURJA DE, FUERA DE O EN CONEXIÓN CON EL SOFTWARE O EL USO U
+OTRO TIPO DE ACCIONES EN EL SOFTWARE.
+
+---
+
+NOTA SOBRE ASSETS COMUNITARIOS:
+
+Los assets (sprites, tilesets, música, efectos de sonido, fuentes tipográficas
+y cualquier otro recurso multimedia) aportados por la comunidad pueden estar
+sujetos a licencias individuales distintas a esta.
+
+Cada contribuidor de assets debe:
+1. Indicar claramente la licencia de su contribución en el Pull Request.
+2. Garantizar que tiene los derechos para licenciar el material.
+3. Agregar la atribución correspondiente en assets/LICENSES.md.
+
+Licencias aceptadas para assets comunitarios:
+  - CC0 1.0 Universal (dominio público) — preferida
+  - CC BY 4.0 (atribución requerida)
+  - CC BY-SA 4.0 (atribución + mismo tipo de licencia)
+  - MIT (para scripts y shaders de arte)
+
+No se aceptan assets con licencias que prohíban uso comercial (CC BY-NC)
+para mantener la flexibilidad del proyecto.

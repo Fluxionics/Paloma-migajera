@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Paloma Migajera</title>
+  <link rel="stylesheet" href="../shared/global.css">
+  <style>
+    /* ---- Layout base ---- */
+    .menu-root {
+      width:100%; height:100%;
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    /* ============ PANTALLA PRINCIPAL ============ */
+    #screen-main {
+      display:flex; flex-direction:column; align-items:center;
+      gap:0;
+    }
+
+    .logo-pigeon {
+      font-size:5rem; line-height:1;
+      filter: drop-shadow(0 0 30px rgba(232,200,64,0.55));
+      animation: float 3.2s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+    .logo-title {
+      font-family: var(--font-title);
+      font-size: clamp(2rem,5.5vw,3.8rem);
+      font-weight:900; letter-spacing:.14em; text-transform:uppercase;
+      color: var(--white);
+      text-shadow: 0 0 50px rgba(232,200,64,.3), 0 2px 0 rgba(0,0,0,.9);
+      margin-top:14px;
+    }
+    .logo-tagline {
+      font-style:italic; font-size:1rem;
+      color: var(--text-dim); letter-spacing:.1em;
+      margin-top:6px; margin-bottom:44px;
+    }
+
+    /* Panel de navegación */
+    .nav-wrap {
+      display:flex; gap:16px; align-items:flex-start;
+    }
+
+    .nav-col {
+      display:flex; flex-direction:column; gap:3px; min-width:250px;
+    }
+
+    .nav-btn {
+      position:relative; display:flex; align-items:center; gap:12px;
+      padding:13px 20px;
+      font-family:var(--font-title); font-size:.72rem; font-weight:700;
+      letter-spacing:.2em; text-transform:uppercase;
+      color: var(--text-dim);
+      background:transparent; border:1px solid transparent;
+      cursor:pointer; transition: all .22s var(--ease); text-align:left;
+    }
+    .nav-btn::before {
+      content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
+      background:var(--gold); transform:scaleY(0); transform-origin:center;
+      transition: transform .22s var(--ease);
+    }
+    .nav-btn:hover, .nav-btn.active {
+      color: var(--text-hi); border-color: var(--border);
+      background: rgba(255,255,255,.025);
+    }
+    .nav-btn:hover::before, .nav-btn.active::before { transform:scaleY(1); }
+    .nav-btn:hover .nav-icon, .nav-btn.active .nav-icon { color:var(--gold); }
+    .nav-icon { font-size:1.1rem; width:22px; text-align:center; color:var(--muted); transition:color .2s; }
+    .nav-arrow { margin-left:auto; opacity:0; color:var(--gold); font-size:.8rem; transition: opacity .2s, transform .2s; }
+    .nav-btn:hover .nav-arrow { opacity:1; transform:translateX(4px); }
+    .nav-btn.disabled { opacity:.3; pointer-events:none; }
+
+    /* Panel de info derecha */
+    .info-panel {
+      width:260px; display:flex; flex-direction:column; gap:10px;
+    }
+    .save-card {
+      padding:18px 18px;
+      background:rgba(18,18,30,.85); border:1px solid var(--border);
+    }
+    .save-card-hdr {
+      font-family:var(--font-title); font-size:.58rem; letter-spacing:.25em;
+      color:var(--gold); text-transform:uppercase; margin-bottom:14px;
+    }
+    .save-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:5px 0; border-bottom:1px solid rgba(255,255,255,.04);
+      font-size:.85rem;
+    }
+    .save-row:last-child { border:none; }
+    .save-lbl { color:var(--text-dim); font-size:.8rem; }
+    .save-val { color:var(--text-hi); font-family:var(--font-title); font-size:.72rem; letter-spacing:.08em; }
+    .tip-card {
+      padding:13px 15px; background:rgba(18,18,30,.65);
+      border:1px solid var(--border); border-left:2px solid var(--sky);
+    }
+    .tip-lbl { font-family:var(--font-title); font-size:.52rem; letter-spacing:.2em; color:var(--sky); display:block; margin-bottom:5px; }
+    .tip-txt  { font-style:italic; font-size:.84rem; color:var(--text-dim); line-height:1.55; }
+
+    .version { position:fixed; bottom:14px; right:18px; font-family:var(--font-title); font-size:.52rem; letter-spacing:.15em; color:var(--muted); }
+
+    /* ============ PANTALLA NUEVA PARTIDA ============ */
+    #screen-new { display:none; }
+    .sub-screen {
+      max-width:680px; width:100%; padding:0 20px;
+    }
+    .sub-back {
+      display:flex; align-items:center; gap:10px; margin-bottom:32px; cursor:pointer;
+      font-family:var(--font-title); font-size:.62rem; letter-spacing:.2em;
+      color:var(--text-dim); background:none; border:none; transition:color .2s;
+    }
+    .sub-back:hover { color:var(--gold); }
+    .sub-title {
+      font-family:var(--font-title); font-size:1.9rem; font-weight:900;
+      letter-spacing:.14em; color:var(--white); margin-bottom:6px;
+    }
+    .sub-subtitle { font-style:italic; color:var(--text-dim); font-size:.9rem; margin-bottom:36px; }
+
+    /* Campo de nombre */
+    .name-field {
+      margin-bottom:28px;
+    }
+    .name-label {
+      font-family:var(--font-title); font-size:.6rem; letter-spacing:.25em;
+      color:var(--gold); text-transform:uppercase; display:block; margin-bottom:10px;
+    }
+    .name-input {
+      width:100%; background:rgba(18,18,30,.9); border:1px solid var(--border);
+      color:var(--text-hi); font-family:var(--font-title); font-size:1.1rem;
+      letter-spacing:.1em; padding:13px 16px; outline:none;
+      transition:border-color .2s;
+    }
+    .name-input:focus { border-color:var(--gold-dim); }
+    .name-input::placeholder { color:var(--muted); }
+
+    /* ============ PANTALLA DIFICULTAD ============ */
+    #screen-diff { display:none; }
+
+    .diff-grid {
+      display:grid; grid-template-columns: repeat(2,1fr); gap:10px;
+      margin-bottom:30px;
+    }
+    .diff-card {
+      padding:22px 20px; cursor:pointer;
+      background:rgba(18,18,30,.75); border:1px solid var(--border);
+      border-top:2px solid var(--border); transition: all .22s var(--ease);
+    }
+    .diff-card:hover { border-top-color:var(--gold); background:rgba(232,200,64,.04); }
+    .diff-card.selected { border-top-color:var(--gold); background:rgba(232,200,64,.08); border-color:rgba(232,200,64,.3); }
+    .diff-icon { font-size:1.8rem; margin-bottom:8px; }
+    .diff-name {
+      font-family:var(--font-title); font-size:.75rem; letter-spacing:.14em;
+      color:var(--text-hi); margin-bottom:5px;
+    }
+    .diff-desc { font-style:italic; font-size:.83rem; color:var(--text-dim); line-height:1.5; }
+    .diff-stars { font-size:.9rem; margin-top:8px; }
+
+    /* ============ PANTALLA CONTINUAR ============ */
+    #screen-continue { display:none; }
+    .continue-save {
+      padding:24px 22px; background:rgba(18,18,30,.85);
+      border:1px solid var(--border); border-left:3px solid var(--gold);
+      margin-bottom:16px;
+    }
+    .cs-name { font-family:var(--font-title); font-size:1.1rem; letter-spacing:.1em; color:var(--white); margin-bottom:12px; }
+    .cs-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .cs-stat { text-align:center; }
+    .cs-stat-val { font-family:var(--font-title); font-size:1.2rem; color:var(--gold); }
+    .cs-stat-lbl { font-size:.75rem; color:var(--text-dim); }
+
+    /* ============ OVERLAY CRÉDITOS ============ */
+    #overlay-credits {
+      position:fixed; inset:0; z-index:200;
+      background:rgba(0,0,0,.8); backdrop-filter:blur(6px);
+      display:none; align-items:center; justify-content:center;
+    }
+    #overlay-credits.open { display:flex; }
+    .credits-box {
+      background:var(--panel); border:1px solid var(--border);
+      padding:44px 52px; max-width:500px; text-align:center;
+    }
+    .credits-title { font-family:var(--font-title); font-size:1.3rem; letter-spacing:.2em; color:var(--gold); margin-bottom:20px; }
+    .credits-body  { font-size:.95rem; color:var(--text-dim); line-height:1.85; margin-bottom:26px; }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="grain"></div>
+  <canvas id="particles" class="particles-canvas"></canvas>
+
+  <div class="screen menu-root">
+
+    <!-- ===== PANTALLA PRINCIPAL ===== -->
+    <div id="screen-main">
+      <div class="logo-pigeon fade-up" style="animation-delay:.05s">🕊️</div>
+      <div class="logo-title fade-up" style="animation-delay:.12s">Paloma Migajera</div>
+      <div class="logo-tagline fade-up" style="animation-delay:.18s">Una aventura entre cornisas y migajas</div>
+
+      <div class="nav-wrap stagger">
+        <nav class="nav-col">
+          <button class="nav-btn" onclick="showScreen('new')">
+            <span class="nav-icon">⚔️</span> Nueva Partida <span class="nav-arrow">›</span>
+          </button>
+          <button class="nav-btn" id="btn-continue" onclick="showScreen('continue')">
+            <span class="nav-icon">📂</span> Continuar <span class="nav-arrow">›</span>
+          </button>
+          <button class="nav-btn" onclick="goTo('../habilidades/index.html')">
+            <span class="nav-icon">✨</span> Habilidades <span class="nav-arrow">›</span>
+          </button>
+          <button class="nav-btn" onclick="goTo('../inventario/index.html')">
+            <span class="nav-icon">🎒</span> Inventario <span class="nav-arrow">›</span>
+          </button>
+          <button class="nav-btn" onclick="goTo('../ajustes/index.html')">
+            <span class="nav-icon">⚙️</span> Ajustes <span class="nav-arrow">›</span>
+          </button>
+          <button class="nav-btn" onclick="showCredits()">
+            <span class="nav-icon">📜</span> Créditos <span class="nav-arrow">›</span>
+          </button>
+        </nav>
+
+        <aside class="info-panel">
+          <div class="save-card" id="save-card">
+            <div class="save-card-hdr">— Última Partida —</div>
+            <div id="save-info-content">
+              <div style="font-style:italic;color:var(--muted);font-size:.85rem;">Sin partida guardada.</div>
+            </div>
+          </div>
+          <div class="tip-card">
+            <span class="tip-lbl">Consejo</span>
+            <span class="tip-txt" id="tip-text">…</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ===== PANTALLA NUEVA PARTIDA ===== -->
+    <div id="screen-new">
+      <div class="sub-screen">
+        <button class="sub-back" onclick="showScreen('main')">← Volver</button>
+        <div class="sub-title fade-up">Nueva Partida</div>
+        <div class="sub-subtitle fade-up">¿Cómo se llama tu paloma?</div>
+
+        <div class="name-field fade-up" style="animation-delay:.1s">
+          <label class="name-label">Nombre de la paloma</label>
+          <input class="name-input" id="inp-name" type="text" maxlength="18"
+            placeholder="Paloma" value="Paloma" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;" class="fade-up" style="animation-delay:.2s">
+          <button class="btn btn-ghost" onclick="showScreen('main')">Cancelar</button>
+          <button class="btn btn-primary" onclick="goToDiff()">Elegir Dificultad →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PANTALLA DIFICULTAD ===== -->
+    <div id="screen-diff">
+      <div class="sub-screen" style="max-width:720px">
+        <button class="sub-back" onclick="showScreen('new')">← Volver</button>
+        <div class="sub-title fade-up">Dificultad</div>
+        <div class="sub-subtitle fade-up">Elige cómo quieres enfrentarte a la ciudad.</div>
+
+        <div class="diff-grid stagger">
+          <div class="diff-card selected" data-diff="facil" onclick="selectDiff(this)">
+            <div class="diff-icon">🕊️</div>
+            <div class="diff-name">Fácil</div>
+            <div class="diff-desc">Para disfrutar la historia sin estrés.</div>
+            <div class="diff-stars">⭐☆☆☆</div>
+          </div>
+          <div class="diff-card" data-diff="normal" onclick="selectDiff(this)">
+            <div class="diff-icon">🦅</div>
+            <div class="diff-name">Normal</div>
+            <div class="diff-desc">La experiencia equilibrada y recomendada.</div>
+            <div class="diff-stars">⭐⭐☆☆</div>
+          </div>
+          <div class="diff-card" data-diff="dificil" onclick="selectDiff(this)">
+            <div class="diff-icon">🐱</div>
+            <div class="diff-name">Difícil</div>
+            <div class="diff-desc">Los enemigos son más agresivos y resistentes.</div>
+            <div class="diff-stars">⭐⭐⭐☆</div>
+          </div>
+          <div class="diff-card" data-diff="pesadilla" onclick="selectDiff(this)">
+            <div class="diff-icon">💀</div>
+            <div class="diff-name">Pesadilla</div>
+            <div class="diff-desc">Un golpe puede ser fatal. Solo para expertos.</div>
+            <div class="diff-stars">⭐⭐⭐⭐</div>
+          </div>
+        </div>
+
+        <div id="diff-detail" style="margin-bottom:24px;padding:14px 16px;background:rgba(232,200,64,.06);border:1px solid rgba(232,200,64,.2);">
+          <span style="font-family:var(--font-title);font-size:.6rem;letter-spacing:.2em;color:var(--gold)">FÁCIL</span>
+          <span style="display:block;font-style:italic;color:var(--text-dim);font-size:.85rem;margin-top:4px;">Daño recibido ×0.5 · Enemigos débiles · Más migajas</span>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button class="btn btn-ghost" onclick="showScreen('new')">← Atrás</button>
+          <button class="btn btn-primary" onclick="startNewGame()">¡Empezar! →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PANTALLA CONTINUAR ===== -->
+    <div id="screen-continue">
+      <div class="sub-screen">
+        <button class="sub-back" onclick="showScreen('main')">← Volver</button>
+        <div class="sub-title fade-up">Continuar</div>
+        <div class="sub-subtitle fade-up">Retoma tu última partida guardada.</div>
+
+        <div class="continue-save fade-up" id="continue-save-card" style="animation-delay:.1s">
+          <!-- Relleno por JS -->
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;" class="fade-up" style="animation-delay:.2s">
+          <button class="btn btn-danger" onclick="confirmDelete()">Borrar Partida</button>
+          <button class="btn btn-primary" onclick="continueGame()">Continuar →</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- screen -->
+
+  <!-- Overlay créditos -->
+  <div id="overlay-credits">
+    <div class="credits-box">
+      <div class="credits-title">🕊️ Paloma Migajera</div>
+      <div class="credits-body">
+        Un juego de plataformas y aventura<br>
+        inspirado en <em>Hollow Knight</em>.<br><br>
+        Diseño y programación:<br>
+        <strong style="color:var(--white)">Guillermo · Francisco · Daila</strong><br><br>
+        <span style="font-size:.8rem;color:var(--muted)">v3.0.0 — 2025</span>
+      </div>
+      <button class="btn btn-ghost" onclick="hideCredits()">Cerrar</button>
+    </div>
+  </div>
+
+  <span class="version">v3.0.0</span>
+
+  <script src="../shared/utils.js"></script>
+  <script>
+    const TIPS = [
+      'Las migajas del Tejado de los Gansos son las más valiosas.',
+      'El doble salto se desbloquea al vencer al Cuervo de la Chimenea.',
+      'El PALOMADUKEN consume 20 de energía. Úsalo con sabiduría.',
+      'Los gatos son peligrosos pero lentos. Usa la altura.',
+      'Planeo Silencioso: los guardias no te oirán caer.',
+      'Las plataformas de madera se destruyen con el Picado Balístico.',
+    ];
+
+    let selectedDiff = 'facil';
+    let newName = 'Paloma';
+
+    function showScreen(id) {
+      document.querySelectorAll('[id^="screen-"]').forEach(s => {
+        s.style.display = 'none';
+      });
+      document.getElementById('screen-' + id).style.display = 'flex';
+      document.getElementById('screen-' + id).style.flexDirection = 'column';
+      document.getElementById('screen-' + id).style.alignItems = 'center';
+    }
+
+    function selectDiff(card) {
+      document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedDiff = card.dataset.diff;
+      const d = DIFICULTAD[selectedDiff];
+      document.getElementById('diff-detail').innerHTML = `
+        <span style="font-family:var(--font-title);font-size:.6rem;letter-spacing:.2em;color:var(--gold)">${d.label.toUpperCase()}</span>
+        <span style="display:block;font-style:italic;color:var(--text-dim);font-size:.85rem;margin-top:4px;">${d.desc} · Daño ×${d.dmgRecibido} · Migajas ×${d.migajas}</span>
+      `;
+    }
+
+    function goToDiff() {
+      newName = document.getElementById('inp-name').value.trim() || 'Paloma';
+      showScreen('diff');
+    }
+
+    function startNewGame() {
+      const save = defaultSave();
+      save.nombre = newName;
+      save.dificultad = selectedDiff;
+      setSave(save);
+      toast('¡Nueva partida iniciada!', 'ok');
+      setTimeout(() => goTo('../juego/index.html'), 500);
+    }
+
+    function continueGame() {
+      if (!getSave()) { toast('No hay partida guardada.', 'bad'); return; }
+      goTo('../juego/index.html');
+    }
+
+    function confirmDelete() {
+      if (confirm('¿Borrar la partida? Esta acción es permanente.')) {
+        deleteSave();
+        toast('Partida borrada.', 'bad');
+        showScreen('main');
+        initSaveInfo();
+      }
+    }
+
+    function showCredits() { document.getElementById('overlay-credits').classList.add('open'); }
+    function hideCredits() { document.getElementById('overlay-credits').classList.remove('open'); }
+
+    function initSaveInfo() {
+      const save = getSave();
+      const btnCont = document.getElementById('btn-continue');
+      if (save) {
+        btnCont.classList.remove('disabled');
+        document.getElementById('save-info-content').innerHTML = `
+          <div class="save-row"><span class="save-lbl">Nombre</span><span class="save-val">${save.nombre}</span></div>
+          <div class="save-row"><span class="save-lbl">Zona</span><span class="save-val">${save.zona.replace('_',' ')}</span></div>
+          <div class="save-row"><span class="save-lbl">Migajas</span><span class="save-val">${save.migajas}</span></div>
+          <div class="save-row"><span class="save-lbl">Tiempo</span><span class="save-val">${fmtTime(save.tiempoJugado)}</span></div>
+          <div class="save-row"><span class="save-lbl">Dificultad</span><span class="save-val">${DIFICULTAD[save.dificultad]?.label||'Normal'}</span></div>
+        `;
+
+        // Continuar card
+        document.getElementById('continue-save-card').innerHTML = `
+          <div class="cs-name">🕊️ ${save.nombre}</div>
+          <div class="cs-stats">
+            <div class="cs-stat"><div class="cs-stat-val">Zona ${save.nivel}</div><div class="cs-stat-lbl">Nivel</div></div>
+            <div class="cs-stat"><div class="cs-stat-val">${save.migajas}</div><div class="cs-stat-lbl">Migajas</div></div>
+            <div class="cs-stat"><div class="cs-stat-val">${fmtTime(save.tiempoJugado)}</div><div class="cs-stat-lbl">Jugado</div></div>
+          </div>
+        `;
+      } else {
+        btnCont.classList.add('disabled');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('tip-text').textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
+      initSaveInfo();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario — Paloma Migajera</title>
+  <link rel="stylesheet" href="../shared/global.css">
+  <style>
+    body { overflow-y: auto; overflow-x: hidden; }
+
+    .inv-layout {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .inv-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    .inv-title {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: var(--text-hi);
+    }
+
+    /* ---- Layout: Grid + Detalle ---- */
+    .inv-body {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
+    }
+
+    /* ---- Categorías ---- */
+    .inv-categories {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 16px;
+    }
+    .cat-btn {
+      font-family: var(--font-title);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cat-btn:hover  { border-color: var(--accent); color: var(--text); }
+    .cat-btn.active { background: rgba(232,200,96,0.1); border-color: var(--accent); color: var(--accent); }
+
+    /* ---- Grid de items ---- */
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 8px;
+    }
+
+    .item-cell {
+      aspect-ratio: 1;
+      border: 1px solid var(--border);
+      background: rgba(21,21,31,0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      padding: 8px 4px 4px;
+    }
+    .item-cell:hover { border-color: var(--accent); background: rgba(232,200,96,0.06); }
+    .item-cell.selected { border-color: var(--accent); background: rgba(232,200,96,0.1); }
+    .item-cell.empty { cursor: default; opacity: 0.2; }
+    .item-cell.empty:hover { border-color: var(--border); background: rgba(21,21,31,0.6); }
+
+    .item-icon { font-size: 1.4rem; line-height: 1; }
+    .item-qty {
+      font-family: var(--font-title);
+      font-size: 0.55rem;
+      color: var(--accent);
+      position: absolute;
+      bottom: 3px;
+      right: 5px;
+    }
+    .item-name-small {
+      font-family: var(--font-title);
+      font-size: 0.45rem;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 2px;
+      line-height: 1.2;
+      max-width: 60px;
+      overflow: hidden;
+    }
+
+    /* ---- Panel de detalle ---- */
+    .detail-panel {
+      background: rgba(21,21,31,0.7);
+      border: 1px solid var(--border);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+
+    .detail-icon   { font-size: 3rem; text-align: center; }
+    .detail-name   {
+      font-family: var(--font-title);
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      color: var(--text-hi);
+      text-align: center;
+    }
+    .detail-type   {
+      font-family: var(--font-title);
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      text-align: center;
+    }
+    .detail-desc   {
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      text-align: center;
+    }
+    .detail-effect {
+      background: rgba(122,184,212,0.08);
+      border: 1px solid rgba(122,184,212,0.2);
+      padding: 10px 12px;
+      font-size: 0.82rem;
+      color: var(--text);
+    }
+    .detail-qty-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+    .detail-qty-label { font-family: var(--font-title); font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; }
+    .detail-qty-val   { font-family: var(--font-title); font-size: 1.2rem; color: var(--accent); }
+
+    .use-btn {
+      width: 100%;
+      padding: 12px;
+      font-family: var(--font-title);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .use-btn:hover { background: rgba(232,200,96,0.15); }
+    .use-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* ---- Contador capacidad ---- */
+    .capacity-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-family: var(--font-title);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+    }
+    .cap-track {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+    }
+    .cap-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+
+    /* ---- Empty state ---- */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px;
+      font-style: italic;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer">
+    <div class="bg-gradient"></div>
+    <div class="bg-grain"></div>
+  </div>
+  <canvas id="particles" class="particles-canvas"></canvas>
+
+  <div class="page">
+    <div class="inv-layout">
+
+      <div class="inv-header fade-up">
+        <div>
+          <div class="inv-title">Inventario</div>
+          <div style="font-style:italic;color:var(--text-dim);font-size:0.9rem;">
+            🍞 <span id="hdr-migajas">0</span> migajas acumuladas
+          </div>
+        </div>
+        <button class="btn" onclick="goTo('../menu/index.html')">← Menú</button>
+      </div>
+
+      <div class="inv-body">
+        <!-- Lado izquierdo -->
+        <div>
+          <!-- Categorías -->
+          <div class="inv-categories">
+            <button class="cat-btn active" onclick="setCategory('todos', this)">Todos</button>
+            <button class="cat-btn" onclick="setCategory('consumible', this)">Consumibles</button>
+            <button class="cat-btn" onclick="setCategory('llave', this)">Llaves</button>
+            <button class="cat-btn" onclick="setCategory('tesoro', this)">Tesoros</button>
+            <button class="cat-btn" onclick="setCategory('ingrediente', this)">Ingredientes</button>
+          </div>
+
+          <!-- Barra de capacidad -->
+          <div class="capacity-bar">
+            <span id="cap-text">0 / 50</span>
+            <div class="cap-track"><div class="cap-fill" id="cap-fill" style="width:0%"></div></div>
+          </div>
+
+          <!-- Grid -->
+          <div class="items-grid" id="items-grid"></div>
+        </div>
+
+        <!-- Detalle -->
+        <div class="detail-panel" id="detail-panel">
+          <div class="detail-icon">🎒</div>
+          <div class="detail-name" style="color:var(--text-dim)">Selecciona un ítem</div>
+          <div class="detail-desc">Haz clic en un objeto del inventario para ver su información.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../shared/utils.js"></script>
+  <script>
+    let save = getSave();
+
+    // ---- Catálogo de ítems ----
+    const ITEMS_DB = {
+      migaja_tostada:   { icon:'🍞', name:'Migaja Tostada',   type:'consumible',   desc:'Una migaja bien tostada. Restaura 1 punto de vida.',      effect:'+1 ❤️ Vida',         useEffect: s => { s.vida = Math.min(s.vida+1, s.vidaMax); return s; } },
+      semilla_paloma:   { icon:'🌾', name:'Semilla de Paloma', type:'ingrediente',  desc:'Semilla encontrada en tejados. Ingrediente de pociones.', effect:'Material de crafting', useEffect: null },
+      llave_alcantarilla:{ icon:'🗝️', name:'Llave de Alcantarilla', type:'llave',   desc:'Abre las rejas de las Alcantarillas de Migas.',           effect:'Desbloquea área',      useEffect: null },
+      cristal_viento:   { icon:'💎', name:'Cristal del Viento', type:'tesoro',      desc:'Cristal que vibra con las corrientes de aire urbanas.',   effect:'Valioso: 50 migajas',  useEffect: s => { s.migajas += 50; return s; } },
+      pluma_curandero:  { icon:'🪶', name:'Pluma Curandera',   type:'consumible',   desc:'Pluma mágica que cierra heridas. Restaura 3 de vida.',    effect:'+3 ❤️ Vida',         useEffect: s => { s.vida = Math.min(s.vida+3, s.vidaMax); return s; } },
+      nido_polvo:       { icon:'🥚', name:'Polvo de Nido',     type:'ingrediente',  desc:'Polvo recogido de un antiguo nido. Huele a lluvia.',       effect:'Material de crafting', useEffect: null },
+      croqueta_dorada:  { icon:'🧇', name:'Croqueta Dorada',   type:'consumible',   desc:'Bocado delicioso. Restaura 2 de vida y 30 de energía.',    effect:'+2 ❤️ +30 ⚡',       useEffect: s => { s.vida = Math.min(s.vida+2, s.vidaMax); s.energia = Math.min(s.energia+30, s.energiaMax); return s; } },
+      mapa_zona1:       { icon:'🗺️', name:'Mapa Ciudad Alta',  type:'llave',        desc:'Mapa detallado de la Ciudad Alta con rutas secretas.',    effect:'Revela el mapa',       useEffect: null },
+    };
+
+    // ---- Inventario del save (poblar si vacío para demo) ----
+    function ensureInventory() {
+      if (!save.inventario) {
+        save.inventario = {
+          migaja_tostada: 5,
+          semilla_paloma: 3,
+          llave_alcantarilla: 1,
+          cristal_viento: 1,
+          pluma_curandero: 2,
+          nido_polvo: 4,
+          croqueta_dorada: 1,
+          mapa_zona1: 1,
+        };
+        setSave(save);
+      }
+    }
+
+    let currentCategory = 'todos';
+    let selectedItem    = null;
+
+    function setCategory(cat, btn) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('items-grid');
+      grid.innerHTML = '';
+
+      ensureInventory();
+
+      // Items filtrados
+      const entries = Object.entries(save.inventario)
+        .filter(([id, qty]) => qty > 0)
+        .filter(([id]) => currentCategory === 'todos' || ITEMS_DB[id]?.type === currentCategory);
+
+      // Actualizar capacidad
+      const total = Object.values(save.inventario).reduce((s,v) => s+v, 0);
+      document.getElementById('cap-text').textContent    = `${total} / 50`;
+      document.getElementById('cap-fill').style.width    = Math.min(total/50*100, 100) + '%';
+      document.getElementById('hdr-migajas').textContent = save.migajas;
+
+      if (entries.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No hay ítems en esta categoría.</div>';
+        return;
+      }
+
+      // Rellenar con celdas de ítems
+      const TOTAL_CELLS = Math.max(entries.length, 30);
+      for (let i = 0; i < TOTAL_CELLS; i++) {
+        const cell = document.createElement('div');
+        if (i < entries.length) {
+          const [id, qty] = entries[i];
+          const info = ITEMS_DB[id] || { icon:'❓', name: id };
+          cell.className = 'item-cell' + (selectedItem === id ? ' selected' : '');
+          cell.innerHTML = `
+            <span class="item-icon">${info.icon}</span>
+            <span class="item-name-small">${info.name}</span>
+            <span class="item-qty">${qty}</span>
+          `;
+          cell.onclick = () => selectItem(id);
+        } else {
+          cell.className = 'item-cell empty';
+        }
+        grid.appendChild(cell);
+      }
+    }
+
+    function selectItem(id) {
+      selectedItem = id;
+      renderGrid();
+      renderDetail(id);
+    }
+
+    function renderDetail(id) {
+      const info = ITEMS_DB[id];
+      const qty  = save.inventario[id] || 0;
+      if (!info) return;
+
+      document.getElementById('detail-panel').innerHTML = `
+        <div class="detail-icon">${info.icon}</div>
+        <div class="detail-name">${info.name}</div>
+        <div class="detail-type">${info.type}</div>
+        <div class="detail-desc">${info.desc}</div>
+        ${info.effect ? `<div class="detail-effect">✦ ${info.effect}</div>` : ''}
+        <div class="detail-qty-row">
+          <span class="detail-qty-label">EN POSESIÓN</span>
+          <span class="detail-qty-val">${qty}</span>
+        </div>
+        ${info.useEffect ? `
+          <button class="use-btn" onclick="useItem('${id}')" ${qty <= 0 ? 'disabled' : ''}>
+            Usar
+          </button>
+        ` : `
+          <button class="use-btn" disabled>No usable</button>
+        `}
+      `;
+    }
+
+    function useItem(id) {
+      const info = ITEMS_DB[id];
+      if (!info || !info.useEffect) return;
+      if ((save.inventario[id] || 0) <= 0) { toast('Sin stock', 'error'); return; }
+
+      save.inventario[id]--;
+      if (save.inventario[id] <= 0) delete save.inventario[id];
+
+      const updated = info.useEffect({ ...save });
+      Object.assign(save, updated);
+      setSave(save);
+
+      toast(`${info.icon} ${info.name} usado`, 'success');
+      renderGrid();
+      if (save.inventario[id] > 0) {
+        renderDetail(id);
+      } else {
+        selectedItem = null;
+        document.getElementById('detail-panel').innerHTML = `
+          <div class="detail-icon">🎒</div>
+          <div class="detail-name" style="color:var(--text-dim)">Sin ítems</div>
+          <div class="detail-desc">El ítem se ha agotado.</div>
+        `;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      ensureInventory();
+      renderGrid();
+    });
+  </script>
+</body>
+</html>

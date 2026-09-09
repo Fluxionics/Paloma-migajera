@@ -32,6 +32,18 @@ function loadBosqueBg() {
   img.src = '../bosque encantado.JPG';
 }
 
+// La elipse se dibuja con ellipsePath (inmune a typos de argumentos)
+// tumba buildZone con TypeError. Este helper traza el mismo camino con arc()
+// y no depende del conteo de argumentos.
+function ellipsePath(ctx, x, y, rx, ry) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(rx / ry, 1);
+  ctx.beginPath();
+  ctx.arc(0, 0, ry, 0, Math.PI * 2);
+  ctx.restore();
+}
+
 function buildZone(zoneId) {
   const vis = document.createElement('canvas');
   const col = document.createElement('canvas');
@@ -819,7 +831,7 @@ function tiledFog(ctx, w, yBottom, color) {
     for (let x = 0; x < w; x += 110) {
       const wv = 70 + pseudoRand(x + y, 60);
       ctx.beginPath();
-      ctx.ellipse(x, y, wv, 5, 0, 0, Math.PI * 2);
+      ellipsePath(ctx, x, y, wv, 5);
       ctx.fill();
     }
   }
@@ -955,9 +967,9 @@ function drawParqueVisuals(ctx, W, H) {
   ctx.fillStyle = waterGrad;
   ctx.beginPath(); ctx.arc(fwx, fwy, 70, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#3c443a';
-  ctx.beginPath(); ctx.ellipse(fwx, fwy, 46, 10, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ellipsePath(ctx, fwx, fwy, 46, 10); ctx.fill();
   ctx.fillStyle = '#4a544a';
-  ctx.beginPath(); ctx.ellipse(fwx, fwy, 46, 10, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ellipsePath(ctx, fwx, fwy, 46, 10); ctx.stroke();
   ctx.fillStyle = '#304034';
   ctx.fillRect(fwx - 5, fwy - 26, 10, 26);
   ctx.save();
@@ -1224,11 +1236,11 @@ function drawTreeTrunk(ctx, x, y, w, h, alpha) {
   ctx.globalAlpha = alpha;
   ctx.fillStyle = '#241a12';
   ctx.beginPath();
-  ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+  ellipsePath(ctx, x + w / 2, y + h / 2, w / 2, h / 2);
   ctx.fill();
   ctx.fillStyle = '#3a2a18';
   ctx.beginPath();
-  ctx.ellipse(x + w / 2, y + h / 2, w / 2 - 8, h / 2 - 6, 0, 0, Math.PI * 2);
+  ellipsePath(ctx, x + w / 2, y + h / 2, w / 2 - 8, h / 2 - 6);
   ctx.fill();
   ctx.restore();
 }
@@ -1403,11 +1415,11 @@ function drawWaterTower(ctx, x, w, h) {
   ctx.fillRect(x, h + 60, w, 120);
   ctx.fillStyle = '#6a5a3c';
   ctx.beginPath();
-  ctx.ellipse(x + w / 2, h + 18, w / 2, 12, 0, 0, Math.PI * 2);
+  ellipsePath(ctx, x + w / 2, h + 18, w / 2, 12);
   ctx.fill();
   ctx.fillStyle = '#7a6a4a';
   ctx.beginPath();
-  ctx.ellipse(x + w / 2, h + 16, w / 2 - 6, 9, 0, 0, Math.PI * 2);
+  ellipsePath(ctx, x + w / 2, h + 16, w / 2 - 6, 9);
   ctx.fill();
   ctx.strokeStyle = '#4a3c28';
   ctx.lineWidth = 1.5;
@@ -1439,7 +1451,7 @@ function drawGansoStatue(ctx, x, y) {
   ctx.globalAlpha = 0.5;
   ctx.fillStyle = '#5a6a5a';
   ctx.beginPath();
-  ctx.ellipse(x, y, 24, 26, 0, 0, Math.PI * 2);
+  ellipsePath(ctx, x, y, 24, 26);
   ctx.fill();
   ctx.fillStyle = '#7a8a7a';
   ctx.beginPath();

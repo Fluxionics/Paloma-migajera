@@ -1,17 +1,8 @@
-// =============================================
-//  PALOMA MIGAJERA v4 — ENTITIES
-//  Mejoras: más enemigos, mejor distribución,
-//  bosses mejorados, más migajas
-// =============================================
-
 function getDiff() {
   const s = getSave();
   return DIFICULTAD[s?.dificultad || 'normal'];
 }
 
-// =============================================
-//  JUGADOR
-// =============================================
 function createPlayer(save) {
   const diff = DIFICULTAD[save.dificultad || 'normal'];
   return {
@@ -46,9 +37,6 @@ function createPlayer(save) {
   };
 }
 
-// =============================================
-//  ENEMIGOS
-// =============================================
 const ENEMY_DEFS = {
   gato: {
     w: 20, h: 16, hp: 3, speed: 1.2, dmg: 1,
@@ -127,23 +115,23 @@ function spawnEnemies(zoneId, diff) {
 
 const ZONE_ENEMIES = {
   ciudad_alta: [
-    // Zona 1: intro fácil
+
     { type: 'rata', x: 400, dir: 1, patrolMin: 300, patrolMax: 600 },
     { type: 'gato', x: 700, dir: -1, patrolMin: 580, patrolMax: 800 },
-    // Zona 2: media
+
     { type: 'rata', x: 1000, dir: 1, patrolMin: 900, patrolMax: 1150 },
     { type: 'gato', x: 1300, dir: -1, patrolMin: 1180, patrolMax: 1450 },
     { type: 'cuervo', x: 1550, dir: 1, patrolMin: 1450, patrolMax: 1700 },
     { type: 'rata', x: 1750, dir: -1, patrolMin: 1650, patrolMax: 1880 },
-    // Zona 3: difícil
+
     { type: 'cuervo', x: 2000, dir: 1, patrolMin: 1900, patrolMax: 2150 },
     { type: 'gato', x: 2200, dir: -1, patrolMin: 2100, patrolMax: 2380 },
     { type: 'gato_grande', x: 2450, dir: 1, patrolMin: 2350, patrolMax: 2600 },
     { type: 'cuervo', x: 2700, dir: -1, patrolMin: 2600, patrolMax: 2850 },
     { type: 'rata', x: 2850, dir: 1, patrolMin: 2780, patrolMax: 3000 },
-    // Zona 4: antes del boss
+
     { type: 'cuervo', x: 2950, dir: -1, patrolMin: 2900, patrolMax: 3100 },
-    // Boss
+
     { type: 'jefe_cuervo', x: 3080, dir: -1, patrolMin: 2980, patrolMax: 3150 },
   ],
   alcantarillas: [
@@ -153,7 +141,7 @@ const ZONE_ENEMIES = {
     { type: 'gato', x: 950, dir: -1, patrolMin: 830, patrolMax: 1100 },
     { type: 'rata', x: 1150, dir: 1, patrolMin: 1050, patrolMax: 1350 },
     { type: 'rata_voladora', x: 1350, dir: -1, patrolMin: 1250, patrolMax: 1500 },
-    // Boss de alcantarillas
+
     { type: 'jefe_rata', x: 1500, dir: -1, patrolMin: 1400, patrolMax: 1580 },
   ],
   parque_palomas: [
@@ -211,9 +199,6 @@ const ZONE_ENEMIES = {
   ],
 };
 
-// =============================================
-//  MIGAJAS DEL MUNDO
-// =============================================
 function spawnWorldMigajas(zoneId) {
   return (ZONE_MIGAJAS[zoneId] || []).map((pos, i) => ({
     id: i, x: pos[0], y: pos[1],
@@ -341,9 +326,6 @@ const ZONE_MIGAJAS = {
   ],
 };
 
-// =============================================
-//  NPCs
-// =============================================
 function spawnNPCs(zoneId) {
   return (ZONE_NPCS[zoneId] || []).map(n => ({ ...n }));
 }
@@ -429,9 +411,6 @@ const ZONE_NPCS = {
   ],
 };
 
-// =============================================
-//  PORTALES DE ZONA
-// =============================================
 const ZONE_PORTALS = {
   ciudad_alta: [
     { x: 3150, y: 0, w: 40, h: 900, toZone: 'alcantarillas', label: 'Alcantarillas →' },
@@ -459,9 +438,6 @@ const ZONE_PORTALS = {
   ],
 };
 
-// =============================================
-//  CHECKPOINTS
-// =============================================
 const ZONE_CHECKPOINTS = {
   ciudad_alta: [
     { x: 240, y: 0, id: 'cp_inicio', lit: true },

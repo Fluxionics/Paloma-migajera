@@ -1,7 +1,4 @@
-﻿// =============================================
-//  SISTEMA DE LOGROS - PALOMA MIGAJERA v4
-//  Integrado con el sistema de save del juego
-// =============================================
+﻿
 
 const LOGROS = {
   primer_vuelo: {
@@ -157,7 +154,6 @@ const LOGROS = {
 
 const LOGRO_SAVE_KEY = 'pm_v4_logros';
 
-// Iconos SVG para los logros (se muestran en la notificación)
 const LOGRO_ICONS = {
   primer_vuelo: '<svg viewBox="0 0 24 24" width="42" height="42"><ellipse cx="12" cy="14" rx="5" ry="6" fill="#e8e8f8"/><ellipse cx="12" cy="10" rx="4" ry="4" fill="#f0f0ff"/><circle cx="14" cy="9" r="1.5" fill="#080810"/><circle cx="14.5" cy="8.5" r="0.5" fill="#fff"/><rect x="16" y="9" width="3" height="1.5" rx="0.5" fill="#e8c040"/><ellipse cx="8" cy="13" rx="4" ry="3" fill="#c0c0e0"/></svg>',
   recolector: '<svg viewBox="0 0 24 24" width="42" height="42"><ellipse cx="12" cy="14" rx="9" ry="6" fill="#e8c840"/><ellipse cx="12" cy="13" rx="8" ry="5" fill="#f0d860"/><ellipse cx="10" cy="12" rx="3" ry="2" fill="#fff8a0" opacity="0.5"/></svg>',
@@ -300,7 +296,6 @@ function obtenerProgreso() {
   };
 }
 
-// Verificar logros cada 30 segundos
 setInterval(() => verificarLogros(), 30000);
 window.addEventListener('DOMContentLoaded', () => verificarLogros());
 

@@ -1,11 +1,6 @@
-// =============================================
-//  PALOMA MIGAJERA v3 — SHARED UTILITIES
-// =============================================
-
 const SAVE_KEY = 'pm_v3_save';
 const CFG_KEY  = 'pm_v3_cfg';
 
-// ---- Datos por defecto ----
 function defaultSave() {
   return {
     slot: 1,
@@ -62,7 +57,7 @@ function getSave() {
   try {
     const data = JSON.parse(localStorage.getItem(SAVE_KEY));
     if (!data) return null;
-    // Migrate old saves: add new fields
+
     const def = defaultSave();
     for (const key of Object.keys(def)) {
       if (data[key] === undefined) data[key] = def[key];
@@ -84,7 +79,6 @@ function deleteSave() {
   localStorage.removeItem(SAVE_KEY);
 }
 
-// ---- Dificultad: multiplicadores ----
 const DIFICULTAD = {
   facil:     { dmgRecibido: 0.5,  dmgEnemigo: 0.7,  enemigoHp: 0.7,  migajas: 1.5, label: 'Fácil',      desc: 'Para disfrutar la historia sin estrés.' },
   normal:    { dmgRecibido: 1.0,  dmgEnemigo: 1.0,  enemigoHp: 1.0,  migajas: 1.0, label: 'Normal',     desc: 'La experiencia equilibrada.' },
@@ -92,14 +86,12 @@ const DIFICULTAD = {
   pesadilla: { dmgRecibido: 2.0,  dmgEnemigo: 2.0,  enemigoHp: 2.5,  migajas: 0.5, label: 'Pesadilla',  desc: 'Un golpe puede ser fatal. Solo para expertos.' },
 };
 
-// ---- Navegación con fade ----
 function goTo(url) {
   document.body.style.transition = 'opacity 0.4s ease';
   document.body.style.opacity = '0';
   setTimeout(() => { window.location.href = url; }, 400);
 }
 
-// ---- Toast ----
 function toast(msg, type = '', dur = 3200) {
   const old = document.querySelector('.toast');
   if (old) old.remove();
@@ -113,7 +105,6 @@ function toast(msg, type = '', dur = 3200) {
   }, dur);
 }
 
-// ---- Formatear tiempo ----
 function fmtTime(sec) {
   const h = Math.floor(sec / 3600);
   const m = Math.floor((sec % 3600) / 60);
@@ -123,7 +114,6 @@ function fmtTime(sec) {
   return `${s}s`;
 }
 
-// ---- Formatear nombre de tecla ----
 const KEY_NAME = {
   ArrowLeft:'←', ArrowRight:'→', ArrowUp:'↑', ArrowDown:'↓',
   Space:'ESPACIO', Escape:'ESC', ShiftLeft:'SHIFT', ShiftRight:'SHIFT',
@@ -136,7 +126,6 @@ function fmtKey(code) {
   return code;
 }
 
-// ---- Partículas flotantes ----
 function initParticles(id = 'particles') {
   const canvas = document.getElementById(id);
   if (!canvas) return;
@@ -175,7 +164,6 @@ function initParticles(id = 'particles') {
   })();
 }
 
-// ---- Fade-in al cargar ----
 document.addEventListener('DOMContentLoaded', () => {
   initParticles();
   document.body.style.opacity = '0';

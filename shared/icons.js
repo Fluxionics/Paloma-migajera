@@ -1,18 +1,5 @@
-// =============================================
-//  PALOMA MIGAJERA v5 — SVG ICON SYSTEM
-//  Reemplaza todos los emojis con SVGs inline,
-//  con degradados, brillos y más detalle.
-// =============================================
-
-// ---- Paleta de referencia ----
-// oro:     #e8c840 / #f0d860 / #c89a20
-// azul:    #6ab0d8 / #c0e8ff
-// rojo:    #ff7070 / #d43a48
-// verde:   #40b860 / #2a8a48
-// neutro:  #9088b0 / #e8e8f8
-
 const ICONS = {
-  // ---- HUD / Juego ----
+
   heart: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ih" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a7a"/><stop offset="1" stop-color="#d43a48"/></linearGradient></defs><path d="M8 14s-5.5-3.5-7-6.5C.5 5 .5 3 2 2s3 .5 4 2c1-1.5 3-2 4-2s3.5 1 3.5 3.5S9.5 10.5 8 14z" fill="url(#ih)" stroke="#7e1f2c" stroke-width="0.6"/><path d="M4 4.5C3.2 5.2 3 6.4 3.2 7.6c.8-.4 1.4-1.2 1.5-2.1z" fill="#fff" opacity="0.45"/></svg>`,
   heartEmpty: `<svg viewBox="0 0 16 16" fill="none" stroke="#4a4460" stroke-width="1.5"><path d="M8 14s-5.5-3.5-7-6.5C.5 5 .5 3 2 2s3 .5 4 2c1-1.5 3-2 4-2s3.5 1 3.5 3.5S9.5 10.5 8 14z"/><circle cx="6.4" cy="4.2" r="0.9" fill="#5a5470" stroke="none"/></svg>`,
   bread: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ibr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2d066"/><stop offset="1" stop-color="#c89a20"/></linearGradient></defs><ellipse cx="8" cy="9.5" rx="7" ry="4.5" fill="#b8891a" stroke="#8a6a12" stroke-width="0.5"/><ellipse cx="8" cy="8.6" rx="6.2" ry="3.6" fill="url(#ibr)"/><path d="M6.2 7.2c.6.6 1.4.6 2 0M9 6.6c.6.6 1.4.6 2 0" stroke="#fff8c8" stroke-width="0.7" fill="none" opacity="0.7"/><circle cx="5.4" cy="9.4" r="0.5" fill="#a07c18"/><circle cx="10.6" cy="9.9" r="0.45" fill="#a07c18"/></svg>`,
@@ -20,7 +7,6 @@ const ICONS = {
   energy: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ien" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe07a"/><stop offset="1" stop-color="#e8a020"/></linearGradient></defs><polygon points="9,1 4.5,8.2 7.4,8.2 6.5,15 11.5,7.8 8.6,7.8" fill="url(#ien)" stroke="#b07c10" stroke-width="0.5"/></svg>`,
   level: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ilv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8e8a0"/><stop offset="1" stop-color="#e0a820"/></linearGradient></defs><polygon points="8,1.2 9.8,5.8 15,6.2 11.2,9.6 12.6,14.6 8,11.8 3.4,14.6 4.8,9.6 1,6.2 6.2,5.8" fill="url(#ilv)" stroke="#a07a10" stroke-width="0.5"/></svg>`,
 
-  // ---- Ataques / Habilidades ----
   sword: `<svg viewBox="0 0 16 16"><defs><linearGradient id="isw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e8ecf8"/><stop offset="0.5" stop-color="#a8b2d0"/><stop offset="1" stop-color="#7078a0"/></linearGradient></defs><rect x="7.2" y="1" width="1.6" height="9" rx="0.8" fill="url(#isw)"/><rect x="4" y="9.2" width="8" height="1.8" rx="0.9" fill="#c89a20"/><rect x="7.2" y="11" width="1.6" height="4" rx="0.8" fill="#c89a20"/><rect x="7.55" y="1" width="0.9" height="2" fill="#fff" opacity="0.7"/></svg>`,
   palomaduken: `<svg viewBox="0 0 16 16"><defs><radialGradient id="ipd" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#e8f8ff"/><stop offset="0.5" stop-color="#6ab0d8"/><stop offset="1" stop-color="#204060"/></radialGradient></defs><circle cx="8" cy="8" r="5.2" fill="url(#ipd)"/><circle cx="8" cy="8" r="1.8" fill="#fff"/><path d="M8 3.4a4.8 4.8 0 014.6 4.6c-1 1.2-2.6 1.8-4.6 1.8S4.4 9.2 3.4 8A4.8 4.8 0 018 3.4z" fill="#e8f8ff" opacity="0.35"/></svg>`,
   dash: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ids" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#284060" stop-opacity="0"/><stop offset="1" stop-color="#6ab0d8"/></linearGradient></defs><path d="M1 8h11l-3-3 1-1 5 4-5 4-1-1 3-3H1z" fill="url(#ids)"/></svg>`,
@@ -28,7 +14,6 @@ const ICONS = {
   shield: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ish" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ec8ec"/><stop offset="1" stop-color="#3a78a8"/></linearGradient></defs><path d="M8 1L2 4v4c0 3.5 2.7 6.8 6 8 3.3-1.2 6-4.5 6-8V4z" fill="url(#ish)" stroke="#1c4a70" stroke-width="0.6"/><path d="M5 8l2 2 4-4.4" fill="none" stroke="#fff" stroke-width="1.1"/></svg>`,
   thunder: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ith" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0a0"/><stop offset="1" stop-color="#e8a020"/></linearGradient></defs><polygon points="9,1 4.5,8.2 7.4,8.2 6.5,15 11.5,7.8 8.6,7.8" fill="url(#ith)"/></svg>`,
 
-  // ---- Navegación ----
   swordNav: `<svg viewBox="0 0 16 16"><defs><linearGradient id="isn" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#eaeefa"/><stop offset="1" stop-color="#8088b0"/></linearGradient></defs><rect x="7.2" y="1" width="1.6" height="8.2" rx="0.8" fill="url(#isn)"/><rect x="4" y="8.6" width="8" height="1.8" rx="0.9" fill="currentColor"/><rect x="7.2" y="10.4" width="1.6" height="4.6" rx="0.8" fill="currentColor"/></svg>`,
   folder: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ifo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c8b06a"/><stop offset="1" stop-color="#8a7020"/></linearGradient></defs><path d="M1 3.2h5l2 2.4h7v8.4H1z" fill="url(#ifo)"/><path d="M1 5.6h14" stroke="#6a5410" stroke-width="0.6"/></svg>`,
   star: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ist" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b0"/><stop offset="1" stop-color="#e0a820"/></linearGradient></defs><polygon points="8,1.2 9.8,5.8 15,6.2 11.2,9.6 12.6,14.6 8,11.8 3.4,14.6 4.8,9.6 1,6.2 6.2,5.8" fill="url(#ist)" stroke="#a07a10" stroke-width="0.4"/></svg>`,
@@ -41,19 +26,16 @@ const ICONS = {
   arrowRight: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
   back: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
 
-  // ---- Mapa ----
   map: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ima" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8b4d8"/><stop offset="1" stop-color="#50587c"/></linearGradient></defs><rect x="1" y="1" width="14" height="14" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2 4.2l4-2v9.6l-4 2z" fill="url(#ima)"/><path d="M10 2.2l4-2v9.6l-4 2z" fill="url(#ima)" opacity="0.8"/><circle cx="8" cy="12.4" r="1.1" fill="#e8c840" stroke="#7e5a10" stroke-width="0.4"/></svg>`,
   lock: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ilo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c8c8e0"/><stop offset="1" stop-color="#807898"/></linearGradient></defs><rect x="3" y="7" width="10" height="8" rx="1.4" fill="url(#ilo)"/><path d="M5 7V5a3 3 0 016 0v2" fill="none" stroke="#4a4460" stroke-width="1.5"/><circle cx="8" cy="10.6" r="0.9" fill="#3a344c"/></svg>`,
   check: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 8.2l4 4 6-8.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M7.2 12.2l-2.4-2.4" fill="none" stroke="#0e0e18" stroke-width="0.4" opacity="0.3"/></svg>`,
   cross: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>`,
 
-  // ---- Zonas nuevas ----
   park: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ipa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ad8a0"/><stop offset="1" stop-color="#3a8a50"/></linearGradient></defs><rect x="6.8" y="7" width="2.4" height="7" fill="#6a4e28"/><path d="M8 1.4a6 6 0 016 6c0 .8-.5 1.6-1.4 2.2H3.4A4 4 0 018 1.4z" fill="url(#ipa)"/><circle cx="5.4" cy="5.8" r="1" fill="#4aa860" opacity="0.8"/><circle cx="10.8" cy="6.4" r="0.8" fill="#4aa860" opacity="0.8"/><rect x="3" y="14" width="10" height="1.2" fill="#3a2a10"/></svg>`,
   tower: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ito" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2dfb0"/><stop offset="1" stop-color="#c8a860"/></linearGradient></defs><path d="M4.4 6.4L6 16h4l1.6-9.6c-1.2-.6-2-.6-3.6-.6s-2.4 0-3.6.6z" fill="#8a7038"/><rect x="3.6" y="5.4" width="8.8" height="1.6" fill="url(#ito)"/><circle cx="8" cy="5" r="1.9" fill="url(#ito)"/><path d="M8 3.6V6.4M8 5l1.8 1.2" stroke="#6a5018" stroke-width="0.5" fill="none"/></svg>`,
   clock: `<svg viewBox="0 0 16 16"><defs><linearGradient id="icl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c8d6f0"/><stop offset="1" stop-color="#6a78a0"/></linearGradient></defs><circle cx="8" cy="8" r="6.4" fill="url(#icl)" stroke="#3a4460" stroke-width="0.8"/><path d="M8 4.6V8l2.4 1.8" stroke="#1c2440" stroke-width="1.3" fill="none"/><circle cx="8" cy="8" r="0.6" fill="#1c2440"/></svg>`,
   leaf: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a8e8b0"/><stop offset="1" stop-color="#2a8a48"/></linearGradient></defs><path d="M13 2C8 3.4 3.6 6.4 2.4 11c-.3 1.2-.2 2.4 0 3 .6-1.6 1.6-3.2 3-4.4 2.6 2.4 6 3.6 8.6 3.4C13 9.4 13 5.4 13 2z" fill="url(#ile)"/><path d="M3 12.6C6 10 9.4 7 12.4 4.4" stroke="#264824" stroke-width="0.7" fill="none"/></svg>`,
 
-  // ---- Misc ----
   flame: `<svg viewBox="0 0 16 16"><defs><radialGradient id="ifl" cx="0.5" cy="0.7" r="0.7"><stop offset="0" stop-color="#ffe880"/><stop offset="0.6" stop-color="#f09020"/><stop offset="1" stop-color="#c04010"></stop></radialGradient></defs><path d="M8 1c-1 3-4 4-4 7a4 4 0 008 0c0-3-3-4-4-7z" fill="url(#ifl)"/><path d="M8 5c-.5 1.5-2 2-2 3.5a2 2 0 004 0c0-1.5-1.5-2-2-3.5z" fill="#fff0b0"/></svg>`,
   portal: `<svg viewBox="0 0 16 16"><defs><linearGradient id="ipor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ad0f0" stop-opacity="0.9"/><stop offset="1" stop-color="#205080" stop-opacity="0.9"/></linearGradient></defs><ellipse cx="8" cy="8" rx="5" ry="7" fill="none" stroke="#6ab0d8" stroke-width="1.4"/><ellipse cx="8" cy="8" rx="2.8" ry="4.2" fill="url(#ipor)"/><ellipse cx="8" cy="8" rx="1" ry="1.8" fill="#e8f8ff"/></svg>`,
   checkpoint: `<svg viewBox="0 0 16 16"><rect x="7.2" y="4" width="1.6" height="10.5" fill="#3a3c58"/><path d="M5 3.4c1-1.8 2-2.6 3-2.6s2 .8 3 2.6z" fill="#f0a020" stroke="#b07010" stroke-width="0.6"/><circle cx="8" cy="3.4" r="1.6" fill="#ffe060"/><path d="M6.4 5.6c-.6.8-1 1.6-1 2.6 0 1.4.6 2.6 1.6 3.4.6-1.8 1.6-3.4 3-4.4-1.2-.8-2.4-1.4-3.6-1.6z" fill="#fff" opacity="0.7"/></svg>`,
@@ -66,7 +48,6 @@ const ICONS = {
   npc: `<svg viewBox="0 0 16 16"><rect x="4" y="6" width="8" height="8" rx="1" fill="#c8a040"/><circle cx="8" cy="4" r="3" fill="#d0b050"/><rect x="5" y="1" width="2" height="3" fill="#f8e060"/><rect x="7" y="0" width="2" height="4" fill="#f8e060"/><rect x="9" y="1" width="2" height="3" fill="#f8e060"/><circle cx="7" cy="4" r="0.5" fill="#202020"/><circle cx="9" cy="4" r="0.5" fill="#202020"/></svg>`,
   particle: `<svg viewBox="0 0 8 8"><defs><radialGradient id="ipt" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff8c0"/><stop offset="1" stop-color="#e8a820" stop-opacity="0"/></radialGradient></defs><circle cx="4" cy="4" r="3" fill="url(#ipt)"/></svg>`,
 
-  // ---- Sidebar icons (settings) ----
   audio: `<svg viewBox="0 0 16 16"><path d="M2 5.4h3l4-3.2v11.6l-4-3.2H2z" fill="currentColor" opacity="0.7"/><path d="M11 5.4c1 1 1 4.2 0 5.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12.6 3.4c2 1.8 2 7.4 0 9.2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`,
   palette: `<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="6" cy="6" r="1.2" fill="#c03030"/><circle cx="10" cy="5" r="1.2" fill="#6ab0d8"/><circle cx="5" cy="9" r="1.2" fill="#40b860"/><circle cx="9" cy="10" r="1.2" fill="#e8c840"/><circle cx="8" cy="8" r="0.6" fill="#fff"/></svg>`,
   gamepad: `<svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="4" width="14" height="8" rx="3" opacity="0.6"/><circle cx="5" cy="8" r="1.2" fill="#080810"/><circle cx="11" cy="7" r="0.8" fill="#c03030"/><circle cx="13" cy="8" r="0.8" fill="#6ab0d8"/></svg>`,
@@ -74,7 +55,6 @@ const ICONS = {
   chart: `<svg viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="8" width="3" height="6" opacity="0.6"/><rect x="6" y="5" width="3" height="9" opacity="0.6"/><rect x="10" y="2" width="3" height="12" opacity="0.6"/></svg>`,
   database: `<svg viewBox="0 0 16 16" fill="currentColor"><ellipse cx="8" cy="4" rx="6" ry="2.5" opacity="0.6"/><path d="M2 4v8c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V4" fill="none" stroke="currentColor" stroke-width="1.2"/><ellipse cx="8" cy="8" rx="6" ry="2.5" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.4"/></svg>`,
 
-  // ---- Alert / Warning ----
   warning: `<svg viewBox="0 0 16 16"><defs><linearGradient id="iwr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb060"/><stop offset="1" stop-color="#c04010"/></linearGradient></defs><path d="M8 1L1 14h14L8 1z" fill="url(#iwr)"/><rect x="7.2" y="5.4" width="1.6" height="4.6" fill="#3a1008"/><rect x="7.2" y="11.4" width="1.6" height="1.4" fill="#3a1008"/></svg>`,
   info: `<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="7" y="6.6" width="2" height="4.4" fill="currentColor"/><circle cx="8" cy="4.2" r="1" fill="currentColor"/></svg>`,
   delete: `<svg viewBox="0 0 16 16" fill="currentColor"><rect x="4" y="3" width="8" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/><line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="1.2"/><line x1="6" y1="1" x2="10" y2="1" stroke="currentColor" stroke-width="1.2"/><line x1="6" y1="7" x2="6" y2="11" stroke="currentColor" stroke-width="1"/><line x1="10" y1="7" x2="10" y2="11" stroke="currentColor" stroke-width="1"/></svg>`,

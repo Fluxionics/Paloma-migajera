@@ -1,9 +1,3 @@
-// =============================================
-//  PALOMA MIGAJERA v4 — PHYSICS & COMBAT
-//  Mejoras: Coyote time, input buffering,
-//  wall slide/jump, combo system, screen shake
-// =============================================
-
 const GRAVITY        = 0.52;
 const JUMP_FORCE     = -11.5;
 const SPEED          = 3.8;
@@ -80,20 +74,15 @@ function drawDamageNumbers(ctx, camX, camY) {
   }
 }
 
-// =============================================
-//  FÍSICA DEL JUGADOR
-// =============================================
 function physicsPlayer(player, colData, dt, input) {
   const { izq, der, saltar, dash, ataque, especial, abajo } = input;
   const { justPressed } = input;
 
-  // ---- Wall detection ----
   const touchingWallLeft  = isTouchingWall(player, colData, -1);
   const touchingWallRight = isTouchingWall(player, colData, 1);
   const touchingWall = touchingWallLeft || touchingWallRight;
   const wallDir = touchingWallLeft ? -1 : touchingWallRight ? 1 : 0;
 
-  // ---- Coyote time ----
   if (player.onGround) {
     player.coyoteTimer = COYOTE_TIME;
     player.hasDoubleJumped = false;
@@ -101,20 +90,17 @@ function physicsPlayer(player, colData, dt, input) {
     player.coyoteTimer = Math.max(0, player.coyoteTimer - dt);
   }
 
-  // ---- Input buffer ----
   if (justPressed.saltar) {
     player.jumpBufferTimer = JUMP_BUFFER;
   } else {
     player.jumpBufferTimer = Math.max(0, player.jumpBufferTimer - dt);
   }
 
-  // ---- Horizontal ----
   if (!player.dashing) {
     if (izq)       { player.vx = -SPEED; player.facing = -1; }
     else if (der)  { player.vx =  SPEED; player.facing =  1; }
     else           { player.vx *= 0.70; }
 
-    // Wall slide
     if (!player.onGround && touchingWall && player.vy > 0 && (izq || der)) {
       const sliding = (izq && touchingWallLeft) || (der && touchingWallRight);
       if (sliding) {
@@ -127,7 +113,6 @@ function physicsPlayer(player, colData, dt, input) {
     }
   }
 
-  // ---- Salto (con coyote time y buffer) ----
   if (player.jumpBufferTimer > 0) {
     if (player.coyoteTimer > 0 && !player.dashing) {
       player.vy = JUMP_FORCE;
@@ -136,7 +121,7 @@ function physicsPlayer(player, colData, dt, input) {
       player.jumpsLeft = player.maxJumps - 1;
       return { action: 'jump', double: false };
     }
-    // Wall jump
+
     else if (player.wallSliding && !player.onGround) {
       player.vy = WALL_JUMP_Y;
       player.vx = -wallDir * WALL_JUMP_X;
@@ -147,7 +132,7 @@ function physicsPlayer(player, colData, dt, input) {
       addScreenShake(3);
       return { action: 'jump', double: false, wallJump: true };
     }
-    // Double jump
+
     else if (player.jumpsLeft > 0 && !player.onGround && !player.wallSliding) {
       player.vy = JUMP_FORCE * 0.92;
       player.jumpsLeft--;
@@ -157,7 +142,6 @@ function physicsPlayer(player, colData, dt, input) {
     }
   }
 
-  // ---- Planeo ----
   if (player.habilidades.planeo && saltar && !player.onGround && player.vy > 0) {
     player.vy = Math.min(player.vy, 0.8);
     player.gliding = true;
@@ -165,7 +149,6 @@ function physicsPlayer(player, colData, dt, input) {
     player.gliding = false;
   }
 
-  // ---- Picado ----
   if (player.habilidades.picado && abajo && !player.onGround) {
     player.vy = Math.min(player.vy + 2.8, 17);
     player.isPounding = true;
@@ -173,7 +156,6 @@ function physicsPlayer(player, colData, dt, input) {
     player.isPounding = false;
   }
 
-  // ---- Dash ----
   if (justPressed.dash && player.habilidades.dash && player.dashCooldown <= 0 && !player.dashing) {
     player.dashing = true;
     player.dashDir = player.facing;
@@ -190,7 +172,6 @@ function physicsPlayer(player, colData, dt, input) {
     player.vy = 0;
     player.dashTimer -= dt;
 
-    // Spawn afterimages
     if (!player.afterimages) player.afterimages = [];
     if (Math.random() > 0.3) {
       player.afterimages.push({
@@ -205,7 +186,6 @@ function physicsPlayer(player, colData, dt, input) {
     }
   }
 
-  // Update afterimages
   if (player.afterimages) {
     if (player.afterimages.length > 20) player.afterimages.splice(0, player.afterimages.length - 20);
     for (let i = player.afterimages.length - 1; i >= 0; i--) {
@@ -214,17 +194,14 @@ function physicsPlayer(player, colData, dt, input) {
     }
   }
 
-  // ---- Gravedad ----
   if (!player.dashing) {
     player.vy += GRAVITY;
     player.vy = Math.min(player.vy, 16);
   }
 
-  // ---- Combo system ----
   if (player.comboTimer > 0) player.comboTimer -= dt;
   if (player.comboTimer <= 0) player.comboCount = 0;
 
-  // ---- Ataque cuerpo a cuerpo ----
   if (justPressed.ataque && player.atkTimer <= 0) {
     player.attacking = true;
     player.atkTimer = ATK_DUR;
@@ -234,7 +211,6 @@ function physicsPlayer(player, colData, dt, input) {
     return { action: 'attack', combo: player.comboCount };
   }
 
-  // ---- PALOMADUKEN ----
   if (justPressed.especial && player.energy >= PALOU_ENERGY && player.palouCooldown <= 0) {
     player.energy -= PALOU_ENERGY;
     player.palouCooldown = PALOU_COOLDOWN;
@@ -244,9 +220,6 @@ function physicsPlayer(player, colData, dt, input) {
   return null;
 }
 
-// =============================================
-//  WALL DETECTION
-// =============================================
 function isTouchingWall(player, colData, dir) {
   const checkX = dir > 0 ? player.x + player.w + WALL_CHECK_DIST : player.x - WALL_CHECK_DIST;
   for (let i = 0; i <= 3; i++) {
@@ -256,9 +229,6 @@ function isTouchingWall(player, colData, dir) {
   return false;
 }
 
-// =============================================
-//  COLISIÓN PÍXEL-PERFECTA CON EL MAPA
-// =============================================
 function resolvePlayerMap(player, colData, mapW, mapH) {
   player.onGround = false;
 
@@ -275,7 +245,6 @@ function resolvePlayerMap(player, colData, mapW, mapH) {
   }
 }
 
-// Límite de seguridad anti-bucles infinitos en la resolución de colisiones
 const RESOLVE_GUARD = 60;
 
 function resolveAxisX(player, colData) {
@@ -326,21 +295,15 @@ function resolveAxisY(player, colData, mapH) {
   if (player.y > mapH + 50) player.y = mapH + 150;
 }
 
-// =============================================
-//  FÍSICA DE ENEMIGOS
-// =============================================
 function physicsEnemies(enemies, colData, mapW, mapH, dt) {
   for (const e of enemies) {
     if (!e.alive) continue;
     if (e.stunTimer > 0) { e.stunTimer -= dt; continue; }
 
-    // Update attack cooldown
     if (e.atkCdTimer > 0) e.atkCdTimer -= dt;
 
-    // AI state machine
     updateEnemyAI(e, dt);
 
-    // Apply movement based on state
     switch (e.aiState) {
       case 'patrol':
         e.x += e.vx;
@@ -367,12 +330,10 @@ function physicsEnemies(enemies, colData, mapW, mapH, dt) {
         break;
     }
 
-    // Gravity
     e.vy = (e.vy || 0) + GRAVITY;
     e.vy = Math.min(e.vy, 14);
     e.y += e.vy;
 
-    // Ground collision
     const steps = 3;
     for (let i = 0; i <= steps; i++) {
       const tx = e.x + (i / steps) * e.w;
@@ -390,14 +351,10 @@ function physicsEnemies(enemies, colData, mapW, mapH, dt) {
       e.vy = 0;
     }
 
-    // Animation timer
     e.animTimer = (e.animTimer || 0) + dt;
   }
 }
 
-// =============================================
-//  ENEMY AI STATE MACHINE
-// =============================================
 function updateEnemyAI(e, dt) {
   if (!e.aiState) e.aiState = 'patrol';
   if (!e.aggroRange) e.aggroRange = 180;
@@ -440,11 +397,11 @@ function updateEnemyAI(e, dt) {
     case 'attack':
       e.dir = chaseDir;
       if (e.attackTelegraph) {
-        // Waiting to charge
+
         e.vx = 0;
       }
       if (!e.isCharging && e.chargeTimer <= 0) {
-        // Attack resolved
+
         e.aiState = 'chase';
         e.isCharging = false;
         e.attackTelegraph = false;
@@ -452,14 +409,14 @@ function updateEnemyAI(e, dt) {
         e._doAtk = true;
       }
       if (e.isCharging) {
-        // Check if hit player during charge
+
         if (rectsOverlap(e.x, e.y, e.w, e.h, p.x, p.y, p.w, p.h)) {
           e._doAtk = true;
           e.aiState = 'retreat';
           e.retreatTimer = 600;
           e.vx = -chaseDir * e.speed;
         }
-        // Hit wall?
+
         if (e.x <= e.patrolMin + 5 || e.x >= e.patrolMax - 5) {
           e.isCharging = false;
           e.aiState = 'retreat';
@@ -480,9 +437,6 @@ function updateEnemyAI(e, dt) {
   }
 }
 
-// =============================================
-//  COMBATE
-// =============================================
 function doMeleeAttack(player, enemies, particles) {
   const combo = player.comboCount || 1;
   const baseDmg = 1;
@@ -587,9 +541,6 @@ function hurtPlayer(player, dmg, particles) {
   return true;
 }
 
-// =============================================
-//  RECOLECCIÓN DE MIGAJAS
-// =============================================
 function collectMigajas(player, migajas) {
   const collected = [];
   for (const m of migajas) {
@@ -605,9 +556,6 @@ function collectMigajas(player, migajas) {
   return collected;
 }
 
-// =============================================
-//  PARTÍCULAS
-// =============================================
 function spawnHitFx(particles, x, y, color, n = 6) {
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2;
@@ -632,7 +580,7 @@ function spawnDeathFx(particles, x, y, color, n = 14) {
       life: 600, maxLife: 600, color, r: Math.random() * 3.5 + 1, sq: Math.random() > 0.4,
     });
   }
-  // Ring burst
+
   for (let i = 0; i < 8; i++) {
     const a = (i / 8) * Math.PI * 2;
     particles.push({
@@ -719,7 +667,6 @@ function spawnDustFx(particles, x, y, dir) {
   }
 }
 
-// Estela de plumas de la paloma (dash / doble salto / picado)
 function spawnFeatherFx(particles, x, y, dir, n = 3) {
   for (let i = 0; i < n; i++) {
     particles.push({
@@ -747,9 +694,6 @@ function updateParticles(particles, dt) {
   while (i--) { if (particles[i].life <= 0) particles.splice(i, 1); }
 }
 
-// =============================================
-//  COOLDOWNS
-// =============================================
 function updateCooldowns(player, dt) {
   if (player.dashCooldown  > 0) player.dashCooldown  -= dt;
   if (player.palouCooldown > 0) player.palouCooldown -= dt;
@@ -763,13 +707,10 @@ function updateCooldowns(player, dt) {
   player.mp = Math.min(player.mpMax, player.mp + dt * 0.012);
 }
 
-// =============================================
-//  UTILIDAD
-// =============================================
 function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
   return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 }
 
 function checkEnemyAggro(enemies, player) {
-  // AI state machine handles aggro now, this function kept for compatibility
+
 }

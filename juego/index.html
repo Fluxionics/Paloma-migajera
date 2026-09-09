@@ -18,7 +18,6 @@
 
     #game-canvas{display:block;position:fixed;top:0;left:0;image-rendering:pixelated;image-rendering:crisp-edges;}
 
-    /* HUD */
     #hud{position:fixed;top:0;left:0;right:0;z-index:40;padding:14px 18px;background:linear-gradient(180deg,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.35) 60%,transparent 100%);pointer-events:none;display:flex;align-items:flex-start;gap:16px;}
     .hud-left,.hud-right{background:linear-gradient(180deg,rgba(10,10,22,0.7),rgba(10,10,22,0.25));border:1px solid rgba(255,255,255,0.07);border-bottom-color:rgba(232,200,64,0.18);border-radius:10px;padding:9px 12px;backdrop-filter:blur(2px);}
     .hud-left{display:flex;flex-direction:column;gap:7px;min-width:180px;}
@@ -46,11 +45,9 @@
     .hud-nivel{font-family:var(--font-title);font-size:0.56rem;letter-spacing:0.12em;color:var(--muted);}
     .hud-nivel b{color:var(--gold);font-weight:700;}
 
-    /* Combo indicator */
     .combo-display{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:45;pointer-events:none;font-family:var(--font-title);font-size:0.7rem;letter-spacing:0.2em;color:var(--gold);opacity:0;transition:opacity 0.3s;}
     .combo-display.active{opacity:1;}
 
-    /* Screens */
     .game-overlay{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
     .game-overlay.visible{display:flex;}
 
@@ -107,15 +104,12 @@
     .boss-fill{height:100%;background:linear-gradient(90deg,#901818,#d04040);transition:width 0.4s;position:relative;}
     .boss-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.15),transparent);}
 
-    /* Screen transition */
     #screen-transition{position:fixed;inset:0;z-index:200;background:#000;opacity:0;pointer-events:none;transition:opacity 0.6s ease;}
     #screen-transition.active{opacity:1;}
 
-    /* Viñeta + scanlines (capas de atmósfera) */
     #vignette{position:fixed;inset:0;z-index:35;pointer-events:none;background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,0.5) 100%);}
     #scanlines{position:fixed;inset:0;z-index:36;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,0.02) 0 1px,transparent 1px 3px);mix-blend-mode:overlay;}
 
-    /* Pausa / muerte / victoria refinados */
     .pause-btn{border-radius:6px;letter-spacing:0.2em;}
     #screen-pause .pause-title{text-shadow:0 0 40px rgba(232,200,64,0.25);}
     #screen-victory .victory-reward{border-radius:10px;box-shadow:0 0 24px rgba(232,200,64,0.12) inset;}
@@ -285,9 +279,6 @@
     };
   }
 
-  // =============================================
-  //  CARGAR ZONA
-  // =============================================
   function loadZone(zoneId) {
     G.state = 'loading';
     G.loadProgress = 0;
@@ -354,9 +345,6 @@
     }, 80);
   }
 
-  // =============================================
-  //  CÁMARA (con screen shake)
-  // =============================================
   function updateCamera() {
     if (!G.map || !G.player) return;
     const targetX = G.player.x - W / 2 + G.player.w / 2;
@@ -369,9 +357,6 @@
     updateScreenShake();
   }
 
-  // =============================================
-  //  UPDATE
-  // =============================================
   function update(dt) {
     if (G.state !== 'running') return;
     const input = getInput();
@@ -392,17 +377,14 @@
       if (action.action === 'palou') { firePalou(p, G.projectiles); PM_AUDIO.sfx.palou(); }
     }
 
-    // Plumas en dash + planeo
     if (p.dashing && Math.random() > 0.35) {
       spawnFeatherFx(G.particles, p.x + p.w / 2, p.y + p.h / 2, p.dashDir || p.facing, 2);
     }
 
-    // Wall slide particles
     if (p.wallSliding) {
       spawnWallSlideFx(G.particles, p.x + (p.facing > 0 ? p.w : 0), p.y + p.h / 2);
     }
 
-    // Running dust
     if (p.onGround && Math.abs(p.vx) > 2 && Math.random() > 0.7) {
       spawnDustFx(G.particles, p.x + p.w / 2, p.y + p.h, p.facing);
     }
@@ -429,6 +411,10 @@
         if (i === 0) PM_AUDIO.sfx[m.value >= 5 ? 'collectBig' : 'collect']();
       });
       updateHUD();
+      if (!G.migajas.some(m => m.alive)) {
+        showPickupPopup(p.x - G.camera.x, p.y - G.camera.y - 20, '¡Zona limpia!');
+        PM_AUDIO.sfx.checkpoint();
+      }
     }
 
     for (const cp of G.checkpoints) {
@@ -471,7 +457,6 @@
     updateParticles(G.particles, dt);
     updateDamageNumbers(dt);
 
-    // Combo display
     const comboEl = document.getElementById('combo-display');
     if (p.comboCount > 1 && p.comboTimer > 0) {
       comboEl.textContent = `${p.comboCount}x COMBO`;
@@ -491,9 +476,6 @@
     }
   }
 
-  // =============================================
-  //  RENDER
-  // =============================================
   function render() {
     ctx.clearRect(0, 0, W, H);
 
@@ -507,7 +489,6 @@
       ctx.fillStyle = grd;
       ctx.fillRect(0, 0, W, H);
 
-      // Estrellas
       for (let i = 0; i < 60; i++) {
         const sx = (Math.sin(i * 127.1) * 0.5 + 0.5) * W;
         const sy = (Math.sin(i * 311.7) * 0.5 + 0.5) * H * 0.7;
@@ -515,7 +496,6 @@
         ctx.fillRect(sx, sy, 2, 2);
       }
 
-      // Título
       ctx.textAlign = 'center';
       ctx.fillStyle = 'rgba(232,200,64,0.7)';
       ctx.font = 'bold 30px Cinzel, serif';
@@ -523,7 +503,6 @@
       ctx.fillStyle = 'rgba(255,255,255,0.14)';
       ctx.fillRect(W / 2 - 90, H / 2 - 140, 180, 1);
 
-      // Paloma real: animación GIF de Franck si ya cargó, si no sprite procedural
       const t = performance.now() / 1000;
       const bounce = Math.sin(t * 3) * 6;
       const dg = window.__SPRITES && window.__SPRITES.getImg('Doble Salto.gif');
@@ -535,7 +514,6 @@
         if (spr) drawSprite(ctx, spr, W / 2 - 17, H / 2 - 92 + bounce, 34, 32);
       }
 
-      // Sombra debajo de la paloma
       ctx.save();
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.beginPath();
@@ -547,7 +525,6 @@
       ctx.font = 'bold 12px Cinzel, serif';
       ctx.fillText('Cargando zona...', W / 2, H / 2 + 40);
 
-      // Barra con degradado y brillo
       const barW = 260;
       const bx = W / 2 - barW / 2;
       const by = H / 2 + 52;
@@ -570,11 +547,9 @@
 
     if (!G.map || !G.player) return;
 
-    // Apply screen shake
     const cx = G.camera.x + screenShake.x;
     const cy = G.camera.y + screenShake.y;
 
-    // Draw only the visible sub-rect of the map (big perf win)
     const sx = Math.max(0, Math.floor(cx)), sy = Math.max(0, Math.floor(cy));
     const sw = Math.min(MAP_W - sx, W + 1), sh = Math.min(MAP_H - sy, H + 1);
     if (sw > 0 && sh > 0) {
@@ -597,9 +572,6 @@
     }
   }
 
-  // =============================================
-  //  HUD
-  // =============================================
   let _lastHpMax = 0, _lastHp = -1, _lastMp = -1, _lastEnergy = -1, _lastMig = -1, _lastZone = '';
   function updateHUD() {
     const p = G.player;
@@ -645,12 +617,6 @@
     document.getElementById('boss-fill').style.width = Math.max(0, b.hp / b.maxHp * 100) + '%';
   }
 
-  // =============================================
-  //  PAUSA / ESTADOS
-  // =============================================
-  // =============================================
-  //  AUDIO INTEGRATION
-  // =============================================
   function toggleSfxBtn() {
     const on = PM_AUDIO.toggleSfx();
     document.getElementById('btn-sfx').textContent = 'SFX: ' + (on ? 'ON' : 'OFF');
@@ -665,7 +631,7 @@
     if (bS) bS.textContent = 'SFX: ' + (PM_AUDIO.sfxOn ? 'ON' : 'OFF');
     if (bM) bM.textContent = 'Música: ' + (PM_AUDIO.musicOn ? 'ON' : 'OFF');
   }
-  // Init audio on first user gesture
+
   let _audioInited = false;
   function ensureAudio() {
     if (!_audioInited) { PM_AUDIO.init(); _audioInited = true; }
@@ -770,9 +736,6 @@
     updateHUD();
   }
 
-  // =============================================
-  //  NPCs
-  // =============================================
   function checkNPCInteraction() {
     for (const npc of G.npcs) {
       const dx = Math.abs((G.player.x + G.player.w / 2) - (npc.x + npc.w / 2));
@@ -802,9 +765,6 @@
     }
   }
 
-  // =============================================
-  //  CAMBIO DE ZONA
-  // =============================================
   function changeZone(zoneId) {
     const trans = document.getElementById('screen-transition');
     trans.classList.add('active');
@@ -818,9 +778,6 @@
     }, 600);
   }
 
-  // =============================================
-  //  BANNERS / POPUPS
-  // =============================================
   function showZoneBanner(zoneId) {
     const names = {
       ciudad_alta: 'Ciudad Alta',
@@ -839,7 +796,8 @@
       tejado_gansos: 'Zona 6 de 6 — El reino de los gansos',
     };
     document.getElementById('zb-name').textContent = names[zoneId] || zoneId;
-    document.getElementById('zb-sub').textContent  = subs[zoneId] || '';
+    const total = (ZONE_MIGAJAS[zoneId] || []).length;
+    document.getElementById('zb-sub').textContent = (subs[zoneId] || '') + (total ? ` — ${total} migas por recoger` : '');
     const banner = document.getElementById('zone-banner');
     banner.classList.remove('show');
     void banner.offsetWidth;
@@ -865,9 +823,6 @@
     setTimeout(() => el.remove(), 1300);
   }
 
-  // =============================================
-  //  GAME LOOP
-  // =============================================
   let lastTime = 0;
   function loop(ts) {
     const dt = Math.min(ts - lastTime, 50);
@@ -880,9 +835,6 @@
     requestAnimationFrame(loop);
   }
 
-  // =============================================
-  //  INICIO
-  // =============================================
   document.addEventListener('DOMContentLoaded', () => {
     loadZone(saveData.zona || 'ciudad_alta');
     requestAnimationFrame(loop);

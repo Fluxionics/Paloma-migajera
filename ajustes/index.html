@@ -13,7 +13,6 @@
       min-height: 100%;
     }
 
-    /* ---- Sidebar ---- */
     .sidebar {
       width: 200px;
       min-height: 100vh;
@@ -80,7 +79,6 @@
       border-top: 1px solid var(--border);
     }
 
-    /* ---- Contenido principal ---- */
     .settings-main {
       flex: 1;
       padding: 40px 48px;
@@ -107,14 +105,12 @@
       margin-top: 4px;
     }
 
-    /* ---- Secciones ---- */
     .section {
       display: none;
       animation: fadeUp 0.3s var(--ease) forwards;
     }
     .section.active { display: block; }
 
-    /* ---- Setting Row ---- */
     .s-row {
       display: flex;
       align-items: center;
@@ -144,7 +140,6 @@
 
     .s-control { flex-shrink: 0; }
 
-    /* ---- Slider ---- */
     .slider-wrap {
       display: flex;
       align-items: center;
@@ -184,7 +179,6 @@
       text-align: right;
     }
 
-    /* ---- Toggle switch ---- */
     .toggle {
       position: relative;
       width: 44px;
@@ -211,7 +205,6 @@
     }
     .toggle input:checked ~ .toggle-thumb { transform: translateX(22px); background: var(--accent); }
 
-    /* ---- Select ---- */
     select {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -228,7 +221,6 @@
     select:focus { border-color: var(--accent); }
     select option { background: #1a1a28; }
 
-    /* ---- Teclas ---- */
     .controls-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -268,7 +260,6 @@
     .key-badge.waiting { border-color: #f0a020; color: #f0a020; background: rgba(240,160,32,0.1); animation: pulse 0.5s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-    /* ---- Estadísticas ---- */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -301,7 +292,6 @@
       letter-spacing: 0.05em;
     }
 
-    /* ---- Zona de peligro ---- */
     .danger-zone {
       margin-top: 24px;
       padding: 20px;
@@ -316,7 +306,6 @@
       margin-bottom: 12px;
     }
 
-    /* ---- Panel wrapper ---- */
     .s-panel {
       padding: 0 20px;
       background: rgba(21,21,31,0.6);
@@ -335,7 +324,6 @@
       margin-bottom: 0;
     }
 
-    /* ---- Action buttons ---- */
     .action-bar {
       display: flex;
       gap: 10px;
@@ -351,7 +339,7 @@
   <canvas id="particles" class="particles-canvas"></canvas>
 
   <div class="page settings-layout">
-    <!-- Sidebar -->
+
     <aside class="sidebar">
       <div class="sidebar-logo">
         <span class="icon"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" style="--color:#e8c840;"><ellipse cx="12" cy="14" rx="5" ry="6" fill="#e8e8f8"/><ellipse cx="12" cy="10" rx="4" ry="4" fill="#f0f0ff"/><circle cx="14" cy="9" r="1.5" fill="#080810"/><circle cx="14.5" cy="8.5" r="0.5" fill="#fff"/><rect x="16" y="9" width="3" height="1.5" rx="0.5" fill="#e8c040"/><ellipse cx="8" cy="13" rx="4" ry="3" fill="#c0c0e0"/></svg></span>
@@ -382,14 +370,12 @@
       </div>
     </aside>
 
-    <!-- Contenido -->
     <main class="settings-main">
       <div class="page-header fade-up">
         <span class="page-title" id="section-title">Audio</span>
         <span class="page-subtitle" id="section-sub">Ajusta los volúmenes del juego.</span>
       </div>
 
-      <!-- AUDIO -->
       <div class="section active" id="sec-audio">
         <div class="s-panel">
           <div class="s-panel-title">Volúmenes</div>
@@ -426,7 +412,6 @@
         </div>
       </div>
 
-      <!-- GRÁFICOS -->
       <div class="section" id="sec-graficos">
         <div class="s-panel">
           <div class="s-panel-title">Rendimiento</div>
@@ -484,7 +469,6 @@
         </div>
       </div>
 
-      <!-- CONTROLES -->
       <div class="section" id="sec-controles">
         <div class="s-panel">
           <div class="s-panel-title">Asignación de Teclas</div>
@@ -498,7 +482,6 @@
         </div>
       </div>
 
-      <!-- JUEGO -->
       <div class="section" id="sec-juego">
         <div class="s-panel">
           <div class="s-panel-title">Preferencias</div>
@@ -553,12 +536,10 @@
         </div>
       </div>
 
-      <!-- ESTADÍSTICAS -->
       <div class="section" id="sec-estadisticas">
         <div class="stats-grid" id="stats-grid"></div>
       </div>
 
-      <!-- DATOS -->
       <div class="section" id="sec-datos">
         <div class="s-panel">
           <div class="s-panel-title">Almacenamiento</div>
@@ -583,7 +564,6 @@
         </div>
       </div>
 
-      <!-- Action bar -->
       <div class="action-bar">
         <button class="btn btn-primary" onclick="saveSettings()">Guardar Cambios</button>
         <button class="btn" onclick="resetAll()">Restaurar Todo</button>
@@ -636,7 +616,6 @@
       document.getElementById('section-sub').textContent   = SECTIONS[id].sub;
     }
 
-    // ---- Sliders ----
     function initSlider(id, valId, cfgPath) {
       const el = document.getElementById(id);
       const vl = document.getElementById(valId);
@@ -649,7 +628,6 @@
       });
     }
 
-    // ---- Toggles ----
     function initToggle(id, cfgPath) {
       const el = document.getElementById(id);
       const [cat, key] = cfgPath.split('.');
@@ -657,7 +635,6 @@
       el.addEventListener('change', () => { cfg[cat][key] = el.checked; });
     }
 
-    // ---- Controles grid ----
     function renderControls() {
       const grid = document.getElementById('controls-grid');
       grid.innerHTML = '';
@@ -700,7 +677,6 @@
       toast('Controles restaurados', 'info');
     }
 
-    // ---- Estadísticas ----
     function renderStats() {
       const save = getSave() || defaultSave();
       const s = save;
@@ -724,7 +700,6 @@
       `).join('');
     }
 
-    // ---- Datos ----
     function renderDatos() {
       let size = 0;
       for (const k in localStorage) {
@@ -752,9 +727,8 @@
       }
     }
 
-    // ---- Guardar / Resetear ----
     function saveSettings() {
-      // Leer select
+
       cfg.graficos.calidad = document.getElementById('g-calidad').value;
       cfg.juego.idioma     = document.getElementById('j-idioma').value;
       setCfg(cfg);
@@ -769,7 +743,6 @@
       setTimeout(() => location.reload(), 600);
     }
 
-    // ---- Init ----
     document.addEventListener('DOMContentLoaded', () => {
       initSlider('vol-musica',   'vv-musica',   'audio.musica');
       initSlider('vol-efectos',  'vv-efectos',  'audio.efectos');

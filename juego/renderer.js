@@ -1,9 +1,3 @@
-// =============================================
-//  PALOMA MIGAJERA v4 — RENDERER
-//  Usa sprites procedurales (shared/sprites.js)
-//  + efectos: shake, afterimages, slash trails
-// =============================================
-
 function sprite(name) {
   return window.__SPRITES ? window.__SPRITES.get(name) : (window.SPRITES ? SPRITES[name] : null);
 }
@@ -46,7 +40,6 @@ function drawPlayer(ctx, player, camX, camY) {
   ctx.fill();
   ctx.restore();
 
-  // Afterimages
   if (player.afterimages) {
     for (const ghost of player.afterimages) {
       const gx = Math.floor(ghost.x - camX);
@@ -60,17 +53,15 @@ function drawPlayer(ctx, player, camX, camY) {
     }
   }
 
-  // Sprite principal
   const st = playerState(player);
   const dir = fw > 0 ? 'r' : 'l';
   let sprName = `pigeon_${st}_${dir}`;
-  // Aleteo: alterna las dos fases del ala en vuelo/planeo
+
   if (st === 'fly' || st === 'glide') {
     if (Math.floor(t * 12) % 2 === 0) sprName = `pigeon_${st}2_${dir}`;
   }
   const spr = sprite(sprName);
 
-  // GIFs de la paloma (Franck): haduken al atacar, Doble Salto en doble salto
   let gif = null;
   if (st === 'attack') {
     const hg = window.__SPRITES && window.__SPRITES.getImg('haduken.gif');
@@ -91,7 +82,7 @@ function drawPlayer(ctx, player, camX, camY) {
     const sh = isGif ? (gifBig ? 40 : 48) : Math.max(24, player.h + 12);
     ctx.save();
     if (isGif) {
-      // El GIF se dibuja girado según la dirección de la paloma
+
       const dW = fw > 0 ? sw : -sw;
       const walk = Math.sin(player.walkCycle * 1.6) * 1.5;
       const lift = st === 'jump' ? -2 : st === 'fall' ? 3 : 0;
@@ -132,7 +123,6 @@ function drawPlayer(ctx, player, camX, camY) {
     ctx.fillRect(rx + 14, ry + 2, 5, 3);
   }
 
-  // Slash trail
   if (player.attacking && player.attackFrame !== undefined) {
     const progress = Math.min(1, player.attackFrame / (window.ATK_DUR || 260));
     const combo = player.comboCount || 1;
@@ -161,7 +151,6 @@ function drawPlayer(ctx, player, camX, camY) {
   ctx.restore();
 }
 
-// ---- Enemigos ----
 function enemySpriteName(e) {
   if (e.type === 'gato') return e.aggroActive ? 'gato_agro' : 'gato';
   if (e.type === 'gato_grande') return 'gato_grande';
@@ -195,7 +184,7 @@ function drawEnemy(ctx, e, camX, camY) {
 
   const breathe = Math.sin(t * 2 + (e.x * 0.01)) * 0.5;
   let spr = sprite(enemySpriteName(e));
-  // Gato real animado (gato.gif de Franck) si está disponible
+
   if (e.type === 'gato' || e.type === 'gato_grande') {
     const gif = window.__SPRITES && window.__SPRITES.getImg('gato.gif');
     if (gif) spr = gif;
@@ -239,7 +228,6 @@ function drawEnemy(ctx, e, camX, camY) {
   ctx.restore();
 }
 
-// ---- Migajas ----
 function drawMigajas(ctx, migajas, camX, camY) {
   const t = performance.now() / 1000;
   const s1 = sprite('migaja');
@@ -253,7 +241,7 @@ function drawMigajas(ctx, migajas, camX, camY) {
     if (rx < -20 || rx > ctx.canvas.width + 20) continue;
 
     ctx.save();
-    // Cheaper glow: no shadowBlur, use semi-transparent fill
+
     ctx.globalAlpha = 0.25;
     ctx.fillStyle = '#e8c840';
     ctx.beginPath();
@@ -280,7 +268,6 @@ function drawMigajas(ctx, migajas, camX, camY) {
   }
 }
 
-// ---- Proyectiles ----
 function drawProjectiles(ctx, projs, camX, camY) {
   const t = performance.now() / 1000;
   const palou = sprite('palou');
@@ -323,7 +310,6 @@ function drawProjectiles(ctx, projs, camX, camY) {
   }
 }
 
-// ---- Partículas ----
 function drawParticles(ctx, particles, camX, camY) {
   const vw = ctx.canvas.width, vh = ctx.canvas.height;
   for (const p of particles) {
@@ -340,12 +326,10 @@ function drawParticles(ctx, particles, camX, camY) {
   ctx.globalAlpha = 1;
 }
 
-// ---- Damage Numbers ----
 function drawDamageNumberEntities(ctx, camX, camY) {
   drawDamageNumbers(ctx, camX, camY);
 }
 
-// ---- NPCs ----
 function drawNPCs(ctx, npcs, camX, camY, playerX, playerY) {
   const t = performance.now() / 1000;
   const npcSpr = sprite('npc_lechuga');
@@ -389,7 +373,6 @@ function drawNPCs(ctx, npcs, camX, camY, playerX, playerY) {
   }
 }
 
-// ---- Checkpoints ----
 function drawCheckpoints(ctx, checkpoints, camX, camY) {
   if (!checkpoints) return;
   const t = performance.now() / 1000;
@@ -412,7 +395,7 @@ function drawCheckpoints(ctx, checkpoints, camX, camY) {
     ctx.fillRect(rx - 7, ry - 54, 14, 2);
 
     if (cp.lit) {
-      // Cheaper glow — simple filled arc instead of radial gradient
+
       ctx.save();
       ctx.globalAlpha = 0.05 + Math.sin(t * 1.5) * 0.02;
       ctx.fillStyle = '#f0a020';
@@ -451,7 +434,6 @@ function drawCheckpoints(ctx, checkpoints, camX, camY) {
   }
 }
 
-// ---- Portales ----
 function drawPortals(ctx, portals, camX, camY) {
   if (!portals) return;
   const t = performance.now() / 1000;
@@ -464,7 +446,6 @@ function drawPortals(ctx, portals, camX, camY) {
     const a = 0.3 + Math.sin(t * 2) * 0.15;
     const pulseA = 0.5 + Math.sin(t * 3) * 0.2;
 
-    // Cheaper column glow (no radial gradient)
     const gw = portal.w * 2;
     ctx.fillStyle = `rgba(106,176,216,${a * 0.10})`;
     ctx.fillRect(rx + portal.w / 2 - gw / 2, 0, gw, vh);

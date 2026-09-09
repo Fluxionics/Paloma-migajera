@@ -1,7 +1,3 @@
-// =============================================
-//  PALOMA MIGAJERA v5 — PROCEDURAL AUDIO ENGINE
-//  Web Audio API: SFX + generative zone music
-// =============================================
 const PM_AUDIO = (() => {
   let ctx = null, masterGain = null, sfxGain = null, musicGain = null;
   let sfxOn = true, musicOn = true, volume = 0.5;
@@ -20,7 +16,7 @@ const PM_AUDIO = (() => {
       musicGain = ctx.createGain();
       musicGain.gain.value = 0.25;
       musicGain.connect(masterGain);
-      // Restore saved prefs
+
       try {
         const s = JSON.parse(localStorage.getItem('pm_audio') || '{}');
         if (s.sfx === false) { sfxOn = false; sfxGain.gain.value = 0; }
@@ -56,7 +52,6 @@ const PM_AUDIO = (() => {
     savePrefs();
   }
 
-  // ---- SFX Generators ----
   function playTone(freq, dur, type, vol, detune) {
     if (!ctx || !sfxOn) return;
     resume();
@@ -129,7 +124,6 @@ const PM_AUDIO = (() => {
     menuConfirm() { sweep(600, 1200, 0.1, 'sine', 0.1); },
   };
 
-  // ---- Generative Zone Music ----
   const ZONE_SCALES = {
     ciudad_alta:     [220, 261, 293, 329, 392, 440, 523],
     alcantarillas:   [196, 233, 261, 293, 349, 392, 466],
@@ -166,7 +160,6 @@ const PM_AUDIO = (() => {
       if (!ctx || !musicOn || ctx.state !== 'running') return;
       const t = ctx.currentTime;
 
-      // Ambient pad (soft, evolves slowly)
       if (step % 16 === 0) {
         const root = scale[chordIdx % scale.length];
         const third = scale[(chordIdx + 2) % scale.length];
@@ -186,7 +179,6 @@ const PM_AUDIO = (() => {
         chordIdx = (chordIdx + 1) % scale.length;
       }
 
-      // Melody note (pentatonic-ish random walk)
       if (step % 4 === 0 && Math.random() > 0.4) {
         const note = scale[Math.floor(Math.random() * scale.length)];
         const osc = ctx.createOscillator();
@@ -200,7 +192,6 @@ const PM_AUDIO = (() => {
         osc.stop(t + beatMs * 3 / 1000);
       }
 
-      // Subtle bass pulse
       if (step % 8 === 0) {
         const bass = scale[chordIdx % scale.length] * 0.25;
         const osc = ctx.createOscillator();
@@ -218,7 +209,6 @@ const PM_AUDIO = (() => {
     }, beatMs / 4);
   }
 
-  // ---- Public API ----
   return {
     init,
     resume,
@@ -232,3 +222,5 @@ const PM_AUDIO = (() => {
     get musicOn() { return musicOn; },
   };
 })();
+
+window.PM_AUDIO = PM_AUDIO;

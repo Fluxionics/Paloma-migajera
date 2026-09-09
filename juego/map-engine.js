@@ -1,13 +1,6 @@
-// =============================================
-//  PALOMA MIGAJERA v4 — MAP ENGINE
-//  Mejoras: más parallax, ambient particles,
-//  better lighting, moving elements
-// =============================================
-
 const MAP_W = 3200;
 const MAP_H = 900;
 
-// Imagen de fondo real (fondo.jpg)
 let BG_FONDO = null;
 let DECOR_PNG = null;
 let BG_BOSQUE = null;
@@ -15,26 +8,21 @@ let bosqueLoading = false;
 (function loadAssets() {
   const img = new Image();
   img.onload = () => { BG_FONDO = img; };
-  img.src = '../fondo.jpg';
+  img.src = '../assets/fondo.jpg';
   const dec = new Image();
   dec.onload = () => { DECOR_PNG = dec; };
-  dec.src = '../decoracion.png';
+  dec.src = '../assets/decoracion.png';
 })();
 
-// La foto del bosque es pesada (~148KB) y solo sirve en 1 de 6 zonas:
-// se carga perezosamente la primera vez que entras al Bosque Encantado.
 function loadBosqueBg() {
   if (BG_BOSQUE || bosqueLoading) return;
   bosqueLoading = true;
   const img = new Image();
   img.onload = () => { BG_BOSQUE = img; };
   img.onerror = () => { bosqueLoading = false; };
-  img.src = '../bosque encantado.JPG';
+  img.src = '../assets/bosque encantado.JPG';
 }
 
-// La elipse se dibuja con ellipsePath (inmune a typos de argumentos)
-// tumba buildZone con TypeError. Este helper traza el mismo camino con arc()
-// y no depende del conteo de argumentos.
 function ellipsePath(ctx, x, y, rx, ry) {
   ctx.save();
   ctx.translate(x, y);
@@ -67,40 +55,35 @@ function isSolid(colData, x, y) {
   return colData.data[idx] > 128;
 }
 
-// =============================================
-//  ZONE DEFINITIONS
-// =============================================
 const ZONES = {
 
   ciudad_alta(v, c, W, H) {
-    // Fondo real si está cargado (fondo.jpg)
+
     if (BG_FONDO) {
       try {
         const scale = Math.max(W / BG_FONDO.width, H / BG_FONDO.height);
         const fw = BG_FONDO.width * scale;
         const fh = BG_FONDO.height * scale;
         v.drawImage(BG_FONDO, (W - fw) / 2, 0, fw, Math.min(fh, H));
-        // Oscurecer la mitad inferior para que las plataformas resalten
+
         const dark = v.createLinearGradient(0, H * 0.45, 0, H);
         dark.addColorStop(0, 'rgba(8,8,16,0.45)');
         dark.addColorStop(1, 'rgba(8,8,16,0.85)');
         v.fillStyle = dark;
         v.fillRect(0, 0, W, H);
-      } catch { /* fallback al escenario procedural */ }
+      } catch {  }
     }
 
-    // Sky gradient (deeper, more atmospheric)
     const sky = v.createLinearGradient(0, 0, 0, H * 0.65);
     sky.addColorStop(0, '#060810');
     sky.addColorStop(0.3, '#0d1020');
     sky.addColorStop(0.6, '#161830');
     sky.addColorStop(1, '#1e1a35');
     v.fillStyle = sky;
-    if (BG_FONDO) v.globalAlpha = 0.35;   // atenuado si hay fondo real
+    if (BG_FONDO) v.globalAlpha = 0.35;
     v.fillRect(0, 0, W, H);
     v.globalAlpha = 1;
 
-    // Nebula-like clouds
     v.save();
     v.globalAlpha = 0.04;
     for (let i = 0; i < 5; i++) {
@@ -115,7 +98,6 @@ const ZONES = {
     }
     v.restore();
 
-    // Stars (improved - twinkle effect baked in)
     for (let i = 0; i < 180; i++) {
       const sx = pseudoRand(i * 13, W);
       const sy = pseudoRand(i * 17, H * 0.5);
@@ -127,7 +109,6 @@ const ZONES = {
       if (sr > 1.2) v.restore();
     }
 
-    // Shooting star (static position, looks good as map art)
     v.save();
     v.globalAlpha = 0.4;
     v.strokeStyle = '#fff';
@@ -138,19 +119,18 @@ const ZONES = {
     v.stroke();
     v.restore();
 
-    // Moon (larger, more detailed)
     v.save();
-    // Moon glow
+
     const moonGrad = v.createRadialGradient(W * 0.82, 80, 10, W * 0.82, 80, 80);
     moonGrad.addColorStop(0, 'rgba(240,232,176,0.15)');
     moonGrad.addColorStop(1, 'transparent');
     v.fillStyle = moonGrad;
     v.beginPath(); v.arc(W * 0.82, 80, 80, 0, Math.PI * 2); v.fill();
-    // Moon body
+
     v.shadowColor = '#f0e8b0'; v.shadowBlur = 50;
     v.fillStyle = '#f0e8b0';
     v.beginPath(); v.arc(W * 0.82, 80, 35, 0, Math.PI * 2); v.fill();
-    // Moon craters
+
     v.shadowBlur = 0;
     v.fillStyle = 'rgba(200,190,140,0.4)';
     v.beginPath(); v.arc(W * 0.82 - 8, 75, 6, 0, Math.PI * 2); v.fill();
@@ -158,14 +138,12 @@ const ZONES = {
     v.beginPath(); v.arc(W * 0.82 - 3, 90, 3, 0, Math.PI * 2); v.fill();
     v.restore();
 
-    // Far buildings (parallax layer 1 - darkest)
     drawBuildings(v, W, H, 0.0, 0.22, '#08080f', '#0e0e18', 60, 160, 240);
-    // Mid buildings (parallax layer 2)
+
     drawBuildings(v, W, H, 0.10, 0.32, '#0c0c16', '#121220', 80, 200, 300);
-    // Near buildings (parallax layer 3)
+
     drawBuildings(v, W, H, 0.22, 0.45, '#10101c', '#181828', 90, 240, 350);
 
-    // Distant city glow
     v.save();
     v.globalAlpha = 0.05;
     const cityGlow = v.createLinearGradient(0, H * 0.35, 0, H * 0.55);
@@ -176,7 +154,6 @@ const ZONES = {
     v.fillRect(0, H * 0.35, W, H * 0.2);
     v.restore();
 
-    // Textura de decoracion.png sobre las fachadas (muy sutil)
     if (DECOR_PNG) {
       try {
         v.save();
@@ -191,18 +168,16 @@ const ZONES = {
       } catch {}
     }
 
-    // Platform visuals
     drawPlatformVisuals(v, W, H);
-    // Urban details
+
     drawUrbanDetails(v, W, H);
 
-    // Collisions
     c.fillStyle = '#fff';
     drawPlatformCollisions(c, W, H);
   },
 
   alcantarillas(v, c, W, H) {
-    // Dark green/brown gradient
+
     const bg = v.createLinearGradient(0, 0, 0, H);
     bg.addColorStop(0, '#050808');
     bg.addColorStop(0.3, '#080c08');
@@ -211,7 +186,6 @@ const ZONES = {
     v.fillStyle = bg;
     v.fillRect(0, 0, W, H);
 
-    // Dripping water streaks (background)
     v.fillStyle = 'rgba(0,60,40,0.08)';
     for (let i = 0; i < 30; i++) {
       const dx = pseudoRand(i * 31, W);
@@ -219,7 +193,6 @@ const ZONES = {
       v.fillRect(dx, 0, dw, H);
     }
 
-    // Moss patches
     v.fillStyle = 'rgba(30,60,20,0.12)';
     for (let i = 0; i < 15; i++) {
       const mx = pseudoRand(i * 41, W);
@@ -227,7 +200,6 @@ const ZONES = {
       v.fillRect(mx, my, pseudoRand(i * 7, 40) + 20, pseudoRand(i * 11, 8) + 4);
     }
 
-    // Pipes and walls
     drawAlcantarillaVisuals(v, W, H);
 
     c.fillStyle = '#fff';
@@ -235,7 +207,7 @@ const ZONES = {
   },
 
   parque_palomas(v, c, W, H) {
-    // Cielo nocturno verdiazul
+
     const sky = v.createLinearGradient(0, 0, 0, H * 0.7);
     sky.addColorStop(0, '#04121f');
     sky.addColorStop(0.4, '#0a2333');
@@ -244,7 +216,6 @@ const ZONES = {
     v.fillStyle = sky;
     v.fillRect(0, 0, W, H);
 
-    // Estrellas frías
     for (let i = 0; i < 120; i++) {
       const sx = pseudoRand(i * 29, W);
       const sy = pseudoRand(i * 17, H * 0.35);
@@ -252,7 +223,6 @@ const ZONES = {
       v.beginPath(); v.arc(sx, sy, pseudoRand(i * 3, 1.4) + 0.2, 0, Math.PI * 2); v.fill();
     }
 
-    // Luna baja y fría
     v.save();
     const moonGrad = v.createRadialGradient(W * 0.18, H * 0.14, 5, W * 0.18, H * 0.14, 70);
     moonGrad.addColorStop(0, 'rgba(210,235,255,0.14)');
@@ -266,7 +236,6 @@ const ZONES = {
     v.beginPath(); v.arc(W * 0.18 + 8, H * 0.16, 3.5, 0, Math.PI * 2); v.fill();
     v.restore();
 
-    // Árboles de fondo (siluetas)
     for (let ti = 0; ti < 14; ti++) {
       const tx = pseudoRand(ti * 53, W);
       const tr = pseudoRand(ti * 17, 46) + 22;
@@ -279,7 +248,6 @@ const ZONES = {
       v.fill();
     }
 
-    // Neblina del parque
     v.save();
     tiledFog(v, W, H * 0.55, 'rgba(120,200,200,0.03)');
     v.restore();
@@ -291,7 +259,7 @@ const ZONES = {
   },
 
   torre_reloj(v, c, W, H) {
-    // Interior de la torre: mampostería cálida
+
     const wall = v.createLinearGradient(0, 0, 0, H);
     wall.addColorStop(0, '#1a1208');
     wall.addColorStop(0.4, '#241a0e');
@@ -300,7 +268,6 @@ const ZONES = {
     v.fillStyle = wall;
     v.fillRect(0, 0, W, H);
 
-    // Ladrillo tenue
     v.fillStyle = 'rgba(255,220,160,0.025)';
     for (let bx = 0; bx < W; bx += 44) {
       for (let by = 0; by < H; by += 18) {
@@ -308,17 +275,14 @@ const ZONES = {
       }
     }
 
-    // Luz de farol interior (cálida)
     const lamp = v.createRadialGradient(W * 0.5, H * 0.25, 0, W * 0.5, H * 0.25, H * 0.5);
     lamp.addColorStop(0, 'rgba(230,150,70,0.10)');
     lamp.addColorStop(1, 'transparent');
     v.fillStyle = lamp;
     v.fillRect(0, 0, W, H);
 
-    // Gran esfera del reloj en la pared posterior
     drawClockFace(v, W, H);
 
-    // Engranajes de fondo
     for (let gi = 0; gi < 9; gi++) {
       const gx = pseudoRand(gi * 71, W);
       const gy = pseudoRand(gi * 37, H * 0.5) + H * 0.12;
@@ -326,7 +290,6 @@ const ZONES = {
       drawGear(v, gx, gy, gr, 'rgba(200,160,90,0.05)');
     }
 
-    // Polvo flotante estático
     for (let i = 0; i < 60; i++) {
       const dx = pseudoRand(i * 43, W);
       const dy = pseudoRand(i * 27, H);
@@ -342,17 +305,16 @@ const ZONES = {
 
   bosque_encantado(v, c, W, H) {
     loadBosqueBg();
-    // Foto real del bosque encantado si está cargada
+
     if (BG_BOSQUE) {
       try {
         const scale = Math.max(W / BG_BOSQUE.width, H / BG_BOSQUE.height);
         const fw = BG_BOSQUE.width * scale;
         const fh = BG_BOSQUE.height * scale;
         v.drawImage(BG_BOSQUE, (W - fw) / 2, 0, fw, Math.min(fh, H));
-      } catch { /* fallback procedural */ }
+      } catch {  }
     }
 
-    // Velo de noche encantada
     const veil = v.createLinearGradient(0, 0, 0, H);
     veil.addColorStop(0, 'rgba(10,6,28,0.25)');
     veil.addColorStop(0.5, 'rgba(10,6,28,0.45)');
@@ -360,7 +322,6 @@ const ZONES = {
     v.fillStyle = veil;
     v.fillRect(0, 0, W, H);
 
-    // Luz de luna entre los árboles (brillo frío)
     const moonGlow = v.createRadialGradient(W * 0.5, H * 0.15, 0, W * 0.5, H * 0.15, H * 0.6);
     moonGlow.addColorStop(0, 'rgba(140,180,255,0.08)');
     moonGlow.addColorStop(1, 'transparent');
@@ -374,7 +335,7 @@ const ZONES = {
   },
 
   tejado_gansos(v, c, W, H) {
-    // Fondo real si está cargado (fondo.jpg)
+
     if (BG_FONDO) {
       try {
         const scale = Math.max(W / BG_FONDO.width, H / BG_FONDO.height);
@@ -386,10 +347,9 @@ const ZONES = {
         dark.addColorStop(1, 'rgba(6,6,16,0.8)');
         v.fillStyle = dark;
         v.fillRect(0, 0, W, H);
-      } catch { /* fallback al escenario procedural */ }
+      } catch {  }
     }
 
-    // Cielo profundo con tonos cálidos (amanecer casi oscuro)
     const sky = v.createLinearGradient(0, 0, 0, H * 0.7);
     sky.addColorStop(0, '#100a08');
     sky.addColorStop(0.4, '#241408');
@@ -400,7 +360,6 @@ const ZONES = {
     v.fillRect(0, 0, W, H);
     v.globalAlpha = 1;
 
-    // Luna naranja baja
     v.save();
     v.globalAlpha = 0.25;
     v.fillStyle = '#ff9a30';
@@ -421,10 +380,6 @@ const ZONES = {
   }
 };
 
-// =============================================
-//  HELPERS — Ciudad Alta
-// =============================================
-
 function pseudoRand(seed, max) {
   return ((Math.sin(seed * 9301 + 49297) * 0.5 + 0.5)) * max;
 }
@@ -440,13 +395,13 @@ function drawBuildings(ctx, W, H, yStart, yEnd, color, roofColor, minW, maxW, mi
     const by = H - bh;
     ctx.fillStyle = color;
     ctx.fillRect(x, by, bw, bh);
-    // Roof
+
     ctx.fillStyle = roofColor;
     ctx.fillRect(x, by, bw, 4);
-    // Roof detail
+
     ctx.fillStyle = 'rgba(255,255,255,0.03)';
     ctx.fillRect(x, by, bw, 1);
-    // Windows (warm glow)
+
     for (let wy = by + 14; wy < by + bh - 10; wy += 24) {
       for (let wx = x + 10; wx < x + bw - 10; wx += 18) {
         const lit = pseudoRand(wx * wy, 1) > 0.3;
@@ -454,13 +409,13 @@ function drawBuildings(ctx, W, H, yStart, yEnd, color, roofColor, minW, maxW, mi
           const warm = pseudoRand(wx + wy, 1) > 0.5;
           ctx.fillStyle = warm ? 'rgba(255,220,100,0.10)' : 'rgba(200,220,255,0.06)';
           ctx.fillRect(wx, wy, 8, 10);
-          // Window frame
+
           ctx.fillStyle = 'rgba(255,255,255,0.03)';
           ctx.fillRect(wx, wy + 4, 8, 1);
         }
       }
     }
-    // Chimney (some buildings)
+
     if (pseudoRand(bi * 13, 1) > 0.6) {
       const chW = 8;
       const chX = x + bw * pseudoRand(bi * 19, 0.6) + bw * 0.2;
@@ -476,7 +431,7 @@ function drawBuildings(ctx, W, H, yStart, yEnd, color, roofColor, minW, maxW, mi
 
 function drawPlatformVisuals(ctx, W, H) {
   const ground = H - 60;
-  // Main ground with better gradient
+
   const gGrad = ctx.createLinearGradient(0, ground - 5, 0, H);
   gGrad.addColorStop(0, '#2a2a38');
   gGrad.addColorStop(0.05, '#252530');
@@ -484,13 +439,11 @@ function drawPlatformVisuals(ctx, W, H) {
   ctx.fillStyle = gGrad;
   ctx.fillRect(0, ground, W, H - ground);
 
-  // Ground top edge (highlight)
   ctx.fillStyle = '#383848';
   ctx.fillRect(0, ground, W, 2);
   ctx.fillStyle = '#303040';
   ctx.fillRect(0, ground + 2, W, 1);
 
-  // Tile texture
   ctx.fillStyle = 'rgba(255,255,255,0.02)';
   for (let tx = 0; tx < W; tx += 48) {
     ctx.fillRect(tx, ground + 6, 44, 2);
@@ -498,7 +451,6 @@ function drawPlatformVisuals(ctx, W, H) {
     ctx.fillRect(tx + 12, ground + 26, 44, 2);
   }
 
-  // Small cracks in ground
   ctx.strokeStyle = 'rgba(0,0,0,0.15)';
   ctx.lineWidth = 1;
   for (let i = 0; i < 20; i++) {
@@ -509,7 +461,6 @@ function drawPlatformVisuals(ctx, W, H) {
     ctx.stroke();
   }
 
-  // Platforms
   PLATFORM_DATA.forEach(p => {
     if (p.type === 'stone') {
       const pg = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
@@ -517,17 +468,17 @@ function drawPlatformVisuals(ctx, W, H) {
       pg.addColorStop(1, '#1e1e2a');
       ctx.fillStyle = pg;
       ctx.fillRect(p.x, p.y, p.w, p.h);
-      // Top highlight
+
       ctx.fillStyle = '#3a3a52';
       ctx.fillRect(p.x, p.y, p.w, 3);
       ctx.fillStyle = '#343448';
       ctx.fillRect(p.x, p.y + 3, p.w, 1);
-      // Stone texture
+
       ctx.fillStyle = 'rgba(255,255,255,0.035)';
       for (let bx = p.x + 10; bx < p.x + p.w - 5; bx += 22) {
         ctx.fillRect(bx, p.y + 5, 1, p.h - 6);
       }
-      // Bottom shadow
+
       ctx.fillStyle = 'rgba(0,0,0,0.15)';
       ctx.fillRect(p.x, p.y + p.h, p.w, 3);
     } else if (p.type === 'wood') {
@@ -535,7 +486,7 @@ function drawPlatformVisuals(ctx, W, H) {
       ctx.fillRect(p.x, p.y, p.w, p.h);
       ctx.fillStyle = '#4a3418';
       ctx.fillRect(p.x, p.y, p.w, 2);
-      // Wood grain
+
       ctx.fillStyle = '#2a1a08';
       for (let bx = p.x + 8; bx < p.x + p.w; bx += 14) {
         ctx.fillRect(bx, p.y + 2, 1, p.h - 2);
@@ -544,7 +495,7 @@ function drawPlatformVisuals(ctx, W, H) {
       for (let bx = p.x + 4; bx < p.x + p.w; bx += 14) {
         ctx.fillRect(bx, p.y + 3, 1, p.h - 3);
       }
-      // Nails
+
       ctx.fillStyle = '#606060';
       ctx.fillRect(p.x + 3, p.y + 4, 2, 2);
       ctx.fillRect(p.x + p.w - 5, p.y + 4, 2, 2);
@@ -553,12 +504,12 @@ function drawPlatformVisuals(ctx, W, H) {
       ctx.fillRect(p.x, p.y, p.w, p.h);
       ctx.fillStyle = '#405060';
       ctx.fillRect(p.x, p.y, p.w, 2);
-      // Rivets
+
       ctx.fillStyle = '#506878';
       for (let bx = p.x; bx < p.x + p.w; bx += 18) {
         ctx.fillRect(bx, p.y + 5, 3, 3);
       }
-      // Metal sheen
+
       ctx.fillStyle = 'rgba(255,255,255,0.04)';
       ctx.fillRect(p.x, p.y, p.w, 1);
     } else if (p.type === 'chain') {
@@ -566,11 +517,11 @@ function drawPlatformVisuals(ctx, W, H) {
       ctx.fillRect(p.x, p.y, p.w, p.h);
       ctx.fillStyle = '#404060';
       ctx.fillRect(p.x, p.y, p.w, 3);
-      // Chains (individual links)
+
       ctx.fillStyle = '#505060';
       ctx.fillRect(p.x + 10, p.y - 24, 4, 26);
       ctx.fillRect(p.x + p.w - 14, p.y - 24, 4, 26);
-      // Chain links
+
       ctx.fillStyle = '#606070';
       for (let cy = p.y - 22; cy < p.y; cy += 6) {
         ctx.fillRect(p.x + 8, cy, 8, 4);
@@ -589,26 +540,25 @@ function drawPlatformCollisions(ctx, W, H) {
 function drawUrbanDetails(ctx, W, H) {
   const ground = H - 60;
 
-  // Street lamps (with light halos)
   const farolas = [80, 320, 680, 1040, 1450, 1890, 2300, 2750, 3050];
   farolas.forEach((fx, idx) => {
-    // Post
+
     ctx.fillStyle = '#222230';
     ctx.fillRect(fx - 3, ground - 85, 6, 85);
-    // Post base
+
     ctx.fillStyle = '#2a2a38';
     ctx.fillRect(fx - 6, ground - 5, 12, 5);
-    // Lamp housing
+
     ctx.fillStyle = '#303040';
     ctx.fillRect(fx - 7, ground - 90, 14, 8);
-    // Lamp light
+
     ctx.save();
     ctx.shadowColor = '#f0d080';
     ctx.shadowBlur = 28;
     ctx.fillStyle = '#f0d080';
     ctx.beginPath(); ctx.arc(fx, ground - 82, 5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    // Light halo (cone)
+
     const lGrad = ctx.createRadialGradient(fx, ground - 82, 0, fx, ground - 40, 100);
     lGrad.addColorStop(0, 'rgba(240,208,128,0.10)');
     lGrad.addColorStop(0.5, 'rgba(240,208,128,0.04)');
@@ -617,7 +567,6 @@ function drawUrbanDetails(ctx, W, H) {
     ctx.beginPath(); ctx.arc(fx, ground - 60, 100, 0, Math.PI * 2); ctx.fill();
   });
 
-  // Signs
   const carteles = [
     { x: 200, y: ground - 170, txt: 'PANADERÍA', color: '#a090c0' },
     { x: 900, y: ground - 210, txt: 'ZONA GATOS', color: '#c08080' },
@@ -625,21 +574,20 @@ function drawUrbanDetails(ctx, W, H) {
     { x: 2400, y: ground - 180, txt: 'CUIDADO', color: '#c0a060' },
   ];
   carteles.forEach(cd => {
-    // Sign board
+
     ctx.fillStyle = '#14101c';
     ctx.fillRect(cd.x, cd.y - 26, 140, 30);
     ctx.fillStyle = '#282040';
     ctx.fillRect(cd.x, cd.y - 26, 140, 2);
-    // Post
+
     ctx.fillStyle = '#1a1828';
     ctx.fillRect(cd.x + 68, cd.y + 4, 4, 16);
-    // Text
+
     ctx.font = '11px Cinzel, serif';
     ctx.fillStyle = cd.color;
     ctx.fillText(cd.txt, cd.x + 8, cd.y - 7);
   });
 
-  // Hanging wires between buildings
   ctx.strokeStyle = 'rgba(255,255,255,0.04)';
   ctx.lineWidth = 1;
   const wirePoints = [150, 500, 850, 1200, 1650, 2050, 2450, 2800];
@@ -653,9 +601,6 @@ function drawUrbanDetails(ctx, W, H) {
   }
 }
 
-// =============================================
-//  PLATFORM DATA — Ciudad Alta
-// =============================================
 const PLATFORM_DATA = [
   { x: 100, y: 760, w: 160, h: 14, type: 'stone' },
   { x: 320, y: 720, w: 120, h: 14, type: 'stone' },
@@ -688,11 +633,8 @@ const PLATFORM_DATA = [
   { x: 3120, y: 620, w: 60, h: 12, type: 'stone' },
 ];
 
-// =============================================
-//  ALCANTARILLAS
-// =============================================
 function drawAlcantarillaVisuals(ctx, W, H) {
-  // Floor
+
   const floorGrad = ctx.createLinearGradient(0, H - 60, 0, H);
   floorGrad.addColorStop(0, '#0e160e');
   floorGrad.addColorStop(1, '#080c08');
@@ -703,14 +645,12 @@ function drawAlcantarillaVisuals(ctx, W, H) {
   ctx.fillStyle = '#162214';
   ctx.fillRect(0, H - 57, W, 1);
 
-  // Brick pattern on floor
   ctx.fillStyle = 'rgba(255,255,255,0.015)';
   for (let tx = 0; tx < W; tx += 32) {
     ctx.fillRect(tx, H - 55, 28, 10);
     ctx.fillRect(tx + 16, H - 43, 28, 10);
   }
 
-  // Platforms
   ALCANTARILLA_PLATS.forEach(p => {
     const pGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
     pGrad.addColorStop(0, '#1e2a1e');
@@ -719,29 +659,28 @@ function drawAlcantarillaVisuals(ctx, W, H) {
     ctx.fillRect(p.x, p.y, p.w, p.h);
     ctx.fillStyle = '#304030';
     ctx.fillRect(p.x, p.y, p.w, 3);
-    // Dampness effect
+
     ctx.fillStyle = 'rgba(80,120,80,0.08)';
     ctx.fillRect(p.x, p.y, p.w, 1);
   });
 
-  // Pipes (horizontal)
   const pipes = [160, 380, 600, 900];
   pipes.forEach((ty, idx) => {
-    // Pipe body
+
     ctx.fillStyle = '#182818';
     ctx.fillRect(0, ty, W, 22);
-    // Pipe highlight
+
     ctx.fillStyle = '#283828';
     ctx.fillRect(0, ty, W, 3);
     ctx.fillStyle = '#203020';
     ctx.fillRect(0, ty + 18, W, 2);
-    // Pipe rivets
+
     ctx.fillStyle = '#304830';
     for (let px = 0; px < W; px += 60) {
       ctx.fillRect(px, ty + 4, 4, 4);
       ctx.fillRect(px, ty + 14, 4, 4);
     }
-    // Drip from pipe
+
     if (idx < 2) {
       const dripX = pseudoRand(idx * 73, W);
       ctx.fillStyle = 'rgba(60,100,60,0.3)';
@@ -749,7 +688,6 @@ function drawAlcantarillaVisuals(ctx, W, H) {
     }
   });
 
-  // Background algae/vegetation patches
   ctx.fillStyle = 'rgba(20,50,20,0.15)';
   for (let i = 0; i < 12; i++) {
     const gx = pseudoRand(i * 61, W);
@@ -759,7 +697,6 @@ function drawAlcantarillaVisuals(ctx, W, H) {
     ctx.fill();
   }
 
-  // Dim ambient light spots
   ctx.save();
   ctx.globalAlpha = 0.03;
   for (let i = 0; i < 8; i++) {
@@ -790,9 +727,6 @@ const ALCANTARILLA_PLATS = [
   { x: 1350, y: 700, w: 100, h: 12 },
 ];
 
-// =============================================
-//  PARQUE DE LAS PALOMAS
-// =============================================
 const PARQUE_PLATS = [
   { x: 0,  y: 740, w: 80, h: 14, kind: 'stone' },
   { x: 0,  y: 640, w: 60, h: 12, kind: 'branch' },
@@ -817,7 +751,7 @@ const PARQUE_PLATS = [
   { x: 3020, y: 660, w: 140, h: 14, kind: 'stone' },
   { x: 3120, y: 740, w: 80, h: 14, kind: 'stone' },
   { x: 3120, y: 640, w: 60, h: 12, kind: 'branch' },
-  // Saltos altos
+
   { x: 760, y: 500, w: 60, h: 12, kind: 'branch' },
   { x: 1300, y: 470, w: 60, h: 12, kind: 'branch' },
   { x: 2100, y: 440, w: 60, h: 12, kind: 'branch' },
@@ -841,7 +775,6 @@ function tiledFog(ctx, w, yBottom, color) {
 function drawParqueVisuals(ctx, W, H) {
   const ground = H - 60;
 
-  // ---- Suelo: sendero de tierra + césped a la luz de la luna ----
   const floorGrad = ctx.createLinearGradient(0, ground, 0, H);
   floorGrad.addColorStop(0, '#141a10');
   floorGrad.addColorStop(0.5, '#0e120a');
@@ -855,7 +788,6 @@ function drawParqueVisuals(ctx, W, H) {
   ctx.fillStyle = 'rgba(180,220,190,0.06)';
   ctx.fillRect(0, ground - 16, W, 1);
 
-  // Briznas de hierba
   for (let i = 0; i < 260; i++) {
     const hx = pseudoRand(i * 13, W);
     const hh = pseudoRand(i * 27, 5) + 2;
@@ -863,7 +795,6 @@ function drawParqueVisuals(ctx, W, H) {
     ctx.fillRect(hx, ground - hh, 2, hh);
   }
 
-  // ---- Plataformas ----
   PARQUE_PLATS.forEach(p => {
     if (p.kind === 'wood') {
       const pGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
@@ -880,7 +811,7 @@ function drawParqueVisuals(ctx, W, H) {
       ctx.fillStyle = '#556060';
       ctx.fillRect(p.x + 4, p.y + 2, 2, 2);
     } else if (p.kind === 'branch') {
-      // Rama gruesa de árbol
+
       const bGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
       bGrad.addColorStop(0, '#3c2c14');
       bGrad.addColorStop(0.5, '#33240e');
@@ -888,7 +819,7 @@ function drawParqueVisuals(ctx, W, H) {
       ctx.fillStyle = bGrad;
       ctx.fillRect(p.x, p.y, p.w, p.h);
       ctx.fillStyle = '#4a3a1c';
-      // Moño de hojas en cada extremo
+
       [p.x, p.x + p.w].forEach(ex => {
         ctx.fillStyle = 'rgba(30,80,50,0.85)';
         ctx.beginPath(); ctx.arc(ex, p.y, 8, 0, Math.PI * 2); ctx.fill();
@@ -897,7 +828,7 @@ function drawParqueVisuals(ctx, W, H) {
         ctx.beginPath(); ctx.arc(ex - 3, p.y - 3, 5, 0, Math.PI * 2); ctx.fill();
       });
     } else if (p.kind === 'gazebo') {
-      // Cubierta de madera del templete
+
       const dGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
       dGrad.addColorStop(0, '#5a4222');
       dGrad.addColorStop(1, '#382808');
@@ -906,11 +837,11 @@ function drawParqueVisuals(ctx, W, H) {
       ctx.fillStyle = '#6b5230';
       ctx.fillRect(p.x, p.y, p.w, 3);
       for (let bx = p.x + 10; bx < p.x + p.w; bx += 16) ctx.fillRect(bx, p.y + 5, 1, p.h - 5);
-      // Columnas
+
       ctx.fillStyle = '#2c2414';
       ctx.fillRect(p.x, p.y - 46, 6, 46);
       ctx.fillRect(p.x + p.w - 6, p.y - 46, 6, 46);
-      // Techo a dos aguas
+
       ctx.fillStyle = '#1a1c10';
       ctx.beginPath();
       ctx.moveTo(p.x - 8, p.y - 46);
@@ -921,7 +852,7 @@ function drawParqueVisuals(ctx, W, H) {
       ctx.fillStyle = '#2a3018';
       ctx.fillRect(p.x - 8, p.y - 48, p.w + 16, 3);
     } else {
-      // Piedra pulida del parque
+
       const sGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
       sGrad.addColorStop(0, '#3a3c30');
       sGrad.addColorStop(1, '#262820');
@@ -936,7 +867,6 @@ function drawParqueVisuals(ctx, W, H) {
     }
   });
 
-  // ---- Farolas del parque (luz cálida) ----
   const farolas = [150, 900, 1600, 2300, 2900];
   farolas.forEach(fx => {
     const fy = ground - 4;
@@ -959,7 +889,6 @@ function drawParqueVisuals(ctx, W, H) {
     ctx.beginPath(); ctx.arc(fx, fy - 84, 90, 0, Math.PI * 2); ctx.fill();
   });
 
-  // ---- Fuente central ----
   const fwx = 520, fwy = ground - 2;
   const waterGrad = ctx.createRadialGradient(fwx, fwy, 0, fwx, fwy, 70);
   waterGrad.addColorStop(0, 'rgba(90,180,200,0.22)');
@@ -979,7 +908,6 @@ function drawParqueVisuals(ctx, W, H) {
   ctx.beginPath(); ctx.arc(fwx, fwy - 30, 7, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 
-  // ---- Bancas del parque ----
   const bancas = [400, 1250, 1950, 2500];
   bancas.forEach(bx => {
     ctx.fillStyle = '#2c2414';
@@ -997,9 +925,6 @@ function drawParqueCollisions(ctx, W, H) {
   PARQUE_PLATS.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
 }
 
-// =============================================
-//  TORRE DEL RELOJ
-// =============================================
 const TORRE_PLATS = [
   { x: 0,  y: 720, w: 60, h: 14, kind: 'steel' },
   { x: 3140, y: 720, w: 60, h: 14, kind: 'steel' },
@@ -1053,27 +978,24 @@ function drawGear(ctx, x, y, r, color) {
 
 function drawClockFace(ctx, W, H) {
   const cx = W * 0.46, cy = H * 0.26, R = 120;
-  // Halo nocturno del reloj
+
   const halo = ctx.createRadialGradient(cx, cy, 10, cx, cy, R * 2);
   halo.addColorStop(0, 'rgba(250,200,110,0.18)');
   halo.addColorStop(1, 'transparent');
   ctx.fillStyle = halo;
   ctx.beginPath(); ctx.arc(cx, cy, R * 2, 0, Math.PI * 2); ctx.fill();
 
-  // Marco de bronce
   ctx.fillStyle = '#2e2210';
   ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#4a3a1c';
   ctx.beginPath(); ctx.arc(cx, cy, R - 8, 0, Math.PI * 2); ctx.fill();
 
-  // Esfera
   const face = ctx.createRadialGradient(cx, cy, 0, cx, cy, R - 12);
   face.addColorStop(0, '#f4e8c8');
   face.addColorStop(1, '#d8c8a0');
   ctx.fillStyle = face;
   ctx.beginPath(); ctx.arc(cx, cy, R - 12, 0, Math.PI * 2); ctx.fill();
 
-  // Marcas horarias (roman strikes)
   ctx.fillStyle = '#3a2c18';
   for (let i = 0; i < 12; i++) {
     const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
@@ -1082,7 +1004,6 @@ function drawClockFace(ctx, W, H) {
     ctx.fillRect(cx + ox - 2, cy + oy - 2, 4, 4);
   }
 
-  // Manecillas estáticas (12:36)
   ctx.save();
   ctx.strokeStyle = '#181008';
   ctx.lineCap = 'round';
@@ -1094,7 +1015,6 @@ function drawClockFace(ctx, W, H) {
   ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 
-  // Soporte de hierro
   ctx.fillStyle = '#241c10';
   ctx.fillRect(cx - 40, cy + R - 14, 80, 70);
   ctx.fillStyle = '#382c18';
@@ -1104,7 +1024,6 @@ function drawClockFace(ctx, W, H) {
 function drawTorreVisuals(ctx, W, H) {
   const ground = H - 60;
 
-  // ---- Suelo de tablones de madera ----
   const floorGrad = ctx.createLinearGradient(0, ground, 0, H);
   floorGrad.addColorStop(0, '#3a2a14');
   floorGrad.addColorStop(1, '#1c1408');
@@ -1119,7 +1038,6 @@ function drawTorreVisuals(ctx, W, H) {
     ctx.fillRect(bx + 2, ground + 4, 1, 56);
   }
 
-  // ---- Plataformas ----
   TORRE_PLATS.forEach(p => {
     if (p.kind === 'steel') {
       ctx.fillStyle = '#353a42';
@@ -1149,12 +1067,12 @@ function drawTorreVisuals(ctx, W, H) {
       for (let bx = p.x + 10; bx < p.x + p.w; bx += 16) ctx.fillRect(bx, p.y + 4, 1, p.h - 4);
       ctx.fillStyle = '#5a4a32';
       ctx.fillRect(p.x, p.y + p.h - 3, p.w, 3);
-      // Bandas metálicas
+
       ctx.fillStyle = '#606870';
       ctx.fillRect(p.x + 8, p.y - 2, 5, p.h + 4);
       ctx.fillRect(p.x + p.w - 13, p.y - 2, 5, p.h + 4);
     } else {
-      // Plataforma-engranaje
+
       ctx.fillStyle = '#4a3014';
       ctx.fillRect(p.x, p.y, p.w, p.h);
       ctx.fillStyle = '#6a4a1c';
@@ -1163,7 +1081,7 @@ function drawTorreVisuals(ctx, W, H) {
         ctx.fillStyle = '#3c2810';
         ctx.fillRect(bx, p.y + 4, 13, 2);
       }
-      // Dientes simulados
+
       ctx.fillStyle = `rgba(120,90,40,${pseudoRand(p.x, 0.15) + 0.1})`;
       for (let bx = p.x; bx < p.x + p.w; bx += 16) {
         ctx.fillRect(bx, p.y - 3, 6, 3);
@@ -1172,7 +1090,6 @@ function drawTorreVisuals(ctx, W, H) {
     }
   });
 
-  // ---- Cadenas colgando del techo ----
   const chains = [{ x: 720, top: 0, len: 190 }, { x: 700 + 30, top: 0, len: 190 }, { x: 1830, top: 0, len: 220 }, { x: 1860, top: 0, len: 220 }];
   chains.forEach(ch => {
     ctx.fillStyle = '#454a52';
@@ -1183,11 +1100,9 @@ function drawTorreVisuals(ctx, W, H) {
     ctx.fillRect(ch.x - 6, ch.top, 12, 8);
   });
 
-  // ---- Maquinaria trasera (engranajes grandes) ----
   drawGear(ctx, W * 0.16, H * 0.72, 70, 'rgba(140,100,50,0.10)');
   drawGear(ctx, W * 0.9, H * 0.65, 55, 'rgba(120,90,45,0.08)');
 
-  // ---- Campanas gemelas arriba ----
   const bells = [W * 0.3, W * 0.7];
   bells.forEach(bx => {
     ctx.fillStyle = 'rgba(120,92,52,0.2)';
@@ -1209,9 +1124,6 @@ function drawTorreCollisions(ctx, W, H) {
   TORRE_PLATS.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
 }
 
-// =============================================
-//  ZONA 5 — BOSQUE ENCANTADO
-// =============================================
 const BOSQUE_PLATS = [
   { x: 0,     y: 840, w: 3200, h: 60 },
   { x: 150,   y: 706, w: 260, h: 20 },
@@ -1284,14 +1196,13 @@ function drawFireflies(ctx, W, H) {
 }
 
 function drawBosqueVisuals(ctx, W, H) {
-  // Árboles troncales (fondo)
+
   for (let i = 0; i < 32; i++) {
     const tx = i * 110 + pseudoRand(i * 31, 60);
     const th = pseudoRand(i * 13, 220) + 420;
     drawTreeTrunk(ctx, tx, H - th, pseudoRand(i * 7, 46) + 34, th, 0.35);
   }
 
-  // Copas de árboles (siluetas oscuras)
   for (let i = 0; i < 26; i++) {
     const cx = i * 140 + pseudoRand(i * 41, 90);
     const cy = pseudoRand(i * 23, H * 0.3) + H * 0.16;
@@ -1304,7 +1215,6 @@ function drawBosqueVisuals(ctx, W, H) {
     ctx.fill();
   }
 
-  // Plataformas de musgo con hongos brillantes
   BOSQUE_PLATS.forEach(p => {
     if (p.y >= 800) return;
     const g = ctx.createLinearGradient(0, p.y, 0, p.y + p.h);
@@ -1324,7 +1234,6 @@ function drawBosqueVisuals(ctx, W, H) {
     drawGlowMushroom(ctx, p.x + p.w * 0.75, p.y - 14, 0.8);
   });
 
-  // Raíces colgantes
   ctx.strokeStyle = 'rgba(30,22,14,0.5)';
   ctx.lineWidth = 2;
   for (let i = 0; i < 24; i++) {
@@ -1338,7 +1247,6 @@ function drawBosqueVisuals(ctx, W, H) {
 
   drawFireflies(ctx, W, H);
 
-  // Luz de luna en el centro (halo)
   const glow = ctx.createRadialGradient(W * 0.48, H * 0.12, 0, W * 0.48, H * 0.12, 150);
   glow.addColorStop(0, 'rgba(170,200,255,0.12)');
   glow.addColorStop(0.5, 'rgba(140,170,255,0.05)');
@@ -1351,9 +1259,6 @@ function drawBosqueCollisions(ctx, W, H) {
   BOSQUE_PLATS.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
 }
 
-// =============================================
-//  ZONA 6 — TEJADO DE LOS GANSOS
-// =============================================
 const TEJADO_PLATS = [
   { x: 0,     y: 840, w: 3200, h: 60 },
   { x: 120,   y: 788, w: 120, h: 16 },
@@ -1379,7 +1284,7 @@ function drawChimney(ctx, x, y, w, h) {
   ctx.fillRect(x + 3, y, w - 6, h - 8);
   ctx.fillStyle = '#2a2018';
   ctx.fillRect(x - 4, y, w + 8, 6);
-  // humo estático
+
   ctx.fillStyle = 'rgba(220,210,190,0.1)';
   ctx.beginPath();
   ctx.arc(x + w / 2 + 6, y - 10, 6, 0, Math.PI * 2);
@@ -1463,10 +1368,9 @@ function drawGansoStatue(ctx, x, y) {
 }
 
 function drawTejadoVisuals(ctx, W, H) {
-  // Silueta de la ciudad nocturna
+
   drawBuildings(ctx, W, H, H * 0.55, H * 0.3, '#0c0c18', '#141420', 90, 240, 140);
 
-  // Chimeneas decorativas
   const chimneys = [
     { x: 220, y: 788, w: 18, h: 44 },
     { x: 420, y: 728, w: 20, h: 56 },
@@ -1478,29 +1382,23 @@ function drawTejadoVisuals(ctx, W, H) {
   ];
   chimneys.forEach(ch => drawChimney(ctx, ch.x, ch.y, ch.w, ch.h));
 
-  // Antenas
   drawAntenna(ctx, 600, 656, 90);
   drawAntenna(ctx, 1380, 708, 60);
   drawAntenna(ctx, 2600, 620, 80);
 
-  // Torre de agua central
   drawWaterTower(ctx, 1650, 110, 540);
 
-  // Tendederos
   drawClothesline(ctx, 500, 300, 600);
   drawClothesline(ctx, 1900, 220, 560);
 
-  // Estatua de ganso (mascota del tejado)
   drawGansoStatue(ctx, W * 0.92, H - 98);
 
-  // Rejilla de tejas horizontales
   ctx.fillStyle = 'rgba(0,0,0,0.28)';
   for (let x = 0; x < W; x += 90) {
     ctx.fillRect(x, H - 60, 40, 4);
     ctx.fillRect(x + 45, H - 50, 40, 4);
   }
 
-  // Luces cálidas distantes
   for (let i = 0; i < 50; i++) {
     const lx = pseudoRand(i * 77, W);
     const ly = H * 0.2 + pseudoRand(i * 31, H * 0.3);

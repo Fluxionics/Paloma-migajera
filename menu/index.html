@@ -6,7 +6,7 @@
   <title>Paloma Migajera</title>
   <link rel="stylesheet" href="../shared/global.css">
   <style>
-    /* ---- Fondo con imagen real del juego (gameplay-preview.png) ---- */
+
     #menu-bg {
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background: url('../assets/screenshots/gameplay-preview.png') center/cover no-repeat;
@@ -20,13 +20,12 @@
         linear-gradient(160deg, rgba(8,8,16,0.55), rgba(8,8,16,0.35));
     }
     .nav-wrap, .info-panel, .logo-title { position: relative; z-index: 1; }
-    /* ---- Layout base ---- */
+
     .menu-root {
       width:100%; height:100%;
       display:flex; align-items:center; justify-content:center;
     }
 
-    /* ============ PANTALLA PRINCIPAL ============ */
     #screen-main {
       display:flex; flex-direction:column; align-items:center;
       gap:0;
@@ -53,7 +52,6 @@
       margin-top:6px; margin-bottom:44px;
     }
 
-    /* Panel de navegación */
     .nav-wrap {
       display:flex; gap:16px; align-items:flex-start;
     }
@@ -87,7 +85,6 @@
     .nav-btn:hover .nav-arrow { opacity:1; transform:translateX(4px); }
     .nav-btn.disabled { opacity:.3; pointer-events:none; }
 
-    /* Panel de info derecha */
     .info-panel {
       width:260px; display:flex; flex-direction:column; gap:10px;
     }
@@ -116,7 +113,6 @@
 
     .version { position:fixed; bottom:14px; right:18px; font-family:var(--font-title); font-size:.52rem; letter-spacing:.15em; color:var(--muted); }
 
-    /* ============ PANTALLA NUEVA PARTIDA ============ */
     #screen-new { display:none; }
     .sub-screen {
       max-width:680px; width:100%; padding:0 20px;
@@ -133,7 +129,6 @@
     }
     .sub-subtitle { font-style:italic; color:var(--text-dim); font-size:.9rem; margin-bottom:36px; }
 
-    /* Campo de nombre */
     .name-field {
       margin-bottom:28px;
     }
@@ -150,7 +145,6 @@
     .name-input:focus { border-color:var(--gold-dim); }
     .name-input::placeholder { color:var(--muted); }
 
-    /* ============ PANTALLA DIFICULTAD ============ */
     #screen-diff { display:none; }
 
     .diff-grid {
@@ -172,7 +166,6 @@
     .diff-desc { font-style:italic; font-size:.83rem; color:var(--text-dim); line-height:1.5; }
     .diff-stars { font-size:.9rem; margin-top:8px; }
 
-    /* ============ PANTALLA CONTINUAR ============ */
     #screen-continue { display:none; }
     .continue-save {
       padding:24px 22px; background:rgba(18,18,30,.85);
@@ -185,7 +178,6 @@
     .cs-stat-val { font-family:var(--font-title); font-size:1.2rem; color:var(--gold); }
     .cs-stat-lbl { font-size:.75rem; color:var(--text-dim); }
 
-    /* ============ OVERLAY CRÉDITOS ============ */
     #overlay-credits {
       position:fixed; inset:0; z-index:200;
       background:rgba(0,0,0,.8); backdrop-filter:blur(6px);
@@ -208,7 +200,6 @@
 
   <div class="screen menu-root">
 
-    <!-- ===== PANTALLA PRINCIPAL ===== -->
     <div id="screen-main">
       <div class="logo-pigeon fade-up" style="animation-delay:.05s"><svg viewBox="0 0 24 24" width="80" height="80"><ellipse cx="12" cy="14" rx="5" ry="6" fill="#e8e8f8"/><ellipse cx="12" cy="10" rx="4" ry="4" fill="#f0f0ff"/><circle cx="14" cy="9" r="1.5" fill="#080810"/><circle cx="14.5" cy="8.5" r="0.5" fill="#fff"/><rect x="16" y="9" width="3" height="1.5" rx="0.5" fill="#e8c040"/><ellipse cx="8" cy="13" rx="4" ry="3" fill="#c0c0e0"/></svg></div>
       <div class="logo-title fade-up" style="animation-delay:.12s">Paloma Migajera</div>
@@ -251,7 +242,6 @@
       </div>
     </div>
 
-    <!-- ===== PANTALLA NUEVA PARTIDA ===== -->
     <div id="screen-new">
       <div class="sub-screen">
         <button class="sub-back" onclick="showScreen('main')">← Volver</button>
@@ -271,7 +261,6 @@
       </div>
     </div>
 
-    <!-- ===== PANTALLA DIFICULTAD ===== -->
     <div id="screen-diff">
       <div class="sub-screen" style="max-width:720px">
         <button class="sub-back" onclick="showScreen('new')">← Volver</button>
@@ -317,7 +306,6 @@
       </div>
     </div>
 
-    <!-- ===== PANTALLA CONTINUAR ===== -->
     <div id="screen-continue">
       <div class="sub-screen">
         <button class="sub-back" onclick="showScreen('main')">← Volver</button>
@@ -325,7 +313,7 @@
         <div class="sub-subtitle fade-up">Retoma tu última partida guardada.</div>
 
         <div class="continue-save fade-up" id="continue-save-card" style="animation-delay:.1s">
-          <!-- Relleno por JS -->
+
         </div>
 
         <div style="display:flex;gap:10px;justify-content:flex-end;" class="fade-up" style="animation-delay:.2s">
@@ -335,9 +323,8 @@
       </div>
     </div>
 
-  </div><!-- screen -->
+  </div>
 
-  <!-- Overlay créditos -->
   <div id="overlay-credits">
     <div class="credits-box">
       <div class="credits-title"><svg viewBox="0 0 24 24" width="22" height="22" style="vertical-align:-4px;margin-right:8px;"><ellipse cx="12" cy="14" rx="5" ry="6" fill="#e8e8f8"/><ellipse cx="12" cy="10" rx="4" ry="4" fill="#f0f0ff"/><circle cx="14" cy="9" r="1.5" fill="#080810"/><rect x="16" y="9" width="3" height="1.5" rx="0.5" fill="#e8c040"/><ellipse cx="8" cy="13" rx="4" ry="3" fill="#c0c0e0"/></svg>Paloma Migajera</div>
@@ -437,7 +424,6 @@
           <div class="save-row"><span class="save-lbl">Dificultad</span><span class="save-val">${DIFICULTAD[save.dificultad]?.label||'Normal'}</span></div>
         `;
 
-        // Continuar card
         document.getElementById('continue-save-card').innerHTML = `
           <div class="cs-name"><svg viewBox="0 0 24 24" width="18" height="18" style="vertical-align:-3px;margin-right:6px;"><ellipse cx="12" cy="14" rx="5" ry="6" fill="#e8e8f8"/><ellipse cx="12" cy="10" rx="4" ry="4" fill="#f0f0ff"/><circle cx="14" cy="9" r="1.5" fill="#080810"/><rect x="16" y="9" width="3" height="1.5" rx="0.5" fill="#e8c040"/><ellipse cx="8" cy="13" rx="4" ry="3" fill="#c0c0e0"/></svg>${save.nombre}</div>
           <div class="cs-stats">

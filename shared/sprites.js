@@ -1,27 +1,17 @@
-// =============================================
-//  PALOMA MIGAJERA v4 — ASSET LOADER & SPRITES
-//  Carga las imágenes reales de assets/.
-//  Si no están disponibles, genera sprites
-//  procedurales en canvas de alta calidad.
-// =============================================
-
 const ASSETS = {
-  root: '../',          // ruta desde juego/
+  root: '../assets/',
   imgs: {},
   ready: false,
   progress: 0,
   listeners: [],
 };
 
-// En el canvas del juego las rutas arrancan desde "juego/"
 function resolveAsset(path) {
   return ASSETS.root + path.split('/').pop();
 }
 
 function loadAssets() {
-  // Solo lo que usa el juego + el gif de la pantalla de carga.
-  // fondos & decoracion los carga map-engine; se evitó duplicar la descarga
-  // de decoracion.png (738KB) que ralentizaba el arranque.
+
   const files = ['gato.gif', 'haduken.gif', 'Doble Salto.gif'];
   let loaded = 0;
   ASSETS.progress = 0;
@@ -36,7 +26,7 @@ function loadAssets() {
       if (loaded === files.length) { ASSETS.ready = true; notifyReady(); }
     };
     img.onerror = () => {
-      ASSETS.imgs[f] = null;   // marcamos como no disponible
+      ASSETS.imgs[f] = null;
       loaded++;
       ASSETS.progress = Math.round(loaded / files.length * 100);
       if (loaded === files.length) { ASSETS.ready = true; notifyReady(); }
@@ -56,9 +46,6 @@ function notifyReady() {
 
 function getImg(name) { return ASSETS.imgs[name] || null; }
 
-// =============================================
-//  PALETA DEL JUEGO
-// =============================================
 const PALETTE = {
   pigeonBody:  '#e8e8f8',
   pigeonBelly: '#f4f4ff',
@@ -96,10 +83,6 @@ const PALETTE = {
   bossEye:     '#c040ff',
 };
 
-// =============================================
-//  GENERADOR DE SPRITES PROCEDURALES (pixel art)
-//  Escala base: cada sprite en rejilla de 2px
-// =============================================
 function makeCanvas(w, h) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
@@ -112,28 +95,25 @@ function pxRect(c, x, y, w, h, color) {
   ctx.fillRect(x, y, w, h);
 }
 
-// ---- Paloma: 30x28 sprite, contorno + poses por estado ----
 function genPigeonSprite(state, facing, wing2) {
   const c = makeCanvas(30, 28);
   const ctx = c.getContext('2d');
   const flip = facing < 0;
-  const M = (x) => flip ? 30 - x : x;            // espejo horizontal
-  const O = '#26263a';                           // contorno
+  const M = (x) => flip ? 30 - x : x;
+  const O = '#26263a';
 
   const fly    = state === 'fly' || state === 'glide' || state === 'fly2' || state === 'glide2';
   const attack = state === 'attack';
   const jump   = state === 'jump' || state === 'fall';
   const dash   = state === 'dash';
 
-  // ---- Silueta de contorno (detrás) ----
   ctx.fillStyle = O;
-  ctx.fillRect(M(1) - 1, 12, 9, 6);              // cola
-  ctx.fillRect(M(13) - 1, 19, 6, 8);             // patas/garras
-  ctx.fillRect(M(7) - 1, 6, 18, 15);             // cuerpo
-  ctx.fillRect(M(11) - 1, -2, 15, 11);           // cabeza + cresta
-  ctx.fillRect(M(12) - 1, 5, 11, 3);             // nuca
+  ctx.fillRect(M(1) - 1, 12, 9, 6);
+  ctx.fillRect(M(13) - 1, 19, 6, 8);
+  ctx.fillRect(M(7) - 1, 6, 18, 15);
+  ctx.fillRect(M(11) - 1, -2, 15, 11);
+  ctx.fillRect(M(12) - 1, 5, 11, 3);
 
-  // ---- Cola (se levanta al volar / planear) ----
   const tailLift = fly ? 1 : (jump ? -4 : 0);
   ctx.fillStyle = '#7a80b4';
   ctx.fillRect(M(2) - 1, 13 + tailLift, 7, 4);
@@ -142,7 +122,6 @@ function genPigeonSprite(state, facing, wing2) {
   ctx.fillStyle = 'rgba(255,255,255,0.18)';
   ctx.fillRect(M(2) - 1, 15 + tailLift, 7, 1);
 
-  // ---- Ala trasera (dibujada debajo del cuerpo) ----
   if (fly) {
     ctx.fillStyle = '#8a90c0';
     ctx.fillRect(M(9) + 1, 7, 5, 8);
@@ -154,7 +133,6 @@ function genPigeonSprite(state, facing, wing2) {
     ctx.fillRect(M(9) + 1, 10, 4, 5);
   }
 
-  // ---- Patas (recogidas al volar/saltar) ----
   if (fly || jump) {
     ctx.fillStyle = '#e0a838';
     ctx.fillRect(M(13) - 1, 20, 2, 3);
@@ -168,7 +146,6 @@ function genPigeonSprite(state, facing, wing2) {
   ctx.fillRect(M(12) - 1, 25, 4, 2);
   ctx.fillRect(M(18) - 1, 25, 4, 2);
 
-  // ---- Cuerpo con degradado ----
   const bodyGrad = ctx.createLinearGradient(0, 8, 0, 20);
   bodyGrad.addColorStop(0, '#f6f6ff');
   bodyGrad.addColorStop(0.55, '#eaeaf8');
@@ -176,11 +153,9 @@ function genPigeonSprite(state, facing, wing2) {
   ctx.fillStyle = bodyGrad;
   ctx.fillRect(M(8) - 1, 7, 15, 13);
 
-  // Sombra trasera
   ctx.fillStyle = 'rgba(60,60,110,0.18)';
   ctx.fillRect(M(8) - 1, 7, 5, 12);
 
-  // Iridiscencia del cuello (lo auténtico de las palomas)
   ctx.fillStyle = 'rgba(40,130,100,0.55)';
   ctx.fillRect(M(20) - 1, 8, 4, 3);
   ctx.fillStyle = 'rgba(130,60,160,0.5)';
@@ -188,17 +163,15 @@ function genPigeonSprite(state, facing, wing2) {
   ctx.fillStyle = 'rgba(30,110,140,0.4)';
   ctx.fillRect(M(22) - 1, 11, 2, 2);
 
-  // ---- Cabeza ----
   ctx.fillStyle = '#eef0ff';
   ctx.fillRect(M(12) - 1, 1, 12, 7);
   ctx.fillStyle = '#e2e2f6';
   ctx.fillRect(M(11) - 1, 0, 9, 3);
-  // Cresta de plumas
+
   ctx.fillStyle = '#d2d4ee';
   ctx.fillRect(M(13) - 1, -2, 3, 3);
   ctx.fillRect(M(16) - 1, -1, 2, 2);
 
-  // ---- Ojo con brillo ----
   ctx.fillStyle = '#14141e';
   ctx.fillRect(M(21) - 1, 2, 3, 3);
   ctx.fillStyle = '#ffffff';
@@ -206,9 +179,8 @@ function genPigeonSprite(state, facing, wing2) {
   ctx.fillStyle = 'rgba(40,40,80,0.5)';
   ctx.fillRect(M(20) - 1, 1, 5, 1);
 
-  // ---- Pico ----
   if (attack) {
-    // Pico abierto (pelea): mandíbulas separadas
+
     ctx.fillStyle = '#e8c040';
     ctx.fillRect(M(23) - 1, 2, 5, 2);
     ctx.fillStyle = '#c09020';
@@ -226,9 +198,8 @@ function genPigeonSprite(state, facing, wing2) {
     ctx.fillRect(M(23) - 1, 2, 2, 1);
   }
 
-  // ---- Ala delantera según estado (variación de pose) ----
   if (state === 'glide' || state === 'glide2') {
-    // Ala extendida amplia, plumas individuales (baja al batir)
+
     const lift = state === 'glide2' ? -2 : 0;
     ctx.fillStyle = O;
     ctx.fillRect(M(13) - 3, 6 + lift, 13, 8);
@@ -242,7 +213,7 @@ function genPigeonSprite(state, facing, wing2) {
     ctx.fillRect(M(12) - 3, 9 + lift, 3, 3);
     ctx.fillRect(M(24) - 3, 7 + lift, 2, 5);
   } else if (state === 'fly' || state === 'fly2') {
-    // Ala levantada (subida) o media (bajada)
+
     const lift = state === 'fly2' ? 3 : 0;
     ctx.fillStyle = O;
     ctx.fillRect(M(15) - 1, 6 + lift, 9, 7);
@@ -261,13 +232,13 @@ function genPigeonSprite(state, facing, wing2) {
     ctx.fillStyle = '#c0c8ea';
     ctx.fillRect(M(15) - 1, 6, 4, 6);
   } else if (dash) {
-    // Ala barrida hacia atrás (sensación de velocidad)
+
     ctx.fillStyle = O;
     ctx.fillRect(M(5) - 1, 8, 9, 5);
     ctx.fillStyle = '#b8c0e4';
     ctx.fillRect(M(6) - 1, 9, 7, 3);
   } else {
-    // Ala plegada con sombra interna
+
     ctx.fillStyle = O;
     ctx.fillRect(M(14) - 1, 10, 6, 7);
     ctx.fillStyle = '#bec6e8';
@@ -279,36 +250,30 @@ function genPigeonSprite(state, facing, wing2) {
   return c;
 }
 
-// ---- Enemigo: Gato 28x22 ----
 function genCatSprite(aggro) {
   const c = makeCanvas(28, 24);
   const body = aggro ? '#808070' : PALETTE.cat;
   const head = aggro ? '#a0a090' : PALETTE.catHead;
 
-  // Cola
   pxRect(c, 2, 15, 6, 2, PALETTE.catDark);
   pxRect(c, 2, 13, 2, 2, PALETTE.catDark);
 
-  // Cuerpo
   pxRect(c, 6, 8, 16, 14, body);
   pxRect(c, 8, 12, 12, 10, '#6a6070');
 
-  // Cabeza
   pxRect(c, 7, 0, 14, 9, head);
-  // Orejas
+
   pxRect(c, 6, -2, 4, 4, body);
   pxRect(c, 18, -2, 4, 4, body);
   pxRect(c, 7, -1, 2, 2, PALETTE.catEar);
   pxRect(c, 19, -1, 2, 2, PALETTE.catEar);
 
-  // Ojos (glow aggro)
   const eye = aggro ? PALETTE.catAggro : PALETTE.catEye;
   pxRect(c, 9, 3, 4, 3, eye);
   pxRect(c, 15, 3, 4, 3, eye);
   pxRect(c, 10, 4, 2, 2, '#080808');
   pxRect(c, 16, 4, 2, 2, '#080808');
 
-  // Bigotes si aggro
   if (aggro) {
     ctx_stroke(c, 6, 6, 1, 8, '#ff4040');
     ctx_stroke(c, 22, 7, 1, 6, '#ff4040');
@@ -316,54 +281,51 @@ function genCatSprite(aggro) {
   return c;
 }
 
-// ---- Enemigo: Rata 20x16 ----
 function genRatSprite() {
   const c = makeCanvas(20, 16);
-  // Cola curva
+
   pxRect(c, 1, 8, 5, 2, PALETTE.ratTail);
   pxRect(c, 3, 6, 3, 2, PALETTE.ratTail);
-  // Cuerpo
+
   pxRect(c, 4, 4, 12, 10, PALETTE.rat);
   pxRect(c, 6, 8, 8, 6, '#463a24');
-  // Cabeza
+
   pxRect(c, 14, 3, 6, 6, PALETTE.ratHead);
-  // Orejas
+
   pxRect(c, 13, 0, 3, 3, PALETTE.ratDark);
   pxRect(c, 17, 0, 3, 3, PALETTE.ratDark);
-  // Ojos rojos
+
   pxRect(c, 15, 4, 2, 2, PALETTE.ratEye);
   pxRect(c, 19, 4, 2, 2, PALETTE.ratEye);
-  // Dientes
+
   pxRect(c, 18, 7, 2, 1, '#fff');
   return c;
 }
 
-// ---- Enemigo: Cuervo 26x22 ----
 function genCrowSprite(aggro) {
   const c = makeCanvas(26, 24);
-  // Alas
+
   pxRect(c, 3, 6, 6, 10, PALETTE.crowWing);
   pxRect(c, 17, 6, 6, 10, PALETTE.crowWing);
   pxRect(c, 4, 8, 4, 6, '#2a2a36');
-  // Cuerpo
+
   pxRect(c, 6, 4, 14, 16, PALETTE.crowBody);
   pxRect(c, 8, 8, 10, 11, PALETTE.crow);
-  // Cabeza
+
   pxRect(c, 8, 0, 10, 8, PALETTE.crowBody);
-  // Cresta
+
   pxRect(c, 9, -3, 2, 5, '#2a2838');
   pxRect(c, 12, -5, 2, 7, '#2a2838');
   pxRect(c, 15, -3, 2, 4, '#2a2838');
-  // Pico
+
   pxRect(c, 16, 2, 6, 3, PALETTE.crowBeak);
   pxRect(c, 16, 5, 5, 2, PALETTE.crowBeakDark);
-  // Ojo
+
   const eye = aggro ? PALETTE.crowEyeAggro : PALETTE.crowEye;
   pxRect(c, 11, 2, 3, 3, eye);
   return c;
 }
 
-// ---- Sprite de splash: posterior usa palomaduken ----
 function genPalouSprite() {
   const c = makeCanvas(20, 8);
   const ctx = c.getContext('2d');
@@ -391,7 +353,6 @@ function ctx_stroke(c, x, y, w, h, color) {
   ctx.stroke();
 }
 
-// ---- Construcción de la hoja de sprites usada por renderer ----
 const SPRITES = {};
 
 function buildSprites() {
@@ -400,7 +361,7 @@ function buildSprites() {
     SPRITES[`pigeon_${st}_r`] = genPigeonSprite(st, 1);
     SPRITES[`pigeon_${st}_l`] = genPigeonSprite(st, -1);
   });
-  // Frecuencia 2 del aleteo (alas en otra fase)
+
   ['fly', 'glide'].forEach(st => {
     SPRITES[`pigeon_${st}2_r`] = genPigeonSprite(st, 1, true);
     SPRITES[`pigeon_${st}2_l`] = genPigeonSprite(st, -1, true);
@@ -434,18 +395,18 @@ function buildSprites() {
     const ctx = c.getContext('2d');
     const bg = genCrowSprite(true);
     ctx.drawImage(bg, 0, 0, bg.width, bg.height, 4, 6, 52, 42);
-    // Corona de plumas grande
+
     for (let i = 0; i < 7; i++) {
       pxRect(c, 10 + i * 6, 10 - i + 2, 3, 10 + i % 3, PALETTE.bossCrown[i % 2]);
     }
-    // Ojos intensos
+
     ctx.fillStyle = PALETTE.bossEye;
     ctx.fillRect(16, 16, 6, 6);
     ctx.fillRect(40, 16, 6, 6);
     ctx.fillStyle = '#fff';
     ctx.fillRect(18, 18, 2, 2);
     ctx.fillRect(42, 18, 2, 2);
-    // Pico dorado
+
     ctx.fillStyle = '#c09020';
     ctx.fillRect(24, 28, 16, 5);
     ctx.fillStyle = '#a07018';
@@ -459,35 +420,34 @@ function buildSprites() {
     ctx.fillRect(4, 12, 36, 22);
     ctx.fillStyle = '#3a2814';
     ctx.fillRect(6, 16, 30, 17);
-    // Cabeza grande
+
     ctx.fillStyle = '#382410';
     ctx.fillRect(8, 4, 28, 12);
-    // Orejas
+
     ctx.fillStyle = '#4a3018';
     ctx.fillRect(4, 0, 6, 6);
     ctx.fillRect(34, 0, 6, 6);
     ctx.fillStyle = '#c06060';
     ctx.fillRect(5, 1, 4, 3);
     ctx.fillRect(35, 1, 4, 3);
-    // Ojos (fiero)
+
     ctx.fillStyle = '#ff3030';
     ctx.fillRect(14, 7, 4, 4);
     ctx.fillRect(26, 7, 4, 4);
     ctx.fillStyle = '#fff';
     ctx.fillRect(15, 7, 2, 2);
     ctx.fillRect(27, 7, 2, 2);
-    // Colmillos
+
     ctx.fillStyle = '#fff';
     ctx.fillRect(18, 13, 3, 3);
     ctx.fillRect(25, 13, 3, 3);
-    // Cola gruesa
+
     ctx.fillStyle = '#2a1808';
     ctx.fillRect(2, 22, 5, 3);
     ctx.fillRect(2, 26, 5, 3);
     return c;
   })();
 
-  // NPCs
   SPRITES.npc_lechuga = (() => {
     const c = makeCanvas(20, 22);
     const ctx = c.getContext('2d');
@@ -505,7 +465,6 @@ function buildSprites() {
     return c;
   })();
 
-  // Migaja dorada (8x8)
   SPRITES.migaja = (() => {
     const c = makeCanvas(8, 8);
     pxRect(c, 1, 2, 6, 4, '#c09028');
@@ -528,10 +487,8 @@ function buildSprites() {
     return c;
   })();
 
-  // Proyectil PALOMADUKEN
   SPRITES.palou = genPalouSprite();
 
-  // Corazón de vida
   SPRITES.heart = (() => {
     const c = makeCanvas(12, 12);
     c.getContext('2d').fillStyle = '#c03030';
@@ -544,7 +501,6 @@ function buildSprites() {
     return c;
   })();
 
-  // Energía (rayo)
   SPRITES.energy = (() => {
     const c = makeCanvas(10, 14);
     const ctx = c.getContext('2d');
@@ -558,7 +514,6 @@ function buildSprites() {
   })();
 }
 
-// ---- API pública ----
 const SpriteSystem = {
   load: loadAssets,
   onReady: onAssetsReady,
@@ -568,5 +523,4 @@ const SpriteSystem = {
   ready: () => ASSETS.ready,
 };
 
-// Auto-construir sprites procedurales
 buildSprites();

@@ -29,14 +29,12 @@
       color: var(--text-hi);
     }
 
-    /* ---- Layout: Grid + Detalle ---- */
     .inv-body {
       display: grid;
       grid-template-columns: 1fr 280px;
       gap: 20px;
     }
 
-    /* ---- Categorías ---- */
     .inv-categories {
       display: flex;
       gap: 2px;
@@ -57,7 +55,6 @@
     .cat-btn:hover  { border-color: var(--accent); color: var(--text); }
     .cat-btn.active { background: rgba(232,200,96,0.1); border-color: var(--accent); color: var(--accent); }
 
-    /* ---- Grid de items ---- */
     .items-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
@@ -103,7 +100,6 @@
       overflow: hidden;
     }
 
-    /* ---- Panel de detalle ---- */
     .detail-panel {
       background: rgba(21,21,31,0.7);
       border: 1px solid var(--border);
@@ -172,7 +168,6 @@
     .use-btn:hover { background: rgba(232,200,96,0.15); }
     .use-btn:disabled { opacity: 0.3; cursor: default; }
 
-    /* ---- Contador capacidad ---- */
     .capacity-bar {
       display: flex;
       align-items: center;
@@ -194,7 +189,6 @@
       transition: width 0.3s;
     }
 
-    /* ---- Empty state ---- */
     .empty-state {
       grid-column: 1 / -1;
       text-align: center;
@@ -226,9 +220,9 @@
       </div>
 
       <div class="inv-body">
-        <!-- Lado izquierdo -->
+
         <div>
-          <!-- Categorías -->
+
           <div class="inv-categories">
             <button class="cat-btn active" onclick="setCategory('todos', this)">Todos</button>
             <button class="cat-btn" onclick="setCategory('consumible', this)">Consumibles</button>
@@ -237,17 +231,14 @@
             <button class="cat-btn" onclick="setCategory('ingrediente', this)">Ingredientes</button>
           </div>
 
-          <!-- Barra de capacidad -->
           <div class="capacity-bar">
             <span id="cap-text">0 / 50</span>
             <div class="cap-track"><div class="cap-fill" id="cap-fill" style="width:0%"></div></div>
           </div>
 
-          <!-- Grid -->
           <div class="items-grid" id="items-grid"></div>
         </div>
 
-        <!-- Detalle -->
         <div class="detail-panel" id="detail-panel">
           <div class="detail-icon" style="display:flex;justify-content:center;color:#b0b0d0;"><svg viewBox="0 0 16 16" width="42" height="42" fill="currentColor"><rect x="3" y="5" width="10" height="9" rx="2" opacity="0.7"/><rect x="5" y="2" width="6" height="3" rx="1" opacity="0.4"/></svg></div>
           <div class="detail-name" style="color:var(--text-dim)">Selecciona un ítem</div>
@@ -262,7 +253,6 @@
   <script>
     let save = getSave();
 
-    // ---- Catálogo de ítems ----
     const SVG_BREAD   = '<svg viewBox="0 0 16 16" width="22" height="22"><ellipse cx="8" cy="9" rx="7" ry="5" fill="#e8c840"/><ellipse cx="8" cy="8" rx="6" ry="4" fill="#f0d860"/><ellipse cx="7" cy="7" rx="2" ry="1.5" fill="#fff8a0" opacity="0.5"/></svg>';
     const SVG_SEED    = '<svg viewBox="0 0 16 16" width="22" height="22"><ellipse cx="8" cy="9" rx="3" ry="4" fill="#c09028"/><ellipse cx="8" cy="4" rx="4" ry="2" fill="#40b860"/><line x1="8" y1="4" x2="8" y2="8" stroke="#308040" stroke-width="1"/></svg>';
     const SVG_KEY     = '<svg viewBox="0 0 16 16" width="22" height="22" fill="currentColor" style="color:#e8c840;"><circle cx="5" cy="11" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="7" y1="9" x2="13" y2="3" stroke="currentColor" stroke-width="1.5"/><path d="M11 5l2 2" stroke="currentColor" stroke-width="1.5"/></svg>';
@@ -284,7 +274,6 @@
       mapa_zona1:       { icon:SVG_MAP,     name:'Mapa Ciudad Alta',  type:'llave',        desc:'Mapa detallado de la Ciudad Alta con rutas secretas.',    effect:'Revela el mapa',        useEffect: null },
     };
 
-    // ---- Inventario del save (poblar si vacío para demo) ----
     function ensureInventory() {
       if (!save.inventario) {
         save.inventario = {
@@ -317,12 +306,10 @@
 
       ensureInventory();
 
-      // Items filtrados
       const entries = Object.entries(save.inventario)
         .filter(([id, qty]) => qty > 0)
         .filter(([id]) => currentCategory === 'todos' || ITEMS_DB[id]?.type === currentCategory);
 
-      // Actualizar capacidad
       const total = Object.values(save.inventario).reduce((s,v) => s+v, 0);
       document.getElementById('cap-text').textContent    = `${total} / 50`;
       document.getElementById('cap-fill').style.width    = Math.min(total/50*100, 100) + '%';
@@ -333,7 +320,6 @@
         return;
       }
 
-      // Rellenar con celdas de ítems
       const TOTAL_CELLS = Math.max(entries.length, 30);
       for (let i = 0; i < TOTAL_CELLS; i++) {
         const cell = document.createElement('div');

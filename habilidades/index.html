@@ -200,7 +200,7 @@
       background: rgba(232,200,96,0.06);
     }
     .amuleto-item.equipped::after {
-      content: '✓ EQUIPADO';
+      content: 'EQUIPADO';
       position: absolute;
       right: 16px;
       font-family: var(--font-title);
@@ -286,9 +286,9 @@
 
       <!-- Tabs -->
       <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('movimiento', this)">🦅 Movimiento</button>
-        <button class="tab-btn" onclick="showTab('activas', this)">⚡ Activas</button>
-        <button class="tab-btn" onclick="showTab('amuletos', this)">🪶 Plumas de Poder</button>
+        <button class="tab-btn active" onclick="showTab('movimiento', this)"><svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="vertical-align:-2px;margin-right:6px;"><path d="M8 1l3 4H5zM8 6l3 4H5z" opacity="0.9"/></svg>Movimiento</button>
+        <button class="tab-btn" onclick="showTab('activas', this)"><svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="vertical-align:-2px;margin-right:6px;color:#e8c840;"><polygon points="9,1 5,8 8,8 7,15 11,8 8,8"/></svg>Activas</button>
+        <button class="tab-btn" onclick="showTab('amuletos', this)"><svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="vertical-align:-2px;margin-right:6px;"><path d="M12 1c-2 2-4 5-5 8-1 3-2 5-3 6 1-2 3-4 5-5 2-1 4-2 6-5z" opacity="0.9"/></svg>Plumas de Poder</button>
       </div>
 
       <!-- MOVIMIENTO -->
@@ -323,59 +323,76 @@
     let save = getSave();
 
     // ---- Datos de habilidades ----
+    const SVG_DOUBLE = '<svg viewBox="0 0 16 16" width="30" height="30" fill="currentColor" style="color:#e8c840;"><path d="M8 1l3 4H5zM8 6l3 4H5z" opacity="0.9"/></svg>';
+    const SVG_DASH   = '<svg viewBox="0 0 16 16" width="30" height="30" fill="currentColor" style="color:#6ab0d8;"><path d="M2 8h10l-3-3 1-1 4 4-4 4-1-1 3-3H2z" opacity="0.8"/></svg>';
+    const SVG_POUND  = '<svg viewBox="0 0 16 16" width="30" height="30" fill="currentColor" style="color:#c06030;"><path d="M8 1v10M4 11h8l-4 4z" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" y1="5" x2="8" y2="9" stroke="#c06030" stroke-width="2"/></svg>';
+    const SVG_GLIDE  = '<svg viewBox="0 0 16 16" width="30" height="30" fill="currentColor" style="color:#30a0a0;"><path d="M3 8h10M6 12l2-2h4zM2 12l2-2h4z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+
     const MOVIMIENTO = [
       {
-        id: 'dobleSalto', icon: '🦅', name: 'Ascenso Térmico',
+        id: 'dobleSalto', icon: SVG_DOUBLE, name: 'Ascenso Térmico',
         tech: 'double_jump',
         desc: 'Aprovecha una corriente de aire para elevarte una segunda vez en el aire.',
         unlock: 'Tras derrotar al Cuervo de la Chimenea.',
       },
       {
-        id: 'dash', icon: '💨', name: 'Impulso de Pluma',
+        id: 'dash', icon: SVG_DASH, name: 'Impulso de Pluma',
         tech: 'dash_air',
         desc: 'Un rápido desplazamiento lateral. Invencible durante el dash.',
         unlock: 'Encontrado en el Nido del Halcón.',
       },
       {
-        id: 'picado', icon: '☄️', name: 'Picado Balístico',
+        id: 'picado', icon: SVG_POUND, name: 'Picado Balístico',
         tech: 'ground_pound',
         desc: 'Cae a gran velocidad. Destruye maderas podridas y aturde enemigos.',
         unlock: 'Alcantarillas de Migas.',
       },
       {
-        id: 'planeo', icon: '🌬️', name: 'Planeo Silencioso',
+        id: 'planeo', icon: SVG_GLIDE, name: 'Planeo Silencioso',
         tech: 'glide_mode',
         desc: 'Mantén ESPACIO en el aire para descender lentamente y en silencio.',
         unlock: 'Regalo de la Lechuza Sabia.',
       },
     ];
 
+    const SVG_SOUND  = '<svg viewBox="0 0 16 16" width="24" height="24" fill="currentColor" style="color:#e8c840;"><path d="M2 5h3l4-3v12l-4-3H2z" opacity="0.8"/><path d="M11 5c1 1 1 5 0 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+    const SVG_SHIELD = '<svg viewBox="0 0 16 16" width="24" height="24" fill="currentColor" style="color:#30a0a0;"><path d="M8 1L2 4v4c0 3.5 2.7 6.8 6 8 3.3-1.2 6-4.5 6-8V4z" opacity="0.8"/></svg>';
+    const SVG_PALOU  = '<svg viewBox="0 0 16 16" width="24" height="24" style="color:#6ab0d8;"><circle cx="8" cy="8" r="5" fill="#6ab0d8" opacity="0.6"/><circle cx="8" cy="8" r="3" fill="#c0e8ff"/><circle cx="8" cy="8" r="1.5" fill="#fff"/></svg>';
+    const SVG_RAY    = '<svg viewBox="0 0 16 16" width="24" height="24" fill="currentColor" style="color:#ffe060;"><polygon points="9,1 5,8 8,8 7,15 11,8 8,8"/></svg>';
+
     const ACTIVAS = [
       {
-        icon: '🔊', name: 'Arpegio de Choque', cost: '15 Energía',
+        icon: SVG_SOUND, name: 'Arpegio de Choque', cost: '15 Energía',
         desc: 'Lanza una onda sonora que aturde a enemigos pequeños y activa interruptores lejanos.',
       },
       {
-        icon: '🛡️', name: 'Escudo de Plumón', cost: '25 Energía',
+        icon: SVG_SHIELD, name: 'Escudo de Plumón', cost: '25 Energía',
         desc: 'Crea un torbellino de plumas que bloquea proyectiles durante 2 segundos.',
       },
       {
-        icon: '💥', name: 'PALOMADUKEN', cost: '20 Energía',
+        icon: SVG_PALOU, name: 'PALOMADUKEN', cost: '20 Energía',
         desc: 'Concentra energía en un proyectil devastador de migas comprimidas. Pulsa [X].',
       },
       {
-        icon: '⚡', name: 'Rayo de Migaja', cost: '40 Energía',
+        icon: SVG_RAY, name: 'Rayo de Migaja', cost: '40 Energía',
         desc: 'Picotazo frontal devastador que atraviesa armaduras y múltiples enemigos.',
       },
     ];
 
+    const SVG_LEAD = '<svg viewBox="0 0 16 16" width="22" height="22" fill="currentColor" style="color:#9090a0;"><circle cx="8" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+    const SVG_MAGNET = '<svg viewBox="0 0 16 16" width="22" height="22" fill="currentColor" style="color:#c03030;"><path d="M1 1h6l-1 6 2 2 2-2-1-6h6v6C15 11 12 15 8 15S1 11 1 7z" opacity="0.85"/></svg>';
+    const SVG_HEART = '<svg viewBox="0 0 16 16" width="22" height="22" fill="currentColor" style="color:#c03030;"><path d="M8 14s-5.5-3.5-7-6.5C.5 5 .5 3 2 2s3 .5 4 2c1-1.5 3-2 4-2s3.5 1 3.5 3.5S9.5 10.5 8 14z"/></svg>';
+    const SVG_CITY = '<svg viewBox="0 0 16 16" width="22" height="22" fill="currentColor" style="color:#80a0c0;"><rect x="1" y="8" width="4" height="7" opacity="0.8"/><rect x="5" y="5" width="4" height="10" opacity="0.8"/><rect x="9" y="2" width="4" height="13" opacity="0.8"/><rect x="13" y="7" width="2" height="8" opacity="0.8"/></svg>';
+    const SVG_SHADE = '<svg viewBox="0 0 16 16" width="22" height="22" fill="currentColor" style="color:#6060a0;"><circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 3v5l4 3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+    const SVG_FAST = '<svg viewBox="0 0 16 16" width="22" height="22" fill="currentColor" style="color:#e8c840;"><polygon points="9,1 5,8 8,8 7,15 11,8 8,8"/></svg>';
+
     const AMULETOS = [
-      { id:'plomo',   icon:'🪨', name:'Pluma de Plomo',    desc:'Caes más rápido, inmune al empuje del viento fuerte.' },
-      { id:'iman',    icon:'🧲', name:'Miga Imán',         desc:'Atraes automáticamente las migajas cercanas.' },
-      { id:'gorrion', icon:'❤️', name:'Corazón de Gorrión',desc:'+1 de vida máxima, pero reduce tu velocidad de planeo.' },
-      { id:'ciudad',  icon:'🏙️', name:'Canto de Ciudad',   desc:'Los NPCs humanos te tiran más migajas de lo normal.' },
-      { id:'sombra',  icon:'🌑', name:'Pluma Sombría',     desc:'Invisibilidad breve al hacer dash en la oscuridad.' },
-      { id:'veloz',   icon:'⚡', name:'Pluma Veloz',       desc:'Incrementa la velocidad de movimiento en un 20%.' },
+      { id:'plomo',   icon:SVG_LEAD,   name:'Pluma de Plomo',    desc:'Caes más rápido, inmune al empuje del viento fuerte.' },
+      { id:'iman',    icon:SVG_MAGNET, name:'Miga Imán',         desc:'Atraes automáticamente las migajas cercanas.' },
+      { id:'gorrion', icon:SVG_HEART,  name:'Corazón de Gorrión',desc:'+1 de vida máxima, pero reduce tu velocidad de planeo.' },
+      { id:'ciudad',  icon:SVG_CITY,   name:'Canto de Ciudad',   desc:'Los NPCs humanos te tiran más migajas de lo normal.' },
+      { id:'sombra',  icon:SVG_SHADE,  name:'Pluma Sombría',     desc:'Invisibilidad breve al hacer dash en la oscuridad.' },
+      { id:'veloz',   icon:SVG_FAST,   name:'Pluma Veloz',       desc:'Incrementa la velocidad de movimiento en un 20%.' },
     ];
 
     // ---- Render Movimiento ----
@@ -385,14 +402,16 @@
         const unlocked = save.habilidades[h.id];
         return `
           <div class="mov-card ${unlocked ? 'unlocked' : 'locked'}">
-            <span class="mov-card-icon">${h.icon}</span>
+            <span class="mov-card-icon" style="display:flex;color:${unlocked ? '#e8c840' : '#606080'};">${h.icon}</span>
             <div class="mov-card-name">${h.name}</div>
             <div class="mov-card-tech">${h.tech}</div>
             <div class="mov-card-desc">${h.desc}</div>
             <div class="mov-card-unlock ${unlocked ? 'done' : ''}">
-              ${unlocked ? '✓ DESBLOQUEADA' : '🔒 ' + h.unlock}
+              ${unlocked
+                ? '<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" style="vertical-align:-2px;margin-right:4px;color:#40b860;"><path d="M3 8l4 4 6-8" fill="none" stroke="#40b860" stroke-width="2"/></svg>DESBLOQUEADA'
+                : '<svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><rect x="3" y="7" width="10" height="8" rx="1" opacity="0.8"/><path d="M5 7V5a3 3 0 016 0v2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>' + h.unlock}
             </div>
-            ${!unlocked ? '<div class="lock-overlay">🔒</div>' : ''}
+            ${!unlocked ? '<div class="lock-overlay"><svg viewBox="0 0 16 16" width="22" height="22" fill="currentColor" style="color:#a0a0c0;"><rect x="3" y="7" width="10" height="8" rx="1" opacity="0.8"/><path d="M5 7V5a3 3 0 016 0v2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></div>' : ''}
           </div>
         `;
       }).join('');
@@ -404,7 +423,7 @@
       grid.innerHTML = ACTIVAS.map(a => `
         <div class="active-card">
           <div class="active-header">
-            <span class="active-icon">${a.icon}</span>
+            <span class="active-icon" style="display:flex;">${a.icon}</span>
             <span class="active-name">${a.name}</span>
             <span class="active-cost">${a.cost}</span>
           </div>
@@ -420,7 +439,7 @@
         const eq = save.amuletosEquipados.includes(a.id);
         return `
           <div class="amuleto-item ${eq ? 'equipped' : ''}" onclick="toggleAmuleto('${a.id}')">
-            <span class="amuleto-icon">${a.icon}</span>
+            <span class="amuleto-icon" style="display:flex;${eq ? 'color:#e8c840;' : 'color:#9090b0;'}">${a.icon}</span>
             <div class="amuleto-info">
               <div class="amuleto-name">${a.name}</div>
               <div class="amuleto-desc">${a.desc}</div>
@@ -438,7 +457,7 @@
         const id = save.amuletosEquipados[i];
         const am = id ? AMULETOS.find(a => a.id === id) : null;
         slots.push(`
-          <div class="amuleto-slot ${am ? 'filled' : ''}">
+          <div class="amuleto-slot ${am ? 'filled' : ''}" style="display:flex;align-items:center;justify-content:center;">
             ${am ? am.icon : ''}
           </div>
         `);
@@ -455,11 +474,11 @@
         toast('Pluma desequipada', 'info');
       } else {
         if (save.amuletosEquipados.length >= 3) {
-          toast('Máximo 3 plumas equipadas', 'error');
+          toast('Máximo 3 plumas equipadas', 'bad');
           return;
         }
         save.amuletosEquipados.push(id);
-        toast('Pluma equipada', 'success');
+        toast('Pluma equipada', 'ok');
       }
       setSave(save);
       renderAmuletos();
@@ -478,7 +497,7 @@
       for (const k in save.habilidades) save.habilidades[k] = true;
       setSave(save);
       renderMovimiento();
-      toast('Todas las habilidades desbloqueadas', 'success');
+      toast('Todas las habilidades desbloqueadas', 'ok');
     }
 
     document.addEventListener('DOMContentLoaded', () => {

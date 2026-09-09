@@ -3,336 +3,215 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Paloma Migajera — Jugando</title>
-  <link rel="stylesheet" href="../shared/global.css">
+  <title>Paloma Migajera</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
   <style>
-    body { background:#000; overflow:hidden; }
+    :root {
+      --gold:#e8c840; --blood:#c03030; --sky:#6ab0d8;
+      --panel:rgba(12,12,22,0.92); --border:#252535;
+      --text:#b0b0d0; --text-hi:#e8e8ff; --muted:#3a3a55;
+      --font-title:'Cinzel',serif; --font-body:'IM Fell English',serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#000;overflow:hidden;font-family:var(--font-body);color:var(--text);}
 
-    /* ============ CANVAS ============ */
-    #game-canvas {
-      display:block; position:fixed; top:0; left:0;
-      image-rendering:pixelated; image-rendering:crisp-edges;
-    }
+    #game-canvas{display:block;position:fixed;top:0;left:0;image-rendering:pixelated;image-rendering:crisp-edges;}
 
-    /* ============ HUD ============ */
-    #hud {
-      position:fixed; top:0; left:0; right:0; z-index:40;
-      padding:10px 14px;
-      background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
-      pointer-events:none;
-      display:flex; align-items:flex-start; gap:14px;
-    }
+    /* HUD */
+    #hud{position:fixed;top:0;left:0;right:0;z-index:40;padding:12px 16px;background:linear-gradient(180deg,rgba(0,0,0,0.75) 0%,transparent 100%);pointer-events:none;display:flex;align-items:flex-start;gap:14px;}
+    .hud-left{display:flex;flex-direction:column;gap:6px;min-width:170px;}
+    .hud-hearts{display:flex;gap:4px;flex-wrap:wrap;max-width:130px;}
+    .heart{width:14px;height:14px;background:var(--blood);clip-path:polygon(50% 0%,100% 28%,100% 68%,50% 100%,0% 68%,0% 28%);transition:background 0.2s;flex-shrink:0;}
+    .heart.empty{background:#2a1010;}
+    .hud-bar-row{display:flex;align-items:center;gap:6px;}
+    .hud-bar-lbl{font-family:var(--font-title);font-size:0.5rem;letter-spacing:0.12em;color:var(--muted);width:14px;text-align:right;}
+    .hud-bar-track{width:105px;height:5px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.08);overflow:hidden;}
+    .hud-bar-fill{height:100%;transition:width 0.3s ease;}
+    .mp-fill{background:linear-gradient(90deg,#185888,#30a0d8);}
+    .energy-fill{background:linear-gradient(90deg,#886010,var(--gold));}
 
-    .hud-left { display:flex; flex-direction:column; gap:5px; min-width:160px; }
+    .hud-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:var(--font-title);}
+    .hud-zona{font-size:0.55rem;letter-spacing:0.22em;color:var(--muted);text-transform:uppercase;}
+    .hud-migajas{font-size:0.78rem;letter-spacing:0.1em;color:var(--gold);}
 
-    .hud-hearts { display:flex; gap:3px; flex-wrap:wrap; max-width:120px; }
+    .hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+    .hud-abilities{display:flex;gap:5px;}
+    .ab-slot{width:32px;height:32px;background:rgba(12,12,22,0.85);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.8rem;position:relative;}
+    .ab-cd{position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:0.45rem;color:var(--muted);}
+    .ab-key{position:absolute;bottom:1px;right:3px;font-family:var(--font-title);font-size:0.38rem;color:var(--muted);}
+    .hud-nivel{font-family:var(--font-title);font-size:0.55rem;letter-spacing:0.12em;color:var(--muted);}
 
-    .hud-bar-row { display:flex; align-items:center; gap:6px; }
-    .hud-bar-lbl {
-      font-family:var(--font-title); font-size:.5rem; letter-spacing:.12em;
-      color:var(--text-dim); width:14px; text-align:right;
-    }
-    .hud-bar-track {
-      width:100px; height:5px;
-      background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.08);
-      overflow:hidden;
-    }
-    .hud-bar-fill { height:100%; transition:width 0.3s ease; }
-    .mp-fill     { background:linear-gradient(90deg,#185888,#30a0d8); }
-    .energy-fill { background:linear-gradient(90deg,#886010,var(--gold)); }
+    /* Combo indicator */
+    .combo-display{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:45;pointer-events:none;font-family:var(--font-title);font-size:0.7rem;letter-spacing:0.2em;color:var(--gold);opacity:0;transition:opacity 0.3s;}
+    .combo-display.active{opacity:1;}
 
-    .hud-center {
-      flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;
-      font-family:var(--font-title);
-    }
-    .hud-zona { font-size:.58rem; letter-spacing:.2em; color:var(--text-dim); text-transform:uppercase; }
-    .hud-migajas { font-size:.75rem; letter-spacing:.1em; color:var(--gold); }
+    /* Screens */
+    .game-overlay{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+    .game-overlay.visible{display:flex;}
 
-    .hud-right {
-      display:flex; flex-direction:column; align-items:flex-end; gap:5px;
-    }
-    .hud-abilities { display:flex; gap:5px; }
-    .ab-slot {
-      width:30px; height:30px;
-      background:rgba(18,18,30,0.8); border:1px solid var(--border);
-      display:flex; align-items:center; justify-content:center;
-      font-size:.75rem; position:relative; flex-direction:column;
-    }
-    .ab-cd {
-      position:absolute; inset:0;
-      background:rgba(0,0,0,0.65); display:flex;
-      align-items:center; justify-content:center;
-      font-family:var(--font-title); font-size:.45rem; color:var(--text-dim);
-    }
-    .ab-key {
-      position:absolute; bottom:1px; right:2px;
-      font-family:var(--font-title); font-size:.4rem; color:var(--muted);
-    }
-    .hud-nivel {
-      font-family:var(--font-title); font-size:.58rem; letter-spacing:.12em; color:var(--text-dim);
-    }
+    #screen-pause{background:rgba(0,0,0,0.78);backdrop-filter:blur(6px);}
+    .pause-title{font-family:var(--font-title);font-size:2.4rem;font-weight:900;letter-spacing:0.25em;color:#f4f4ff;margin-bottom:30px;text-shadow:0 0 40px rgba(255,255,255,0.08);}
+    .pause-btn{font-family:var(--font-title);font-size:0.7rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--muted);padding:13px 0;cursor:pointer;transition:all 0.2s;min-width:260px;text-align:center;}
+    .pause-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(232,200,64,0.04);}
+    .pause-sep{width:260px;height:1px;background:var(--border);margin:6px 0;}
+    .pause-stats{display:flex;gap:24px;margin-bottom:22px;font-family:var(--font-title);font-size:0.62rem;letter-spacing:0.12em;color:var(--muted);}
+    .pstat{text-align:center;}
+    .pstat-val{display:block;font-size:1.1rem;color:var(--gold);}
 
-    /* ============ PANTALLAS SOBRE EL JUEGO ============ */
-    .game-overlay {
-      position:fixed; inset:0; z-index:100;
-      display:none; flex-direction:column;
-      align-items:center; justify-content:center;
-      gap:8px;
-    }
-    .game-overlay.visible { display:flex; }
+    #screen-death{background:rgba(0,0,0,0);transition:background 1.4s;}
+    #screen-death.visible{background:rgba(50,0,0,0.85);}
+    .death-title{font-family:var(--font-title);font-size:3.2rem;font-weight:900;letter-spacing:0.3em;color:var(--blood);text-shadow:0 0 60px rgba(192,48,48,0.5);margin-bottom:8px;animation:flicker 0.15s infinite;}
+    @keyframes flicker{0%,100%{opacity:1}50%{opacity:0.85}}
+    .death-sub{font-style:italic;font-size:1rem;color:var(--muted);margin-bottom:30px;}
+    .death-stats{font-family:var(--font-title);font-size:0.62rem;color:var(--muted);letter-spacing:0.15em;margin-bottom:22px;}
 
-    /* ---- Pausa ---- */
-    #screen-pause {
-      background:rgba(0,0,0,0.72);
-      backdrop-filter:blur(5px);
-    }
-    .pause-title {
-      font-family:var(--font-title); font-size:2.2rem; font-weight:900;
-      letter-spacing:.25em; color:var(--white);
-      margin-bottom:28px;
-      text-shadow:0 0 30px rgba(255,255,255,0.1);
-    }
-    .pause-btn {
-      font-family:var(--font-title); font-size:.68rem; font-weight:700;
-      letter-spacing:.2em; text-transform:uppercase;
-      background:transparent; border:1px solid var(--border);
-      color:var(--text-dim); padding:12px 0; cursor:pointer;
-      transition:all .2s; min-width:240px; text-align:center;
-    }
-    .pause-btn:hover { border-color:var(--gold); color:var(--gold); background:rgba(232,200,64,.05); }
+    #screen-victory{background:rgba(0,18,0,0.82);}
+    .victory-title{font-family:var(--font-title);font-size:2.8rem;font-weight:900;letter-spacing:0.2em;color:var(--gold);text-shadow:0 0 50px rgba(232,200,64,0.4);margin-bottom:8px;animation:glow 2s ease-in-out infinite;}
+    @keyframes glow{0%,100%{text-shadow:0 0 30px rgba(232,200,64,0.4)}50%{text-shadow:0 0 60px rgba(232,200,64,0.7)}}
+    .victory-sub{font-style:italic;font-size:1rem;color:var(--muted);margin-bottom:24px;}
+    .victory-reward{display:flex;gap:18px;margin-bottom:26px;background:rgba(232,200,64,0.06);border:1px solid rgba(232,200,64,0.2);padding:14px 28px;}
+    .vr-item{text-align:center;font-family:var(--font-title);font-size:0.65rem;}
+    .vr-val{display:block;font-size:1.3rem;color:var(--gold);}
 
-    /* Separador en pausa */
-    .pause-sep { width:240px; height:1px; background:var(--border); margin:6px 0; }
+    #dialogue-box{position:fixed;bottom:50px;left:50%;transform:translateX(-50%);z-index:80;width:min(600px,90vw);background:var(--panel);border:1px solid var(--border);border-top:2px solid var(--gold);padding:18px 24px;display:none;}
+    #dialogue-box.visible{display:block;}
+    .dlg-speaker{font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.22em;color:var(--gold);margin-bottom:6px;}
+    .dlg-text{font-size:0.95rem;color:var(--text-hi);line-height:1.7;}
+    .dlg-hint{font-family:var(--font-title);font-size:0.5rem;letter-spacing:0.15em;color:var(--muted);text-align:right;margin-top:10px;}
 
-    /* Stats de pausa */
-    .pause-stats {
-      display:flex; gap:20px; margin-bottom:20px;
-      font-family:var(--font-title); font-size:.6rem; letter-spacing:.12em; color:var(--text-dim);
-    }
-    .pstat { text-align:center; }
-    .pstat-val { display:block; font-size:1rem; color:var(--gold); }
+    #cp-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:90;text-align:center;pointer-events:none;display:none;}
+    #cp-banner.show{display:block;animation:cpAnim 2.5s ease forwards;}
+    @keyframes cpAnim{0%{opacity:0;transform:translate(-50%,-50%) scale(0.85)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
+    .cp-icon{font-size:2.8rem;display:block;}
+    .cp-title{font-family:var(--font-title);font-size:0.72rem;letter-spacing:0.3em;color:var(--gold);margin-top:8px;}
 
-    /* ---- Muerte ---- */
-    #screen-death {
-      background:rgba(0,0,0,0);
-      transition:background 1.2s;
-    }
-    #screen-death.visible { background:rgba(60,0,0,0.82); }
-    .death-title {
-      font-family:var(--font-title); font-size:3rem; font-weight:900;
-      letter-spacing:.3em; color:var(--blood);
-      text-shadow:0 0 50px rgba(192,48,48,0.5);
-      margin-bottom:8px;
-      animation:flicker .15s infinite;
-    }
-    @keyframes flicker { 0%,100%{opacity:1} 50%{opacity:.88} }
-    .death-sub { font-style:italic; font-size:1rem; color:var(--text-dim); margin-bottom:28px; }
-    .death-stats { font-family:var(--font-title); font-size:.62rem; color:var(--muted); letter-spacing:.15em; margin-bottom:20px; }
+    .pickup-pop{position:fixed;z-index:85;pointer-events:none;font-family:var(--font-title);font-size:0.68rem;letter-spacing:0.1em;color:var(--gold);animation:popUp 1.3s ease forwards;text-shadow:0 0 8px rgba(232,200,64,0.5);}
+    @keyframes popUp{0%{opacity:1;transform:translateY(0) scale(1.1)}100%{opacity:0;transform:translateY(-50px) scale(0.8)}}
 
-    /* ---- Victoria / Boss derrotado ---- */
-    #screen-victory {
-      background:rgba(0,20,0,0.8);
-    }
-    .victory-title {
-      font-family:var(--font-title); font-size:2.5rem; font-weight:900;
-      letter-spacing:.2em; color:var(--gold);
-      text-shadow:0 0 40px rgba(232,200,64,0.4);
-      margin-bottom:8px; animation:glow 2s ease-in-out infinite;
-    }
-    @keyframes glow { 0%,100%{text-shadow:0 0 30px rgba(232,200,64,.4)} 50%{text-shadow:0 0 60px rgba(232,200,64,.7)} }
-    .victory-sub { font-style:italic; font-size:1rem; color:var(--text-dim); margin-bottom:22px; }
-    .victory-reward {
-      display:flex; gap:16px; margin-bottom:24px;
-      background:rgba(232,200,64,0.08); border:1px solid rgba(232,200,64,.2);
-      padding:12px 24px;
-    }
-    .vr-item { text-align:center; font-family:var(--font-title); font-size:.65rem; }
-    .vr-val { display:block; font-size:1.2rem; color:var(--gold); }
+    #zone-banner{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:85;text-align:center;pointer-events:none;display:none;}
+    #zone-banner.show{display:block;animation:zoneBanner 3.5s ease forwards;}
+    @keyframes zoneBanner{0%{opacity:0;transform:translateX(-50%) translateY(-10px)}12%{opacity:1;transform:translateX(-50%) translateY(0)}75%{opacity:1}100%{opacity:0}}
+    .zb-line{font-family:var(--font-title);font-size:1.2rem;letter-spacing:0.3em;color:#f4f4ff;text-shadow:0 0 20px rgba(232,200,64,0.3);}
+    .zb-sub{font-style:italic;font-size:0.88rem;color:var(--muted);margin-top:5px;}
 
-    /* ---- Diálogo ---- */
-    #dialogue-box {
-      position:fixed; bottom:50px; left:50%; transform:translateX(-50%);
-      z-index:80; width:min(580px,90vw);
-      background:var(--panel); border:1px solid var(--border); border-top:2px solid var(--gold);
-      padding:16px 22px; display:none;
-    }
-    #dialogue-box.visible { display:block; }
-    .dlg-speaker { font-family:var(--font-title); font-size:.58rem; letter-spacing:.2em; color:var(--gold); margin-bottom:5px; }
-    .dlg-text    { font-size:.95rem; color:var(--text); line-height:1.6; }
-    .dlg-hint    { font-family:var(--font-title); font-size:.5rem; letter-spacing:.15em; color:var(--muted); text-align:right; margin-top:8px; }
+    #boss-bar{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);width:min(520px,80vw);z-index:45;display:none;}
+    #boss-bar.visible{display:block;animation:fadeIn 0.5s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%)}}
+    .boss-name{font-family:var(--font-title);font-size:0.65rem;letter-spacing:0.22em;color:var(--text-hi);text-align:center;margin-bottom:6px;}
+    .boss-track{height:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border);overflow:hidden;position:relative;}
+    .boss-fill{height:100%;background:linear-gradient(90deg,#901818,#d04040);transition:width 0.4s;position:relative;}
+    .boss-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.15),transparent);}
 
-    /* ---- Checkpoint activado ---- */
-    #cp-banner {
-      position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-      z-index:90; text-align:center; pointer-events:none;
-      display:none;
-    }
-    #cp-banner.show { display:block; animation:cpAnim 2.5s ease forwards; }
-    @keyframes cpAnim {
-      0%  {opacity:0;transform:translate(-50%,-50%) scale(0.85)}
-      15% {opacity:1;transform:translate(-50%,-50%) scale(1)}
-      70% {opacity:1;transform:translate(-50%,-50%) scale(1)}
-      100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}
-    }
-    .cp-icon  { font-size:2.5rem; display:block; }
-    .cp-title { font-family:var(--font-title); font-size:.7rem; letter-spacing:.3em; color:var(--gold); margin-top:6px; }
-
-    /* ---- Pickup popup ---- */
-    .pickup-pop {
-      position:fixed; z-index:85; pointer-events:none;
-      font-family:var(--font-title); font-size:.65rem; letter-spacing:.1em; color:var(--gold);
-      animation:popUp 1.3s ease forwards;
-    }
-    @keyframes popUp { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-45px)} }
-
-    /* ---- Indicador de zona ---- */
-    #zone-banner {
-      position:fixed; top:80px; left:50%; transform:translateX(-50%);
-      z-index:85; text-align:center; pointer-events:none;
-      display:none;
-    }
-    #zone-banner.show { display:block; animation:zoneBanner 3s ease forwards; }
-    @keyframes zoneBanner {
-      0%  {opacity:0;transform:translateX(-50%) translateY(-10px)}
-      15% {opacity:1;transform:translateX(-50%) translateY(0)}
-      75% {opacity:1}
-      100%{opacity:0}
-    }
-    .zb-line { font-family:var(--font-title); font-size:1.1rem; letter-spacing:.25em; color:var(--white); }
-    .zb-sub  { font-style:italic; font-size:.85rem; color:var(--text-dim); margin-top:4px; }
-
-    /* ---- Barra de vida del jefe ---- */
-    #boss-bar {
-      position:fixed; bottom:40px; left:50%; transform:translateX(-50%);
-      width:min(500px,80vw); z-index:45; display:none;
-    }
-    #boss-bar.visible { display:block; }
-    .boss-name { font-family:var(--font-title); font-size:.62rem; letter-spacing:.2em; color:var(--text-hi); text-align:center; margin-bottom:5px; }
-    .boss-track { height:8px; background:rgba(255,255,255,.06); border:1px solid var(--border); overflow:hidden; }
-    .boss-fill  { height:100%; background:linear-gradient(90deg,#901818,#d04040); transition:width .4s; }
+    /* Screen transition */
+    #screen-transition{position:fixed;inset:0;z-index:200;background:#000;opacity:0;pointer-events:none;transition:opacity 0.6s ease;}
+    #screen-transition.active{opacity:1;}
   </style>
 </head>
 <body>
   <canvas id="game-canvas"></canvas>
 
-  <!-- HUD fijo -->
   <div id="hud">
     <div class="hud-left">
       <div class="hud-hearts" id="hud-hearts"></div>
       <div class="hud-bar-row">
-        <span class="hud-bar-lbl">MP</span>
+        <span class="hud-bar-lbl" style="display:inline-flex;align-items:center;">MP</span>
         <div class="hud-bar-track"><div class="hud-bar-fill mp-fill" id="hud-mp" style="width:100%"></div></div>
       </div>
       <div class="hud-bar-row">
-        <span class="hud-bar-lbl">⚡</span>
+        <span class="hud-bar-lbl" style="display:inline-flex;align-items:center;color:var(--gold);"><svg viewBox="0 0 16 16" width="12" height="12" fill="#e8c840"><polygon points="9,1 5,8 8,8 7,15 11,8 8,8"/></svg></span>
         <div class="hud-bar-track"><div class="hud-bar-fill energy-fill" id="hud-energy" style="width:100%"></div></div>
       </div>
     </div>
-
     <div class="hud-center">
       <div class="hud-zona" id="hud-zona">Ciudad Alta</div>
-      <div class="hud-migajas">🍞 <span id="hud-mig">0</span></div>
+      <div class="hud-migajas" style="display:flex;align-items:center;justify-content:center;gap:5px;"><svg viewBox="0 0 16 16" width="13" height="13"><ellipse cx="8" cy="9" rx="7" ry="5" fill="#e8c840"/><ellipse cx="8" cy="8" rx="6" ry="4" fill="#f0d860"/><ellipse cx="7" cy="7" rx="2" ry="1.5" fill="#fff8a0" opacity="0.5"/></svg> <span id="hud-mig">0</span></div>
     </div>
-
     <div class="hud-right">
       <div class="hud-nivel">Nv.<span id="hud-nivel">1</span></div>
       <div class="hud-abilities">
-        <div class="ab-slot">🪃<span class="ab-key">Z</span><div class="ab-cd" id="cd-z" style="display:none">–</div></div>
-        <div class="ab-slot">💥<span class="ab-key">X</span><div class="ab-cd" id="cd-x" style="display:none">–</div></div>
-        <div class="ab-slot">💨<span class="ab-key">⇧</span><div class="ab-cd" id="cd-sh" style="display:none">–</div></div>
+        <div class="ab-slot" style="color:#e8e8ff;"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><rect x="7" y="1" width="2" height="8"/><rect x="4" y="8" width="8" height="2"/><rect x="7" y="10" width="2" height="5"/></svg><span class="ab-key">Z</span><div class="ab-cd" id="cd-z" style="display:none">–</div></div>
+        <div class="ab-slot" style="color:#6ab0d8;"><svg viewBox="0 0 16 16" width="15" height="15"><circle cx="8" cy="8" r="5" fill="#6ab0d8" opacity="0.6"/><circle cx="8" cy="8" r="3" fill="#c0e8ff"/><circle cx="8" cy="8" r="1.5" fill="#fff"/></svg><span class="ab-key">X</span><div class="ab-cd" id="cd-x" style="display:none">–</div></div>
+        <div class="ab-slot" style="color:#c0c0e0;"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M2 8h10l-3-3 1-1 4 4-4 4-1-1 3-3H2z"/></svg><span class="ab-key">⇧</span><div class="ab-cd" id="cd-sh" style="display:none">–</div></div>
       </div>
     </div>
   </div>
 
-  <!-- Barra del jefe -->
+  <div class="combo-display" id="combo-display"></div>
+
   <div id="boss-bar">
     <div class="boss-name" id="boss-name">CUERVO DE LA CHIMENEA</div>
     <div class="boss-track"><div class="boss-fill" id="boss-fill" style="width:100%"></div></div>
   </div>
 
-  <!-- Pantalla de pausa -->
   <div class="game-overlay" id="screen-pause">
     <div class="pause-title">— PAUSA —</div>
     <div class="pause-stats" id="pause-stats"></div>
-    <button class="pause-btn" onclick="resumeGame()">▶ Continuar</button>
+    <button class="pause-btn" onclick="resumeGame()"><svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><polygon points="4,2 14,8 4,14"/></svg>Continuar</button>
     <div class="pause-sep"></div>
-    <button class="pause-btn" onclick="goTo('../habilidades/index.html')">✨ Habilidades</button>
-    <button class="pause-btn" onclick="goTo('../inventario/index.html')">🎒 Inventario</button>
-    <button class="pause-btn" onclick="goTo('../mapa/index.html')">🗺️ Mapa</button>
-    <button class="pause-btn" onclick="goTo('../ajustes/index.html')">⚙️ Ajustes</button>
+    <button class="pause-btn" onclick="goTo('../habilidades/index.html')"><svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><polygon points="8,1 10,6 16,6 11,10 13,15 8,12 3,15 5,10 0,6 6,6"/></svg>Habilidades</button>
+    <button class="pause-btn" onclick="goTo('../inventario/index.html')"><svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><rect x="3" y="5" width="10" height="9" rx="2" opacity="0.7"/><rect x="5" y="2" width="6" height="3" rx="1" opacity="0.4"/></svg>Inventario</button>
+    <button class="pause-btn" onclick="goTo('../mapa/index.html')"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;margin-right:8px;"><rect x="1" y="1" width="14" height="14" rx="1"/><line x1="5" y1="1" x2="5" y2="15"/><line x1="11" y1="1" x2="11" y2="15"/></svg>Mapa</button>
+    <button class="pause-btn" onclick="goTo('../ajustes/index.html')"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.3" style="vertical-align:middle;margin-right:8px;"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5L13 13M13 3l-1.5 1.5M4.5 11.5L3 13"/></svg>Ajustes</button>
     <div class="pause-sep"></div>
-    <button class="pause-btn" onclick="saveAndExit()" style="color:var(--text-dim);font-size:.6rem;">💾 Guardar y salir al menú</button>
+    <button class="pause-btn" onclick="saveAndExit()" style="color:var(--muted);font-size:0.6rem;"><svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M2 2h9l3 3v9H2z" opacity="0.7"/><rect x="4" y="8" width="8" height="5" fill="#080810" opacity="0.4"/><rect x="5" y="9" width="3" height="2" rx="0.5"/></svg>Guardar y salir</button>
   </div>
 
-  <!-- Pantalla de muerte -->
   <div class="game-overlay" id="screen-death">
     <div class="death-title">HAS MUERTO</div>
     <div class="death-sub">Las migas siguen cayendo, sin ti.</div>
     <div class="death-stats" id="death-stats"></div>
-    <button class="pause-btn" onclick="respawn()">🔄 Revivir en checkpoint</button>
-    <button class="pause-btn" onclick="saveAndExit()">🏠 Volver al menú</button>
+    <button class="pause-btn" onclick="respawn()"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;margin-right:8px;"><path d="M2 8a6 6 0 0111-3M14 8a6 6 0 01-11 3"/><polyline points="2,3 2,8 7,8"/><polyline points="14,13 14,8 9,8"/></svg>Revivir en checkpoint</button>
+    <button class="pause-btn" onclick="saveAndExit()"><svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M2 8l6-6 6 6v6H2z" opacity="0.7"/><rect x="6" y="10" width="4" height="4"/></svg>Volver al menú</button>
   </div>
 
-  <!-- Pantalla de victoria (boss) -->
   <div class="game-overlay" id="screen-victory">
     <div class="victory-title">¡VICTORIA!</div>
-    <div class="victory-sub" id="victory-sub">Has derrotado al Cuervo de la Chimenea.</div>
+    <div class="victory-sub" id="victory-sub">Has derrotado al jefe.</div>
     <div class="victory-reward" id="victory-reward"></div>
     <button class="pause-btn" onclick="closeVictory()">Continuar →</button>
   </div>
 
-  <!-- Diálogo NPC -->
   <div id="dialogue-box">
     <div class="dlg-speaker" id="dlg-speaker">???</div>
     <div class="dlg-text" id="dlg-text"></div>
     <div class="dlg-hint">[Z] Continuar</div>
   </div>
 
-  <!-- Checkpoint banner -->
   <div id="cp-banner">
-    <span class="cp-icon">🔥</span>
+    <span class="cp-icon" style="color:#f0a020;"><svg viewBox="0 0 16 16" width="34" height="34"><path d="M8 1c-1 3-4 4-4 7a4 4 0 008 0c0-3-3-4-4-7z" fill="#f0a020"/><path d="M8 5c-.5 1.5-2 2-2 3.5a2 2 0 004 0c0-1.5-1.5-2-2-3.5z" fill="#ffe060"/></svg></span>
     <span class="cp-title">CHECKPOINT ACTIVADO</span>
   </div>
 
-  <!-- Zona banner -->
   <div id="zone-banner">
     <div class="zb-line" id="zb-name">Ciudad Alta</div>
     <div class="zb-sub" id="zb-sub">Zona 1 de 3</div>
   </div>
 
+  <div id="screen-transition"></div>
+
   <script src="../shared/utils.js"></script>
+  <script src="../shared/icons.js"></script>
+  <script src="../shared/sprites.js"></script>
+  <script src="../Logros/sistema-logros.js"></script>
   <script src="map-engine.js"></script>
   <script src="entities.js"></script>
   <script src="physics.js"></script>
   <script src="renderer.js"></script>
   <script>
-  // =============================================
-  //  PALOMA MIGAJERA v3 — MAIN GAME LOOP
-  // =============================================
-
   const canvas = document.getElementById('game-canvas');
   const ctx    = canvas.getContext('2d');
-
   let W, H;
-  function resizeCanvas() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
+  function resizeCanvas() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  // ---- Cargar save ----
   let saveData = getSave();
-  if(!saveData) {
-    // Sin save → redirigir al menú
-    window.location.href = '../menu/index.html';
-  }
+  if (!saveData) { window.location.href = '../menu/index.html'; }
 
-  // ---- Estado global ----
   const G = {
-    state: 'loading',  // 'loading'|'running'|'paused'|'dead'|'dialogue'|'victory'
+    state: 'loading',
     currentZone: saveData.zona || 'ciudad_alta',
-    map: null,         // { visual, colData, w, h }
+    map: null,
     player: null,
     enemies: [],
     migajas: [],
@@ -341,7 +220,7 @@
     projectiles: [],
     checkpoints: [],
     portals: [],
-    camera: { x:0, y:0 },
+    camera: { x: 0, y: 0 },
     time: 0,
     bossFight: false,
     bossEnemy: null,
@@ -349,37 +228,38 @@
     loadProgress: 0,
   };
 
-  // ---- Input ----
+  window._gamePlayer = null;
+  window._gameParticles = null;
+  window.__SPRITES = SpriteSystem;
+  SpriteSystem.build();
+  SpriteSystem.load();
+
   const keys = {}, justP = {}, justR = {};
   window.addEventListener('keydown', e => {
-    if(!keys[e.code]) justP[e.code]=true;
-    keys[e.code]=true;
-    // Pausa con ESC siempre
-    if(e.code==='Escape') togglePause();
-    // Interacción NPC / diálogo con Z
-    if(e.code==='KeyZ') {
-      if(G.state==='dialogue') advanceDialogue();
+    if (!keys[e.code]) justP[e.code] = true;
+    keys[e.code] = true;
+    if (e.code === 'Escape') togglePause();
+    if (e.code === 'KeyZ') {
+      if (G.state === 'dialogue') advanceDialogue();
     }
   });
-  window.addEventListener('keyup', e => {
-    keys[e.code]=false; justR[e.code]=true;
-  });
+  window.addEventListener('keyup', e => { keys[e.code] = false; justR[e.code] = true; });
 
   function getInput() {
     const cfg = getCfg().controles;
     return {
-      izq:     keys[cfg.izq] || keys['ArrowLeft']  || keys['KeyA'],
-      der:     keys[cfg.der] || keys['ArrowRight'] || keys['KeyD'],
-      saltar:  keys[cfg.saltar] || keys['Space']   || keys['KeyW'],
-      dash:    keys[cfg.dash]   || keys['ShiftLeft']|| keys['ShiftRight'],
-      ataque:  keys[cfg.ataque] || keys['KeyZ'],
-      especial:keys[cfg.especial]|| keys['KeyX'],
-      abajo:   keys[cfg.abajo]  || keys['ArrowDown']|| keys['KeyS'],
+      izq: keys[cfg.izq] || keys['ArrowLeft'] || keys['KeyA'],
+      der: keys[cfg.der] || keys['ArrowRight'] || keys['KeyD'],
+      saltar: keys[cfg.saltar] || keys['Space'] || keys['KeyW'],
+      dash: keys[cfg.dash] || keys['ShiftLeft'] || keys['ShiftRight'],
+      ataque: keys[cfg.ataque] || keys['KeyZ'],
+      especial: keys[cfg.especial] || keys['KeyX'],
+      abajo: keys[cfg.abajo] || keys['ArrowDown'] || keys['KeyS'],
       justPressed: {
-        saltar:  justP[cfg.saltar]||justP['Space']||justP['KeyW'],
-        dash:    justP[cfg.dash]||justP['ShiftLeft']||justP['ShiftRight'],
-        ataque:  justP[cfg.ataque]||justP['KeyZ'],
-        especial:justP[cfg.especial]||justP['KeyX'],
+        saltar: justP[cfg.saltar] || justP['Space'] || justP['KeyW'],
+        dash: justP[cfg.dash] || justP['ShiftLeft'] || justP['ShiftRight'],
+        ataque: justP[cfg.ataque] || justP['KeyZ'],
+        especial: justP[cfg.especial] || justP['KeyX'],
       },
     };
   }
@@ -390,8 +270,6 @@
   function loadZone(zoneId) {
     G.state = 'loading';
     G.loadProgress = 0;
-
-    // Limpiar
     G.enemies = [];
     G.migajas = [];
     G.npcs = [];
@@ -401,136 +279,130 @@
     G.bossEnemy = null;
     document.getElementById('boss-bar').classList.remove('visible');
 
-    // Construir mapa (async simulado con setTimeout para no bloquear)
     setTimeout(() => {
       G.map = buildZone(zoneId);
       G.loadProgress = 50;
-
       const diff = DIFICULTAD[saveData.dificultad || 'normal'];
 
-      // Crear o reposicionar jugador
-      if(!G.player) {
+      if (!G.player) {
         G.player = createPlayer(saveData);
       }
-      // Posición Y: buscar suelo desde arriba
-      const cpData = (ZONE_CHECKPOINTS[zoneId] || []).find(c=>c.lit) || { x: saveData.checkpoint?.x||240 };
+      window._gamePlayer = G.player;
+      window._gameParticles = G.particles;
+
+      const cpData = (ZONE_CHECKPOINTS[zoneId] || []).find(c => c.lit) || { x: saveData.checkpoint?.x || 240 };
       G.player.x = cpData.x;
       G.player.y = 0;
-      // Ajustar Y al suelo
-      for(let ty = 0; ty < G.map.h; ty++) {
-        if(isSolid(G.map.colData, G.player.x + G.player.w/2, ty)) {
+      for (let ty = 0; ty < G.map.h; ty++) {
+        if (isSolid(G.map.colData, G.player.x + G.player.w / 2, ty)) {
           G.player.y = ty - G.player.h - 2;
           break;
         }
       }
-      if(G.player.y <= 0) G.player.y = G.map.h - 120;
+      if (G.player.y <= 0) G.player.y = G.map.h - 120;
 
-      // Spawnear entidades
       G.enemies     = spawnEnemies(zoneId, diff);
       G.migajas     = spawnWorldMigajas(zoneId);
       G.npcs        = spawnNPCs(zoneId);
       G.portals     = ZONE_PORTALS[zoneId] || [];
-      G.checkpoints = (ZONE_CHECKPOINTS[zoneId] || []).map(cp => ({
-        ...cp,
-        y: 0,   // Y se pone sobre suelo
-      }));
-      // Ajustar Y de checkpoints
+      G.checkpoints = (ZONE_CHECKPOINTS[zoneId] || []).map(cp => ({ ...cp, y: 0 }));
+
       G.checkpoints.forEach(cp => {
-        for(let ty=0; ty<G.map.h; ty++) {
-          if(isSolid(G.map.colData, cp.x+3, ty)) { cp.y = ty - 54; break; }
+        for (let ty = 0; ty < G.map.h; ty++) {
+          if (isSolid(G.map.colData, cp.x + 3, ty)) { cp.y = ty - 54; break; }
         }
       });
-      // Ajustar Y de NPCs
       G.npcs.forEach(npc => {
-        for(let ty=0; ty<G.map.h; ty++) {
-          if(isSolid(G.map.colData, npc.x+npc.w/2, ty)) { npc.y = ty - npc.h; break; }
+        for (let ty = 0; ty < G.map.h; ty++) {
+          if (isSolid(G.map.colData, npc.x + npc.w / 2, ty)) { npc.y = ty - npc.h; break; }
         }
       });
-      // Ajustar Y de enemigos
       G.enemies.forEach(e => {
-        for(let ty=0; ty<G.map.h; ty++) {
-          if(isSolid(G.map.colData, e.x+e.w/2, ty)) { e.y = ty - e.h; break; }
+        for (let ty = 0; ty < G.map.h; ty++) {
+          if (isSolid(G.map.colData, e.x + e.w / 2, ty)) { e.y = ty - e.h; break; }
         }
-        if(e.isBoss) { G.bossEnemy = e; }
+        if (e.isBoss) G.bossEnemy = e;
       });
 
       G.loadProgress = 100;
       G.currentZone = zoneId;
       G.state = 'running';
-
-      // Mostrar banner de zona
       showZoneBanner(zoneId);
       updateHUD();
     }, 80);
   }
 
   // =============================================
-  //  CÁMARA
+  //  CÁMARA (con screen shake)
   // =============================================
   function updateCamera() {
-    if(!G.map || !G.player) return;
-    const targetX = G.player.x - W/2 + G.player.w/2;
+    if (!G.map || !G.player) return;
+    const targetX = G.player.x - W / 2 + G.player.w / 2;
     const targetY = G.player.y - H * 0.52;
     G.camera.x += (targetX - G.camera.x) * 0.09;
     G.camera.y += (targetY - G.camera.y) * 0.09;
     G.camera.x = Math.max(0, Math.min(G.camera.x, G.map.w - W));
     G.camera.y = Math.max(-150, Math.min(G.camera.y, G.map.h - H));
+
+    updateScreenShake();
   }
 
   // =============================================
-  //  ACTUALIZACIÓN PRINCIPAL
+  //  UPDATE
   // =============================================
   function update(dt) {
-    if(G.state !== 'running') return;
+    if (G.state !== 'running') return;
     const input = getInput();
     const p = G.player;
 
-    // ---- Física jugador ----
     const action = physicsPlayer(p, G.map.colData, dt, input);
     resolvePlayerMap(p, G.map.colData, G.map.w, G.map.h);
     updateCooldowns(p, dt);
 
-    // ---- Acciones del jugador ----
-    if(action) {
-      if(action.action === 'jump')   { spawnJumpFx(G.particles, p.x+p.w/2, p.y+p.h, action.double); }
-      if(action.action === 'dash')   { spawnDashFx(G.particles, p.x+p.w/2, p.y+p.h/2, p.dashDir); }
-      if(action.action === 'attack') { doMeleeAttack(p, G.enemies, G.particles); }
-      if(action.action === 'palou')  { firePalou(p, G.projectiles); }
+    if (action) {
+      if (action.action === 'jump') { spawnJumpFx(G.particles, p.x + p.w / 2, p.y + p.h, action.double, action.wallJump); }
+      if (action.action === 'dash') { spawnDashFx(G.particles, p.x + p.w / 2, p.y + p.h / 2, p.dashDir); }
+      if (action.action === 'attack') { doMeleeAttack(p, G.enemies, G.particles); }
+      if (action.action === 'palou') { firePalou(p, G.projectiles); }
     }
 
-    // ---- Física enemigos ----
-    physicsEnemies(G.enemies, G.map.colData, G.map.w, G.map.h, dt);
-    checkEnemyAggro(G.enemies, p);
+    // Wall slide particles
+    if (p.wallSliding) {
+      spawnWallSlideFx(G.particles, p.x + (p.facing > 0 ? p.w : 0), p.y + p.h / 2);
+    }
 
-    // Enemigos atacan al jugador
-    for(const e of G.enemies) {
-      if(!e.alive || !e._doAtk) continue;
+    // Running dust
+    if (p.onGround && Math.abs(p.vx) > 2 && Math.random() > 0.7) {
+      spawnDustFx(G.particles, p.x + p.w / 2, p.y + p.h, p.facing);
+    }
+
+    physicsEnemies(G.enemies, G.map.colData, G.map.w, G.map.h, dt);
+
+    for (const e of G.enemies) {
+      if (!e.alive || !e._doAtk) continue;
       e._doAtk = false;
-      if(hurtPlayer(p, e.dmg * e.diff?.dmgEnemigo || e.dmg, G.particles)) {
+      if (hurtPlayer(p, e.dmg * (e.diff?.dmgEnemigo || 1), G.particles)) {
         updateHUD();
-        if(p.hp <= 0) killPlayer();
+        if (p.hp <= 0) killPlayer();
       }
     }
 
-    // ---- Proyectiles ----
     updateProjectiles(G.projectiles, G.enemies, G.map.colData, dt, G.particles);
 
-    // ---- Migajas ----
     const collected = collectMigajas(p, G.migajas);
-    if(collected.length > 0) {
+    if (collected.length > 0) {
       collected.forEach(m => {
         spawnPickupFx(G.particles, m.x, m.y, m.value);
-        showPickupPopup(m.x - G.camera.x, m.y - G.camera.y, `+${m.value}🍞`);
+        showPickupPopup(m.x - G.camera.x, m.y - G.camera.y, `+${m.value} migajas`);
       });
       updateHUD();
     }
 
-    // ---- Checkpoints ----
-    for(const cp of G.checkpoints) {
-      if(!cp.lit) {
+    for (const cp of G.checkpoints) {
+      if (!cp.lit) {
         const dx = Math.abs(p.x - cp.x);
         const dy = Math.abs(p.y - cp.y);
-        if(dx < 24 && dy < 50) {
+        if (dx < 24 && dy < 50) {
           cp.lit = true;
           saveData.checkpoint = { x: cp.x, y: cp.y };
           saveData.vida = p.hp;
@@ -541,38 +413,42 @@
       }
     }
 
-    // ---- Portales ----
-    for(const portal of G.portals) {
-      if(rectsOverlap(p.x,p.y,p.w,p.h, portal.x,0,portal.w,G.map.h)) {
+    for (const portal of G.portals) {
+      if (rectsOverlap(p.x, p.y, p.w, p.h, portal.x, 0, portal.w, G.map.h)) {
         changeZone(portal.toZone);
         return;
       }
     }
 
-    // ---- Muerte por caída ----
-    if(p.y > G.map.h + 80) killPlayer();
+    if (p.y > G.map.h + 80) killPlayer();
 
-    // ---- Boss ----
-    if(G.bossEnemy && G.bossEnemy.alive) {
+    if (G.bossEnemy && G.bossEnemy.alive) {
       updateBossBar();
-    } else if(G.bossEnemy && !G.bossEnemy.alive && !G.bossFight) {
-      G.bossFight = true; // ya procesado
+    } else if (G.bossEnemy && !G.bossEnemy.alive && !G.bossFight) {
+      G.bossFight = true;
       bossVictory();
     }
 
-    // ---- NPC check (con Z) ----
-    if(input.justPressed.ataque && G.state === 'running') {
+    if (input.justPressed.ataque && G.state === 'running') {
       checkNPCInteraction();
     }
 
-    // ---- Partículas ----
     updateParticles(G.particles, dt);
+    updateDamageNumbers(dt);
 
-    // ---- Tiempo jugado ----
+    // Combo display
+    const comboEl = document.getElementById('combo-display');
+    if (p.comboCount > 1 && p.comboTimer > 0) {
+      comboEl.textContent = `${p.comboCount}x COMBO`;
+      comboEl.classList.add('active');
+    } else {
+      comboEl.classList.remove('active');
+    }
+
     G.time += dt;
-    if(G.time % 5000 < dt+16) {
+    if (G.time % 5000 < dt + 16) {
       saveData.tiempoJugado += 5;
-      if(getCfg().juego.autoGuardar) {
+      if (getCfg().juego.autoGuardar) {
         saveData.migajas = p.migajas;
         saveData.vida = p.hp;
         setSave(saveData);
@@ -581,62 +457,71 @@
   }
 
   // =============================================
-  //  DIBUJO
+  //  RENDER
   // =============================================
   function render() {
     ctx.clearRect(0, 0, W, H);
 
-    if(G.state === 'loading') {
-      // Pantalla de carga
-      const grd = ctx.createLinearGradient(0,0,0,H);
-      grd.addColorStop(0,'#080810'); grd.addColorStop(1,'#0c0c18');
-      ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
-      ctx.fillStyle='rgba(232,200,64,0.8)';
-      ctx.font='bold 13px serif'; ctx.textAlign='center';
-      ctx.fillText('Cargando zona...', W/2, H/2);
-      const barW = 200;
-      ctx.fillStyle='#252535';
-      ctx.fillRect(W/2-barW/2, H/2+20, barW, 4);
-      ctx.fillStyle='#e8c840';
-      ctx.fillRect(W/2-barW/2, H/2+20, barW*G.loadProgress/100, 4);
+    if (G.state === 'loading') {
+      const grd = ctx.createLinearGradient(0, 0, 0, H);
+      grd.addColorStop(0, '#080810');
+      grd.addColorStop(1, '#0c0c18');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, W, H);
+
+      // Loading pigeon icon (dibujado, sin emoji)
+      const t = performance.now() / 1000;
+      const bounce = Math.sin(t * 3) * 5;
+      const lx = W / 2, ly = H / 2 - 30 + bounce;
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.fillStyle = 'rgba(232,200,64,0.9)';
+      ctx.beginPath();
+      ctx.ellipse(0, 8, 9, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(0, -1, 7, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(4, -3, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#e0b030';
+      ctx.fillRect(8, -2, 4, 3);
+      ctx.restore();
+
+      ctx.fillStyle = 'rgba(232,200,64,0.8)';
+      ctx.font = 'bold 12px Cinzel, serif';
+      ctx.fillText('Cargando zona...', W / 2, H / 2 + 15);
+
+      const barW = 220;
+      ctx.fillStyle = '#1a1a28';
+      ctx.fillRect(W / 2 - barW / 2, H / 2 + 30, barW, 4);
+      ctx.fillStyle = '#e8c840';
+      ctx.fillRect(W / 2 - barW / 2, H / 2 + 30, barW * G.loadProgress / 100, 4);
       return;
     }
 
-    if(!G.map || !G.player) return;
+    if (!G.map || !G.player) return;
 
-    const cx = G.camera.x, cy = G.camera.y;
+    // Apply screen shake
+    const cx = G.camera.x + screenShake.x;
+    const cy = G.camera.y + screenShake.y;
 
-    // ---- Imagen visual del mapa ----
     ctx.drawImage(G.map.visual, -cx, -cy);
-
-    // ---- Portales ----
     drawPortals(ctx, G.portals, cx, cy);
-
-    // ---- Checkpoints ----
     drawCheckpoints(ctx, G.checkpoints, cx, cy);
-
-    // ---- NPCs ----
     drawNPCs(ctx, G.npcs, cx, cy, G.player.x, G.player.y);
-
-    // ---- Migajas ----
     drawMigajas(ctx, G.migajas, cx, cy);
-
-    // ---- Enemigos ----
     G.enemies.forEach(e => drawEnemy(ctx, e, cx, cy));
-
-    // ---- Proyectiles ----
     drawProjectiles(ctx, G.projectiles, cx, cy);
-
-    // ---- Partículas ----
     drawParticles(ctx, G.particles, cx, cy);
-
-    // ---- Jugador ----
     drawPlayer(ctx, G.player, cx, cy);
+    drawDamageNumberEntities(ctx, cx, cy);
 
-    // ---- Debug: mapa de colisiones (presiona F1) ----
-    if(keys['F1']) {
+    if (keys['F1']) {
       ctx.globalAlpha = 0.25;
-      ctx.drawImage(G.map.visual, -cx, -cy); // ya incluye colisiones visualmente
+      ctx.drawImage(G.map.visual, -cx, -cy);
       ctx.globalAlpha = 1;
     }
   }
@@ -646,75 +531,69 @@
   // =============================================
   function updateHUD() {
     const p = G.player;
-    if(!p) return;
-    // Corazones
+    if (!p) return;
     const hh = document.getElementById('hud-hearts');
     hh.innerHTML = '';
-    for(let i=0;i<p.hpMax;i++) {
-      const h=document.createElement('div');
-      h.className='heart'+(i>=p.hp?' empty':'');
+    for (let i = 0; i < p.hpMax; i++) {
+      const h = document.createElement('div');
+      h.className = 'heart' + (i >= p.hp ? ' empty' : '');
       hh.appendChild(h);
     }
-    // Barras
-    document.getElementById('hud-mp').style.width     = (p.mp/p.mpMax*100)+'%';
-    document.getElementById('hud-energy').style.width = (p.energy/p.energyMax*100)+'%';
-    // Migajas
-    document.getElementById('hud-mig').textContent    = p.migajas;
-    // Nivel
-    document.getElementById('hud-nivel').textContent  = saveData.nivel;
-    // Zona
-    document.getElementById('hud-zona').textContent   = G.currentZone.replace('_',' ').toUpperCase();
-    // Cooldowns
-    setCd('cd-z',  p.atkTimer,      ATK_DUR);
-    setCd('cd-x',  p.palouCooldown, PALOU_COOLDOWN);
-    setCd('cd-sh', p.dashCooldown,  DASH_COOLDOWN);
+    document.getElementById('hud-mp').style.width = (p.mp / p.mpMax * 100) + '%';
+    document.getElementById('hud-energy').style.width = (p.energy / p.energyMax * 100) + '%';
+    document.getElementById('hud-mig').textContent = p.migajas;
+    document.getElementById('hud-nivel').textContent = saveData.nivel;
+    document.getElementById('hud-zona').textContent = G.currentZone.replace('_', ' ').toUpperCase();
+    setCd('cd-z', p.atkTimer, ATK_DUR);
+    setCd('cd-x', p.palouCooldown, PALOU_COOLDOWN);
+    setCd('cd-sh', p.dashCooldown, DASH_COOLDOWN);
   }
 
   function setCd(id, val, max) {
-    const el=document.getElementById(id);
-    if(val>0){el.style.display='flex';el.textContent=(val/1000).toFixed(1);}
-    else el.style.display='none';
+    const el = document.getElementById(id);
+    if (val > 0) { el.style.display = 'flex'; el.textContent = (val / 1000).toFixed(1); }
+    else el.style.display = 'none';
   }
 
   function updateBossBar() {
     const b = G.bossEnemy;
-    if(!b) return;
+    if (!b) return;
     document.getElementById('boss-bar').classList.add('visible');
-    document.getElementById('boss-name').textContent = b.type.replace('_',' ').toUpperCase();
-    document.getElementById('boss-fill').style.width = Math.max(0, b.hp/b.maxHp*100)+'%';
+    document.getElementById('boss-name').textContent = b.type.replace('_', ' ').toUpperCase();
+    document.getElementById('boss-fill').style.width = Math.max(0, b.hp / b.maxHp * 100) + '%';
   }
 
   // =============================================
   //  PAUSA / ESTADOS
   // =============================================
   function togglePause() {
-    if(G.state==='dead'||G.state==='victory'||G.state==='loading') return;
-    if(G.state==='running'||G.state==='dialogue') {
-      G.activeNpc=null;
+    if (G.state === 'dead' || G.state === 'victory' || G.state === 'loading') return;
+    if (G.state === 'running' || G.state === 'dialogue') {
+      G.activeNpc = null;
       document.getElementById('dialogue-box').classList.remove('visible');
-      G.state='paused';
+      G.state = 'paused';
       document.getElementById('screen-pause').classList.add('visible');
-      // Stats en pausa
       document.getElementById('pause-stats').innerHTML = `
         <div class="pstat"><span class="pstat-val">${G.player.migajas}</span>Migajas</div>
         <div class="pstat"><span class="pstat-val">${saveData.muertes}</span>Muertes</div>
         <div class="pstat"><span class="pstat-val">${fmtTime(saveData.tiempoJugado)}</span>Jugado</div>
       `;
-    } else if(G.state==='paused') {
+    } else if (G.state === 'paused') {
       resumeGame();
     }
   }
 
   function resumeGame() {
-    G.state='running';
+    G.state = 'running';
     document.getElementById('screen-pause').classList.remove('visible');
   }
 
   function killPlayer() {
-    if(G.state==='dead') return;
-    G.state='dead';
+    if (G.state === 'dead') return;
+    G.state = 'dead';
     saveData.muertes++;
     setSave(saveData);
+    addScreenShake(12);
     document.getElementById('screen-death').classList.add('visible');
     document.getElementById('death-stats').textContent =
       `${saveData.muertes} muertes · ${G.player.migajas} migajas · ${fmtTime(saveData.tiempoJugado)} jugado`;
@@ -726,13 +605,13 @@
     p.hp = p.hpMax;
     p.energy = p.energyMax;
     p.invincible = false;
+    p.invTimer = 1200;
     p.vx = p.vy = 0;
     p.x = saveData.checkpoint?.x || 240;
-    // Ajustar Y al suelo del checkpoint
-    for(let ty=0;ty<G.map.h;ty++) {
-      if(isSolid(G.map.colData, p.x+p.w/2, ty)) { p.y = ty-p.h-2; break; }
+    for (let ty = 0; ty < G.map.h; ty++) {
+      if (isSolid(G.map.colData, p.x + p.w / 2, ty)) { p.y = ty - p.h - 2; break; }
     }
-    G.state='running';
+    G.state = 'running';
     updateHUD();
   }
 
@@ -745,28 +624,37 @@
   }
 
   function bossVictory() {
-    G.state='victory';
+    G.state = 'victory';
     const xpGain = G.bossEnemy.xp;
     const migGain = G.bossEnemy.migajas;
     G.player.migajas += migGain;
-    // Desbloquear doble salto si es el cuervo
-    if(G.bossEnemy.type === 'jefe_cuervo') {
+    addScreenShake(10);
+
+    if (G.bossEnemy.type === 'jefe_cuervo') {
       G.player.habilidades.dobleSalto = true;
       G.player.maxJumps = 2;
       saveData.habilidades.dobleSalto = true;
     }
-    document.getElementById('victory-reward').innerHTML = `
+    if (G.bossEnemy.type === 'jefe_rata') {
+      G.player.habilidades.dash = true;
+      saveData.habilidades.dash = true;
+    }
+
+    const rewards = `
       <div class="vr-item"><span class="vr-val">+${xpGain}</span>XP</div>
       <div class="vr-item"><span class="vr-val">+${migGain}</span>Migajas</div>
-      ${G.bossEnemy.type==='jefe_cuervo'?'<div class="vr-item"><span class="vr-val">🦅</span>Doble Salto</div>':''}
+      ${G.bossEnemy.type === 'jefe_cuervo' ? '<div class="vr-item"><span class="vr-val">' + '<svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" style="vertical-align:-4px;"><path d="M8 1l3 4H5zM8 6l3 4H5z"/></svg>' + '</span>Doble Salto</div>' : ''}
+      ${G.bossEnemy.type === 'jefe_rata' ? '<div class="vr-item"><span class="vr-val">' + '<svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" style="vertical-align:-4px;"><path d="M2 8h10l-3-3 1-1 4 4-4 4-1-1 3-3H2z"/></svg>' + '</span>Dash</div>' : ''}
     `;
+    document.getElementById('victory-reward').innerHTML = rewards;
+    document.getElementById('victory-sub').textContent = `Has derrotado al ${G.bossEnemy.type.replace('_', ' ')}.`;
     document.getElementById('screen-victory').classList.add('visible');
     document.getElementById('boss-bar').classList.remove('visible');
   }
 
   function closeVictory() {
     document.getElementById('screen-victory').classList.remove('visible');
-    G.state='running';
+    G.state = 'running';
     updateHUD();
   }
 
@@ -774,15 +662,16 @@
   //  NPCs
   // =============================================
   function checkNPCInteraction() {
-    for(const npc of G.npcs) {
-      const dx = Math.abs((G.player.x+G.player.w/2)-(npc.x+npc.w/2));
-      const dy = Math.abs((G.player.y+G.player.h/2)-(npc.y+npc.h/2));
-      if(dx < 50 && dy < 44) {
+    for (const npc of G.npcs) {
+      const dx = Math.abs((G.player.x + G.player.w / 2) - (npc.x + npc.w / 2));
+      const dy = Math.abs((G.player.y + G.player.h / 2) - (npc.y + npc.h / 2));
+      if (dx < 50 && dy < 44) {
         G.activeNpc = npc;
         G.state = 'dialogue';
         document.getElementById('dlg-speaker').textContent = npc.name;
-        document.getElementById('dlg-text').textContent    = npc.dialogues[npc.dIdx];
+        document.getElementById('dlg-text').textContent = npc.dialogues[npc.dIdx];
         document.getElementById('dialogue-box').classList.add('visible');
+        if (window.PALOMA_LOGROS) window.PALOMA_LOGROS.registrarNPCConocido(npc.name);
         return;
       }
     }
@@ -790,9 +679,9 @@
 
   function advanceDialogue() {
     const npc = G.activeNpc;
-    if(!npc) return;
-    npc.dIdx = (npc.dIdx+1) % npc.dialogues.length;
-    if(npc.dIdx === 0) {
+    if (!npc) return;
+    npc.dIdx = (npc.dIdx + 1) % npc.dialogues.length;
+    if (npc.dIdx === 0) {
       document.getElementById('dialogue-box').classList.remove('visible');
       G.activeNpc = null;
       G.state = 'running';
@@ -805,25 +694,31 @@
   //  CAMBIO DE ZONA
   // =============================================
   function changeZone(zoneId) {
-    saveData.zona = zoneId;
-    saveData.migajas = G.player.migajas;
-    setSave(saveData);
-    loadZone(zoneId);
+    const trans = document.getElementById('screen-transition');
+    trans.classList.add('active');
+    setTimeout(() => {
+      saveData.zona = zoneId;
+      saveData.migajas = G.player.migajas;
+      setSave(saveData);
+      loadZone(zoneId);
+      if (window.PALOMA_LOGROS) window.PALOMA_LOGROS.registrarAreaDescubierta(zoneId);
+      setTimeout(() => trans.classList.remove('active'), 200);
+    }, 600);
   }
 
   // =============================================
   //  BANNERS / POPUPS
   // =============================================
   function showZoneBanner(zoneId) {
-    const names = { ciudad_alta:'Ciudad Alta', alcantarillas:'Alcantarillas de Migas' };
-    const subs  = { ciudad_alta:'Zona 1 — El tejado del mundo', alcantarillas:'Zona 2 — Las profundidades' };
-    document.getElementById('zb-name').textContent = names[zoneId]||zoneId;
-    document.getElementById('zb-sub').textContent  = subs[zoneId]||'';
+    const names = { ciudad_alta: 'Ciudad Alta', alcantarillas: 'Alcantarillas de Migas' };
+    const subs  = { ciudad_alta: 'Zona 1 — El tejado del mundo', alcantarillas: 'Zona 2 — Las profundidades' };
+    document.getElementById('zb-name').textContent = names[zoneId] || zoneId;
+    document.getElementById('zb-sub').textContent  = subs[zoneId] || '';
     const banner = document.getElementById('zone-banner');
     banner.classList.remove('show');
     void banner.offsetWidth;
     banner.classList.add('show');
-    setTimeout(()=>banner.classList.remove('show'), 3000);
+    setTimeout(() => banner.classList.remove('show'), 3500);
   }
 
   function showCpBanner() {
@@ -831,7 +726,7 @@
     b.classList.remove('show');
     void b.offsetWidth;
     b.classList.add('show');
-    setTimeout(()=>b.classList.remove('show'), 2500);
+    setTimeout(() => b.classList.remove('show'), 2500);
   }
 
   function showPickupPopup(x, y, text) {
@@ -841,7 +736,7 @@
     el.style.top  = (y - 16) + 'px';
     el.textContent = text;
     document.body.appendChild(el);
-    setTimeout(()=>el.remove(), 1300);
+    setTimeout(() => el.remove(), 1300);
   }
 
   // =============================================
@@ -851,15 +746,11 @@
   function loop(ts) {
     const dt = Math.min(ts - lastTime, 50);
     lastTime = ts;
-
     update(dt);
     updateCamera();
     render();
-
-    // Limpiar inputs
-    for(const k in justP) delete justP[k];
-    for(const k in justR) delete justR[k];
-
+    for (const k in justP) delete justP[k];
+    for (const k in justR) delete justR[k];
     requestAnimationFrame(loop);
   }
 
@@ -869,9 +760,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     loadZone(saveData.zona || 'ciudad_alta');
     requestAnimationFrame(loop);
-
-    setTimeout(()=>{
-      toast('Z atacar · X Palomaduken · ⇧ Dash · ESC pausa · M mapa', 'info', 5000);
+    setTimeout(() => {
+      toast('Z atacar · X Palomaduken · ⇧ Dash · ESC pausa', 'info', 5000);
     }, 1200);
   });
   </script>

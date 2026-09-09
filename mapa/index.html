@@ -106,7 +106,10 @@
     <!-- Header -->
     <div class="map-header">
       <div>
-        <span class="map-header-title">🗺️ MAPA DEL MUNDO</span>
+        <span class="map-header-title" style="display:flex;align-items:center;gap:8px;">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--gold);"><rect x="1" y="1" width="14" height="14" rx="1"/><line x1="5" y1="1" x2="5" y2="15"/><line x1="11" y1="1" x2="11" y2="15"/></svg>
+          MAPA DEL MUNDO
+        </span>
         <span class="map-header-sub" id="hdr-sub">Ciudad urbana nocturna</span>
       </div>
       <button class="btn btn-ghost" onclick="goBack()">← Volver</button>
@@ -178,7 +181,7 @@
         // Posición en el mapa del mundo (0-1 relativo)
         rx:0.15, ry:0.2, rw:0.35, rh:0.55,
         color:'#1a1a2a', borderColor:'#303050',
-        icon:'🏙️',
+        kind:'city',
       },
       {
         id:'alcantarillas',
@@ -189,7 +192,7 @@
         reward:'Picado Balístico',
         rx:0.52, ry:0.35, rw:0.28, rh:0.45,
         color:'#0e180e', borderColor:'#204020',
-        icon:'🏚️',
+        kind:'sewer',
       },
       {
         id:'tejado_gansos',
@@ -200,7 +203,7 @@
         reward:'Planeo Silencioso',
         rx:0.55, ry:0.08, rw:0.25, rh:0.25,
         color:'#0a0a0a', borderColor:'#202020',
-        icon:'🔒',
+        kind:'lock',
         locked:true,
       },
       {
@@ -212,7 +215,7 @@
         reward:'Dash de Aire',
         rx:0.82, ry:0.05, rw:0.15, rh:0.28,
         color:'#0a0a0a', borderColor:'#202020',
-        icon:'🔒',
+        kind:'lock',
         locked:true,
       },
     ];
@@ -336,9 +339,7 @@
       }
 
       // Ícono
-      ctx.font = '18px serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(z.icon, x+w/2, y+22);
+      drawZoneIcon(ctx, z, x, y, w, h);
 
       // Nombre
       ctx.fillStyle = isLocked ? '#404050' : isSelected ? '#f0f0ff' : '#b0b0d0';
@@ -358,6 +359,43 @@
         ctx.fillStyle='rgba(64,184,96,0.15)';
         ctx.fillRect(x,y,w,h);
       }
+    }
+
+    // Ícono de zona dibujado proceduralmente (ciudad, alcantarillas o candado)
+    function drawZoneIcon(ctx, z, x, y, w, h) {
+      const cx = x + w/2;
+      const cy = y + 18;
+      ctx.save();
+      ctx.textAlign = 'center';
+      if(z.kind === 'lock') {
+        // Candado
+        ctx.strokeStyle = '#a0a0c0';
+        ctx.fillStyle = '#a0a0c0';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(cx, cy-3, 5, Math.PI, 0); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx-6, cy-4); ctx.lineTo(cx+6, cy-4); ctx.lineTo(cx+6, cy+7); ctx.lineTo(cx-6, cy+7); ctx.closePath();
+        ctx.rect(cx-5, cy+2, 4, 3); ctx.fill();
+        ctx.fillRect(cx+1, cy+2, 4, 3);
+      } else if(z.kind === 'sewer') {
+        // Tuberías de alcantarillado
+        ctx.strokeStyle = '#40a070';
+        ctx.fillStyle = '#40a070';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx-6, cy+3); ctx.lineTo(cx+6, cy+3); ctx.stroke();
+        ctx.strokeStyle = 'rgba(64,160,112,0.5)';
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy-7); ctx.stroke();
+      } else {
+        // Edificios de la ciudad
+        ctx.fillStyle = '#c8c8e0';
+        ctx.fillRect(cx-8, cy+5, 5, 8);
+        ctx.fillRect(cx-2, cy+1, 5, 12);
+        ctx.fillRect(cx+4, cy+4, 5, 9);
+        ctx.fillStyle = '#e8c840';
+        ctx.fillRect(cx-1, cy+2, 3, 2);
+        ctx.fillRect(cx+7, cy+5, 3, 2);
+      }
+      ctx.restore();
     }
 
     function drawPlayerDot(W,H,t) {

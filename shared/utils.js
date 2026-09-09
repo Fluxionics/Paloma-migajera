@@ -10,9 +10,9 @@ function defaultSave() {
   return {
     slot: 1,
     nombre: 'Paloma',
-    dificultad: 'normal',   // 'facil' | 'normal' | 'dificil' | 'pesadilla'
+    dificultad: 'normal',
     zona: 'ciudad_alta',
-    checkpoint: { x: 240, y: 0 },  // y=0 → se pone encima del suelo
+    checkpoint: { x: 240, y: 0 },
     nivel: 1,
     xp: 0, xpNext: 100,
     vida: 5, vidaMax: 5,
@@ -20,7 +20,7 @@ function defaultSave() {
     migajas: 0,
     migajasTotal: 0,
     muertes: 0,
-    tiempoJugado: 0,       // segundos
+    tiempoJugado: 0,
     logros: [],
     habilidades: {
       dobleSalto: false,
@@ -32,6 +32,9 @@ function defaultSave() {
     inventario: {},
     zonasVisitadas: ['ciudad_alta'],
     enemigosDerrotados: 0,
+    saltosTotales: 0,
+    palomadukensLanzados: 0,
+    npcsConocidos: [],
   };
 }
 
@@ -56,8 +59,16 @@ function defaultCfg() {
 }
 
 function getSave() {
-  try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || null; }
-  catch { return null; }
+  try {
+    const data = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (!data) return null;
+    // Migrate old saves: add new fields
+    const def = defaultSave();
+    for (const key of Object.keys(def)) {
+      if (data[key] === undefined) data[key] = def[key];
+    }
+    return data;
+  } catch { return null; }
 }
 function setSave(data) {
   localStorage.setItem(SAVE_KEY, JSON.stringify(data));

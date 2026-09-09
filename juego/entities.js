@@ -181,6 +181,34 @@ const ZONE_ENEMIES = {
     { type: 'gato_grande', x: 2800, dir: -1, patrolMin: 2700, patrolMax: 2980 },
     { type: 'cuervo', x: 3050, dir: 1, patrolMin: 2980, patrolMax: 3140 },
   ],
+  bosque_encantado: [
+    { type: 'rata', x: 260, dir: 1, patrolMin: 150, patrolMax: 480 },
+    { type: 'rata_voladora', x: 550, dir: 1, patrolMin: 500, patrolMax: 720 },
+    { type: 'gato', x: 850, dir: -1, patrolMin: 780, patrolMax: 1040 },
+    { type: 'cuervo', x: 1180, dir: 1, patrolMin: 1120, patrolMax: 1380 },
+    { type: 'gato', x: 1500, dir: -1, patrolMin: 1450, patrolMax: 1630 },
+    { type: 'rata', x: 1760, dir: 1, patrolMin: 1700, patrolMax: 1940 },
+    { type: 'gato_grande', x: 2060, dir: -1, patrolMin: 2020, patrolMax: 2220 },
+    { type: 'rata_voladora', x: 2330, dir: 1, patrolMin: 2300, patrolMax: 2440 },
+    { type: 'cuervo', x: 2600, dir: -1, patrolMin: 2560, patrolMax: 2760 },
+    { type: 'gato', x: 2900, dir: 1, patrolMin: 2860, patrolMax: 3010 },
+    { type: 'cuervo', x: 3080, dir: -1, patrolMin: 3050, patrolMax: 3150 },
+  ],
+  tejado_gansos: [
+    { type: 'cuervo', x: 360, dir: 1, patrolMin: 320, patrolMax: 470 },
+    { type: 'rata', x: 600, dir: -1, patrolMin: 570, patrolMax: 730 },
+    { type: 'gato', x: 900, dir: 1, patrolMin: 840, patrolMax: 980 },
+    { type: 'rata_voladora', x: 1100, dir: -1, patrolMin: 1060, patrolMax: 1210 },
+    { type: 'gato_grande', x: 1360, dir: 1, patrolMin: 1310, patrolMax: 1440 },
+    { type: 'cuervo', x: 1560, dir: -1, patrolMin: 1520, patrolMax: 1690 },
+    { type: 'rata', x: 1800, dir: 1, patrolMin: 1730, patrolMax: 1880 },
+    { type: 'gato', x: 2010, dir: -1, patrolMin: 1960, patrolMax: 2110 },
+    { type: 'cuervo', x: 2250, dir: 1, patrolMin: 2200, patrolMax: 2370 },
+    { type: 'rata_voladora', x: 2500, dir: -1, patrolMin: 2450, patrolMax: 2580 },
+    { type: 'gato_grande', x: 2760, dir: 1, patrolMin: 2680, patrolMax: 2860 },
+    { type: 'cuervo', x: 2980, dir: -1, patrolMin: 2930, patrolMax: 3080 },
+    { type: 'gato', x: 3120, dir: 1, patrolMin: 3080, patrolMax: 3160 },
+  ],
 };
 
 // =============================================
@@ -271,6 +299,46 @@ const ZONE_MIGAJAS = {
     [3090, 606, 1],
     [180, 466, 5], [910, 436, 5], [1890, 366, 5], [2730, 346, 5],
   ],
+  bosque_encantado: [
+    [170, 686, 1], [190, 686, 1], [210, 686, 1],
+    [530, 628, 1], [550, 628, 1],
+    [710, 480, 2], [725, 480, 2],
+    [850, 686, 2], [870, 686, 2],
+    [1100, 540, 2], [1140, 540, 2], [1180, 540, 1],
+    [1210, 420, 3], [1240, 420, 3],
+    [1480, 610, 2], [1500, 610, 2],
+    [1750, 686, 1], [1770, 686, 1],
+    [2010, 440, 3], [2030, 440, 3],
+    [2060, 610, 2], [2080, 610, 2],
+    [2340, 686, 1], [2360, 686, 1],
+    [2590, 628, 2], [2610, 628, 2],
+    [2900, 686, 2], [2920, 686, 2],
+    [2990, 500, 3], [3010, 500, 3],
+    [3080, 628, 5],
+    [350, 820, 1], [700, 820, 1], [1050, 820, 1], [1400, 820, 1],
+    [1750, 820, 1], [2100, 820, 1], [2450, 820, 1], [2800, 820, 1], [3120, 820, 1],
+    [620, 460, 5], [1350, 400, 5], [2050, 420, 5],
+  ],
+  tejado_gansos: [
+    [150, 768, 1],
+    [360, 708, 1], [380, 708, 1], [400, 708, 1],
+    [610, 636, 1], [630, 636, 1], [650, 636, 1],
+    [880, 708, 2], [900, 708, 2],
+    [1100, 636, 2], [1120, 636, 2],
+    [1350, 688, 2], [1370, 688, 2],
+    [1560, 580, 3], [1580, 580, 3],
+    [1770, 688, 1], [1790, 688, 1],
+    [2000, 620, 2], [2020, 620, 2],
+    [2240, 560, 3], [2260, 560, 3],
+    [2490, 668, 2], [2510, 668, 2],
+    [2720, 600, 3], [2740, 600, 3],
+    [2950, 688, 2], [2970, 688, 2],
+    [3100, 620, 5], [3130, 620, 5],
+    [1620, 520, 5], [2280, 500, 5],
+    [300, 820, 1], [600, 820, 1], [900, 820, 1], [1200, 820, 1],
+    [1500, 820, 1], [1800, 820, 1], [2100, 820, 1], [2400, 820, 1],
+    [2700, 820, 1], [3000, 820, 1],
+  ],
 };
 
 // =============================================
@@ -333,6 +401,32 @@ const ZONE_NPCS = {
       dIdx: 0,
     },
   ],
+  bosque_encantado: [
+    {
+      x: 180, y: 0, w: 14, h: 18, color: '#e0a040', name: 'Lumen el Zorro Fuego',
+      dialogues: [
+        'Shhh... escucha. El bosque respira aquí más profundo que en el parque.',
+        'Los hongos resplandecen porque guardan memoria. Cuánta migaja cae, ellos lo saben.',
+        'No toques la luna blanca de arriba... o quizá sí, sí puedes. Es solo luz.',
+        'Más al este está el Tejado de los Gansos. Lo que allí brilla no es oro, pero sabe a oro.',
+        'Las ratas voladoras aquí son más viejas. Vuelan en círculos, como si conocieran tu nombre.',
+      ],
+      dIdx: 0,
+    },
+  ],
+  tejado_gansos: [
+    {
+      x: 160, y: 0, w: 14, h: 18, color: '#c8e0c8', name: 'Ganso Capitán',
+      dialogues: [
+        '¡Ganso capitán! Bienvenido al último tejado. Aquí vive la leyenda de las migajas doradas.',
+        'Los gatos grandes guardan la antena. Ampárate en los tendederos, no los esquives.',
+        'Ventisca de plumas: cuando veas rojo en el horizonte, es la ciudad despertándose.',
+        'Las migajas de valor cinco están escondidas en el aire. Salta dos veces y confía en tus alas.',
+        'Has recorrido cada teja de esta ciudad. El cielo te pertenece, pequeña paloma.',
+      ],
+      dIdx: 0,
+    },
+  ],
 };
 
 // =============================================
@@ -350,10 +444,18 @@ const ZONE_PORTALS = {
   parque_palomas: [
     { x: 0, y: 0, w: 40, h: 900, toZone: 'ciudad_alta', label: '← Ciudad Alta' },
     { x: 3150, y: 0, w: 40, h: 900, toZone: 'torre_reloj', label: 'Torre del Reloj →' },
+    { x: 2370, y: 480, w: 90, h: 40, toZone: 'bosque_encantado', label: 'Bosque Encantado ↑' },
   ],
   torre_reloj: [
     { x: 0, y: 0, w: 40, h: 900, toZone: 'parque_palomas', label: '← Parque de las Palomas' },
     { x: 3150, y: 0, w: 40, h: 900, toZone: 'alcantarillas', label: 'Alcantarillas →' },
+  ],
+  bosque_encantado: [
+    { x: 0, y: 0, w: 40, h: 900, toZone: 'parque_palomas', label: '← Parque de las Palomas' },
+    { x: 3150, y: 0, w: 40, h: 900, toZone: 'tejado_gansos', label: 'Tejado de los Gansos →' },
+  ],
+  tejado_gansos: [
+    { x: 0, y: 0, w: 40, h: 900, toZone: 'bosque_encantado', label: '← Bosque Encantado' },
   ],
 };
 
@@ -383,5 +485,17 @@ const ZONE_CHECKPOINTS = {
     { x: 900, y: 0, id: 'cp_torre_2', lit: false },
     { x: 1600, y: 0, id: 'cp_torre_3', lit: false },
     { x: 2400, y: 0, id: 'cp_torre_4', lit: false },
+  ],
+  bosque_encantado: [
+    { x: 240, y: 0, id: 'cp_bosque_1', lit: true },
+    { x: 950, y: 0, id: 'cp_bosque_2', lit: false },
+    { x: 1700, y: 0, id: 'cp_bosque_3', lit: false },
+    { x: 2400, y: 0, id: 'cp_bosque_4', lit: false },
+  ],
+  tejado_gansos: [
+    { x: 240, y: 0, id: 'cp_tejado_1', lit: true },
+    { x: 1000, y: 0, id: 'cp_tejado_2', lit: false },
+    { x: 1750, y: 0, id: 'cp_tejado_3', lit: false },
+    { x: 2500, y: 0, id: 'cp_tejado_4', lit: false },
   ],
 };

@@ -10,6 +10,7 @@ const MAP_H = 900;
 // Imagen de fondo real (fondo.jpg)
 let BG_FONDO = null;
 let DECOR_PNG = null;
+let BG_BOSQUE = null;
 (function loadAssets() {
   const img = new Image();
   img.onload = () => { BG_FONDO = img; };
@@ -17,6 +18,9 @@ let DECOR_PNG = null;
   const dec = new Image();
   dec.onload = () => { DECOR_PNG = dec; };
   dec.src = '../decoracion.png';
+  const bosque = new Image();
+  bosque.onload = () => { BG_BOSQUE = bosque; };
+  bosque.src = '../bosque encantado.JPG';
 })();
 
 function buildZone(zoneId) {
@@ -313,6 +317,85 @@ const ZONES = {
 
     c.fillStyle = '#fff';
     drawTorreCollisions(c, W, H);
+  },
+
+  bosque_encantado(v, c, W, H) {
+    // Foto real del bosque encantado si está cargada
+    if (BG_BOSQUE) {
+      try {
+        const scale = Math.max(W / BG_BOSQUE.width, H / BG_BOSQUE.height);
+        const fw = BG_BOSQUE.width * scale;
+        const fh = BG_BOSQUE.height * scale;
+        v.drawImage(BG_BOSQUE, (W - fw) / 2, 0, fw, Math.min(fh, H));
+      } catch { /* fallback procedural */ }
+    }
+
+    // Velo de noche encantada
+    const veil = v.createLinearGradient(0, 0, 0, H);
+    veil.addColorStop(0, 'rgba(10,6,28,0.25)');
+    veil.addColorStop(0.5, 'rgba(10,6,28,0.45)');
+    veil.addColorStop(1, 'rgba(4,2,14,0.72)');
+    v.fillStyle = veil;
+    v.fillRect(0, 0, W, H);
+
+    // Luz de luna entre los árboles (brillo frío)
+    const moonGlow = v.createRadialGradient(W * 0.5, H * 0.15, 0, W * 0.5, H * 0.15, H * 0.6);
+    moonGlow.addColorStop(0, 'rgba(140,180,255,0.08)');
+    moonGlow.addColorStop(1, 'transparent');
+    v.fillStyle = moonGlow;
+    v.fillRect(0, 0, W, H);
+
+    drawBosqueVisuals(v, W, H);
+
+    c.fillStyle = '#fff';
+    drawBosqueCollisions(c, W, H);
+  },
+
+  tejado_gansos(v, c, W, H) {
+    // Fondo real si está cargado (fondo.jpg)
+    if (BG_FONDO) {
+      try {
+        const scale = Math.max(W / BG_FONDO.width, H / BG_FONDO.height);
+        const fw = BG_FONDO.width * scale;
+        const fh = BG_FONDO.height * scale;
+        v.drawImage(BG_FONDO, (W - fw) / 2, 0, fw, Math.min(fh, H));
+        const dark = v.createLinearGradient(0, H * 0.5, 0, H);
+        dark.addColorStop(0, 'rgba(6,6,16,0.4)');
+        dark.addColorStop(1, 'rgba(6,6,16,0.8)');
+        v.fillStyle = dark;
+        v.fillRect(0, 0, W, H);
+      } catch { /* fallback al escenario procedural */ }
+    }
+
+    // Cielo profundo con tonos cálidos (amanecer casi oscuro)
+    const sky = v.createLinearGradient(0, 0, 0, H * 0.7);
+    sky.addColorStop(0, '#100a08');
+    sky.addColorStop(0.4, '#241408');
+    sky.addColorStop(0.75, '#3a2208');
+    sky.addColorStop(1, '#1c1006');
+    v.fillStyle = sky;
+    if (BG_FONDO) v.globalAlpha = 0.35;
+    v.fillRect(0, 0, W, H);
+    v.globalAlpha = 1;
+
+    // Luna naranja baja
+    v.save();
+    v.globalAlpha = 0.25;
+    v.fillStyle = '#ff9a30';
+    v.beginPath();
+    v.arc(W * 0.24, H * 0.12, 42, 0, Math.PI * 2);
+    v.fill();
+    v.globalAlpha = 0.5;
+    v.beginPath();
+    v.arc(W * 0.24, H * 0.12, 30, 0, Math.PI * 2);
+    v.fill();
+    v.globalAlpha = 1;
+    v.restore();
+
+    drawTejadoVisuals(v, W, H);
+
+    c.fillStyle = '#fff';
+    drawTejadoCollisions(c, W, H);
   }
 };
 
@@ -1102,4 +1185,308 @@ function drawTorreCollisions(ctx, W, H) {
   const ground = H - 60;
   ctx.fillRect(0, ground, W, 60);
   TORRE_PLATS.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
+}
+
+// =============================================
+//  ZONA 5 — BOSQUE ENCANTADO
+// =============================================
+const BOSQUE_PLATS = [
+  { x: 0,     y: 840, w: 3200, h: 60 },
+  { x: 150,   y: 706, w: 260, h: 20 },
+  { x: 500,   y: 648, w: 200, h: 20 },
+  { x: 800,   y: 706, w: 220, h: 20 },
+  { x: 680,   y: 500, w: 120, h: 18 },
+  { x: 1120,  y: 560, w: 260, h: 22 },
+  { x: 1180,  y: 440, w: 180, h: 22 },
+  { x: 1450,  y: 630, w: 180, h: 20 },
+  { x: 1700,  y: 706, w: 240, h: 20 },
+  { x: 1980,  y: 460, w: 120, h: 18 },
+  { x: 2020,  y: 630, w: 200, h: 20 },
+  { x: 2300,  y: 706, w: 180, h: 20 },
+  { x: 2560,  y: 648, w: 200, h: 20 },
+  { x: 2860,  y: 706, w: 200, h: 20 },
+  { x: 2960,  y: 520, w: 130, h: 20 },
+  { x: 3050,  y: 648, w: 150, h: 22 },
+];
+
+function drawTreeTrunk(ctx, x, y, w, h, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = '#241a12';
+  ctx.beginPath();
+  ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#3a2a18';
+  ctx.beginPath();
+  ctx.ellipse(x + w / 2, y + h / 2, w / 2 - 8, h / 2 - 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawGlowMushroom(ctx, x, y, s) {
+  ctx.save();
+  ctx.fillStyle = '#e8d060';
+  ctx.beginPath();
+  ctx.arc(x, y, 4 * s, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(232,208,96,0.25)';
+  ctx.beginPath();
+  ctx.arc(x, y, 12 * s, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#a05030';
+  ctx.fillRect(x - 2.5 * s, y, 5 * s, 7 * s);
+  ctx.fillStyle = '#e8d060';
+  ctx.beginPath();
+  ctx.arc(x, y - 2 * s, 6 * s, Math.PI, 0);
+  ctx.fill();
+  ctx.fillStyle = '#f8e890';
+  ctx.beginPath();
+  ctx.arc(x, y - 4 * s, 3 * s, Math.PI, 0);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawFireflies(ctx, W, H) {
+  for (let i = 0; i < 40; i++) {
+    const fx = pseudoRand(i * 93, W);
+    const fy = pseudoRand(i * 47, H * 0.7) + H * 0.2;
+    const glow = 0.12 + pseudoRand(i * 11, 0.4);
+    ctx.save();
+    ctx.globalAlpha = glow;
+    ctx.fillStyle = '#e8ffa0';
+    ctx.beginPath();
+    ctx.arc(fx, fy, pseudoRand(i * 3, 2) + 1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawBosqueVisuals(ctx, W, H) {
+  // Árboles troncales (fondo)
+  for (let i = 0; i < 32; i++) {
+    const tx = i * 110 + pseudoRand(i * 31, 60);
+    const th = pseudoRand(i * 13, 220) + 420;
+    drawTreeTrunk(ctx, tx, H - th, pseudoRand(i * 7, 46) + 34, th, 0.35);
+  }
+
+  // Copas de árboles (siluetas oscuras)
+  for (let i = 0; i < 26; i++) {
+    const cx = i * 140 + pseudoRand(i * 41, 90);
+    const cy = pseudoRand(i * 23, H * 0.3) + H * 0.16;
+    const cr = pseudoRand(i * 17, 80) + 60;
+    ctx.fillStyle = i % 3 === 0 ? 'rgba(8,20,34,0.55)' : 'rgba(6,26,36,0.45)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+    ctx.arc(cx - cr * 0.8, cy + cr * 0.4, cr * 0.7, 0, Math.PI * 2);
+    ctx.arc(cx + cr * 0.8, cy + cr * 0.3, cr * 0.7, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Plataformas de musgo con hongos brillantes
+  BOSQUE_PLATS.forEach(p => {
+    if (p.y >= 800) return;
+    const g = ctx.createLinearGradient(0, p.y, 0, p.y + p.h);
+    g.addColorStop(0, '#2c3a20');
+    g.addColorStop(1, '#1c2814');
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(p.x + 2, p.y + 2, p.w, p.h);
+    ctx.fillStyle = g;
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    ctx.fillStyle = '#3a4a28';
+    ctx.fillRect(p.x, p.y, p.w, 4);
+    ctx.fillStyle = 'rgba(40,60,30,0.5)';
+    for (let x = p.x; x < p.x + p.w - 14; x += 26) {
+      ctx.beginPath(); ctx.arc(x, p.y + p.h - 3, 5, 0, Math.PI * 2); ctx.fill();
+    }
+    drawGlowMushroom(ctx, p.x + p.w * 0.2, p.y - 12, 1);
+    drawGlowMushroom(ctx, p.x + p.w * 0.75, p.y - 14, 0.8);
+  });
+
+  // Raíces colgantes
+  ctx.strokeStyle = 'rgba(30,22,14,0.5)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 24; i++) {
+    const rx = pseudoRand(i * 61, W);
+    const rl = pseudoRand(i * 9, 70) + 30;
+    ctx.beginPath();
+    ctx.moveTo(rx, 0);
+    ctx.quadraticCurveTo(rx + 8, rl / 2, rx + Math.sin(i) * 12, rl);
+    ctx.stroke();
+  }
+
+  drawFireflies(ctx, W, H);
+
+  // Luz de luna en el centro (halo)
+  const glow = ctx.createRadialGradient(W * 0.48, H * 0.12, 0, W * 0.48, H * 0.12, 150);
+  glow.addColorStop(0, 'rgba(170,200,255,0.12)');
+  glow.addColorStop(0.5, 'rgba(140,170,255,0.05)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(W * 0.48 - 150, 0, 300, H * 0.4);
+}
+
+function drawBosqueCollisions(ctx, W, H) {
+  BOSQUE_PLATS.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
+}
+
+// =============================================
+//  ZONA 6 — TEJADO DE LOS GANSOS
+// =============================================
+const TEJADO_PLATS = [
+  { x: 0,     y: 840, w: 3200, h: 60 },
+  { x: 120,   y: 788, w: 120, h: 16 },
+  { x: 320,   y: 728, w: 150, h: 16 },
+  { x: 570,   y: 656, w: 160, h: 16 },
+  { x: 840,   y: 728, w: 120, h: 16 },
+  { x: 1060,  y: 656, w: 150, h: 16 },
+  { x: 1310,  y: 708, w: 130, h: 16 },
+  { x: 1520,  y: 600, w: 170, h: 16 },
+  { x: 1730,  y: 708, w: 130, h: 16 },
+  { x: 1960,  y: 640, w: 150, h: 16 },
+  { x: 2200,  y: 580, w: 170, h: 16 },
+  { x: 2450,  y: 688, w: 130, h: 16 },
+  { x: 2680,  y: 620, w: 150, h: 16 },
+  { x: 2910,  y: 708, w: 130, h: 16 },
+  { x: 3080,  y: 640, w: 120, h: 16 },
+];
+
+function drawChimney(ctx, x, y, w, h) {
+  ctx.fillStyle = '#3a2c22';
+  ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = '#4a3a2c';
+  ctx.fillRect(x + 3, y, w - 6, h - 8);
+  ctx.fillStyle = '#2a2018';
+  ctx.fillRect(x - 4, y, w + 8, 6);
+  // humo estático
+  ctx.fillStyle = 'rgba(220,210,190,0.1)';
+  ctx.beginPath();
+  ctx.arc(x + w / 2 + 6, y - 10, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + w / 2 + 10, y - 20, 5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawAntenna(ctx, x, y, h) {
+  ctx.strokeStyle = '#4a4a5a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x, y - h);
+  ctx.stroke();
+  ctx.fillStyle = '#c03030';
+  ctx.fillRect(x - 3, y - h - 4, 6, 4);
+  ctx.fillStyle = 'rgba(230,60,60,0.5)';
+  ctx.beginPath();
+  ctx.arc(x, y - h - 3, 5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawWaterTower(ctx, x, w, h) {
+  ctx.strokeStyle = '#5a5038';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x + 4, h + 60); ctx.lineTo(x + 30, h + 18); ctx.lineTo(x + 56, h + 18);
+  ctx.lineTo(x + 82, h + 60);
+  ctx.stroke();
+  ctx.fillStyle = '#3a2c1c';
+  ctx.fillRect(x, h + 60, w, 120);
+  ctx.fillStyle = '#6a5a3c';
+  ctx.beginPath();
+  ctx.ellipse(x + w / 2, h + 18, w / 2, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#7a6a4a';
+  ctx.beginPath();
+  ctx.ellipse(x + w / 2, h + 16, w / 2 - 6, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#4a3c28';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x + w / 2 - w / 4, h + 32); ctx.lineTo(x + w / 2 + w / 4, h + 6);
+  ctx.stroke();
+}
+
+function drawClothesline(ctx, x, len, y) {
+  ctx.strokeStyle = 'rgba(200,200,220,0.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + len, y);
+  ctx.stroke();
+  const cols = ['#c04040', '#4070c0', '#c0c040', '#8060c0'];
+  for (let i = 0; i < 5; i++) {
+    const cx = x + 30 + i * (len - 60) / 4;
+    ctx.fillStyle = cols[i % cols.length];
+    ctx.globalAlpha = 0.6;
+    ctx.fillRect(cx, y, 12, 14 + ((i * 7) % 5));
+    ctx.globalAlpha = 1;
+    ctx.fillRect(cx + 4, y + 14 + ((i * 7) % 5), 4, 8);
+  }
+}
+
+function drawGansoStatue(ctx, x, y) {
+  ctx.save();
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = '#5a6a5a';
+  ctx.beginPath();
+  ctx.ellipse(x, y, 24, 26, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#7a8a7a';
+  ctx.beginPath();
+  ctx.arc(x, y - 40, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#ff9a30';
+  ctx.fillRect(x + 12, y - 44, 12, 8);
+  ctx.restore();
+}
+
+function drawTejadoVisuals(ctx, W, H) {
+  // Silueta de la ciudad nocturna
+  drawBuildings(ctx, W, H, H * 0.55, H * 0.3, '#0c0c18', '#141420', 90, 240, 140);
+
+  // Chimeneas decorativas
+  const chimneys = [
+    { x: 220, y: 788, w: 18, h: 44 },
+    { x: 420, y: 728, w: 20, h: 56 },
+    { x: 890, y: 728, w: 16, h: 48 },
+    { x: 1350, y: 708, w: 18, h: 60 },
+    { x: 1770, y: 708, w: 16, h: 44 },
+    { x: 2240, y: 580, w: 20, h: 62 },
+    { x: 2480, y: 688, w: 18, h: 48 },
+  ];
+  chimneys.forEach(ch => drawChimney(ctx, ch.x, ch.y, ch.w, ch.h));
+
+  // Antenas
+  drawAntenna(ctx, 600, 656, 90);
+  drawAntenna(ctx, 1380, 708, 60);
+  drawAntenna(ctx, 2600, 620, 80);
+
+  // Torre de agua central
+  drawWaterTower(ctx, 1650, 110, 540);
+
+  // Tendederos
+  drawClothesline(ctx, 500, 300, 600);
+  drawClothesline(ctx, 1900, 220, 560);
+
+  // Estatua de ganso (mascota del tejado)
+  drawGansoStatue(ctx, W * 0.92, H - 98);
+
+  // Rejilla de tejas horizontales
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  for (let x = 0; x < W; x += 90) {
+    ctx.fillRect(x, H - 60, 40, 4);
+    ctx.fillRect(x + 45, H - 50, 40, 4);
+  }
+
+  // Luces cálidas distantes
+  for (let i = 0; i < 50; i++) {
+    const lx = pseudoRand(i * 77, W);
+    const ly = H * 0.2 + pseudoRand(i * 31, H * 0.3);
+    ctx.fillStyle = `rgba(255,190,110,${pseudoRand(i * 9, 0.18) + 0.05})`;
+    ctx.fillRect(lx, ly, 2 + pseudoRand(i * 3, 3), 2 + pseudoRand(i * 5, 2));
+  }
+}
+
+function drawTejadoCollisions(ctx, W, H) {
+  TEJADO_PLATS.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
 }

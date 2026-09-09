@@ -62,7 +62,13 @@ function drawPlayer(ctx, player, camX, camY) {
 
   // Sprite principal
   const st = playerState(player);
-  const spr = sprite(`pigeon_${st}_${fw > 0 ? 'r' : 'l'}`);
+  const dir = fw > 0 ? 'r' : 'l';
+  let sprName = `pigeon_${st}_${dir}`;
+  // Aleteo: alterna las dos fases del ala en vuelo/planeo
+  if (st === 'fly' || st === 'glide') {
+    if (Math.floor(t * 12) % 2 === 0) sprName = `pigeon_${st}2_${dir}`;
+  }
+  const spr = sprite(sprName);
   let bodyShown = false;
   if (spr) {
     const sw = Math.max(22, player.w + 8);
@@ -138,6 +144,8 @@ function enemySpriteName(e) {
 function drawEnemy(ctx, e, camX, camY) {
   const rx = Math.floor(e.x - camX);
   const ry = Math.floor(e.y - camY);
+  const vw = ctx.canvas.width, vh = ctx.canvas.height;
+  if (rx + e.w < -40 || rx > vw + 40 || ry + e.h < -40 || ry > vh + 40) return;
   const t = performance.now() / 1000;
   ctx.save();
 
@@ -154,7 +162,12 @@ function drawEnemy(ctx, e, camX, camY) {
   }
 
   const breathe = Math.sin(t * 2 + (e.x * 0.01)) * 0.5;
-  const spr = sprite(enemySpriteName(e));
+  let spr = sprite(enemySpriteName(e));
+  // Gato real animado (gato.gif de Franck) si está disponible
+  if (e.type === 'gato' || e.type === 'gato_grande') {
+    const gif = window.__SPRITES && window.__SPRITES.getImg('gato.gif');
+    if (gif) spr = gif;
+  }
   if (spr) {
     const sw = e.w + 10;
     const sh = e.h + 10;
@@ -208,8 +221,13 @@ function drawMigajas(ctx, migajas, camX, camY) {
     if (rx < -20 || rx > ctx.canvas.width + 20) continue;
 
     ctx.save();
-    ctx.shadowColor = '#e8c840';
-    ctx.shadowBlur = 10 + Math.sin(t * 3 + m.bob) * 4;
+    // Cheaper glow: no shadowBlur, use semi-transparent fill
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = '#e8c840';
+    ctx.beginPath();
+    ctx.arc(rx, ry, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
     const stretchX = Math.abs(Math.cos(t * 2 + m.bob));
 
     if (m.value >= 5 && s5) {
@@ -245,7 +263,12 @@ function drawProjectiles(ctx, projs, camX, camY) {
       ctx.fillStyle = '#6ab0d8';
       ctx.fillRect(rx - 24 * p.dir, ry, 24 * p.dir, p.h);
       ctx.globalAlpha = 1;
-      if (palou) drawSprite(ctx, palou, rx - 10 * p.dir, ry - 1, 20 * p.dir, 10);
+      const haduken = window.__SPRITES && window.__SPRITES.getImg('haduken.gif');
+      if (haduken) {
+        ctx.globalAlpha = 0.95;
+        drawSprite(ctx, haduken, rx - 16 * p.dir, ry - 2, 32 * p.dir, 16);
+        ctx.globalAlpha = 1;
+      } else if (palou) drawSprite(ctx, palou, rx - 10 * p.dir, ry - 1, 20 * p.dir, 10);
       else {
         ctx.fillStyle = '#6ab0d8';
         ctx.fillRect(rx, ry, p.w * p.dir, p.h);
@@ -270,9 +293,11 @@ function drawProjectiles(ctx, projs, camX, camY) {
 
 // ---- Partículas ----
 function drawParticles(ctx, particles, camX, camY) {
+  const vw = ctx.canvas.width, vh = ctx.canvas.height;
   for (const p of particles) {
     const rx = p.x - camX;
     const ry = p.y - camY;
+    if (rx < -10 || rx > vw + 10 || ry < -10 || ry > vh + 10) continue;
     const a = p.life / p.maxLife;
     ctx.globalAlpha = a * 0.9;
     ctx.fillStyle = p.color;
@@ -312,7 +337,7 @@ function drawNPCs(ctx, npcs, camX, camY, playerX, playerY) {
     ctx.globalAlpha = 0.06 + Math.sin(t * 2) * 0.03;
     ctx.fillStyle = '#f8e060';
     ctx.beginPath();
-    ctx.arc(rx + n.w / 2, ry + n.h / 2, 30, 0, Math.PI * 2);
+    ctx.arc(rx + n.w / 2, ry + n.h / 2, 25, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
 
@@ -355,12 +380,10 @@ function drawCheckpoints(ctx, checkpoints, camX, camY) {
     ctx.fillRect(rx - 7, ry - 54, 14, 2);
 
     if (cp.lit) {
+      // Cheaper glow — simple filled arc instead of radial gradient
       ctx.save();
-      ctx.globalAlpha = 0.04 + Math.sin(t * 1.5) * 0.02;
-      const rayGrad = ctx.createRadialGradient(rx, ry - 54, 0, rx, ry - 54, 80);
-      rayGrad.addColorStop(0, '#f0a020');
-      rayGrad.addColorStop(1, 'transparent');
-      ctx.fillStyle = rayGrad;
+      ctx.globalAlpha = 0.05 + Math.sin(t * 1.5) * 0.02;
+      ctx.fillStyle = '#f0a020';
       ctx.beginPath();
       ctx.arc(rx, ry - 54, 80, 0, Math.PI * 2);
       ctx.fill();
@@ -368,7 +391,7 @@ function drawCheckpoints(ctx, checkpoints, camX, camY) {
 
       ctx.save();
       ctx.shadowColor = '#f0a020';
-      ctx.shadowBlur = 25 + Math.sin(t * 5) * 8;
+      ctx.shadowBlur = 18;
       ctx.fillStyle = '#f0a020';
       ctx.beginPath();
       ctx.arc(rx, ry - 54, 6 + Math.sin(t * 7) * 1.5, 0, Math.PI * 2);
@@ -400,41 +423,34 @@ function drawCheckpoints(ctx, checkpoints, camX, camY) {
 function drawPortals(ctx, portals, camX, camY) {
   if (!portals) return;
   const t = performance.now() / 1000;
+  const vw = ctx.canvas.width, vh = ctx.canvas.height;
   for (const portal of portals) {
     const rx = portal.x - camX;
-    const ry = portal.y - camY;
-    if (rx < -80 || rx > ctx.canvas.width + 80) continue;
+    if (rx < -80 || rx > vw + 80) continue;
     ctx.save();
 
     const a = 0.3 + Math.sin(t * 2) * 0.15;
     const pulseA = 0.5 + Math.sin(t * 3) * 0.2;
 
-    const glowGrad = ctx.createRadialGradient(
-      rx + portal.w / 2, ctx.canvas.height / 2, 0,
-      rx + portal.w / 2, ctx.canvas.height / 2, portal.w * 2
-    );
-    glowGrad.addColorStop(0, `rgba(106,176,216,${a * 0.3})`);
-    glowGrad.addColorStop(1, 'transparent');
-    ctx.fillStyle = glowGrad;
-    ctx.fillRect(rx - portal.w, 0, portal.w * 3, ctx.canvas.height);
-
+    // Cheaper column glow (no radial gradient)
+    const gw = portal.w * 2;
+    ctx.fillStyle = `rgba(106,176,216,${a * 0.10})`;
+    ctx.fillRect(rx + portal.w / 2 - gw / 2, 0, gw, vh);
     ctx.fillStyle = `rgba(106,176,216,${a * 0.12})`;
-    ctx.fillRect(rx, 0, portal.w, ctx.canvas.height);
+    ctx.fillRect(rx, 0, portal.w, vh);
 
     ctx.strokeStyle = `rgba(106,176,216,${pulseA})`;
     ctx.lineWidth = 2;
     ctx.setLineDash([8, 4]);
     ctx.lineDashOffset = -t * 30;
     ctx.beginPath();
-    ctx.moveTo(rx, 0);
-    ctx.lineTo(rx, ctx.canvas.height);
-    ctx.moveTo(rx + portal.w, 0);
-    ctx.lineTo(rx + portal.w, ctx.canvas.height);
+    ctx.moveTo(rx, 0); ctx.lineTo(rx, vh);
+    ctx.moveTo(rx + portal.w, 0); ctx.lineTo(rx + portal.w, vh);
     ctx.stroke();
     ctx.setLineDash([]);
 
     for (let i = 0; i < 3; i++) {
-      const py = (t * 40 + i * 300) % ctx.canvas.height;
+      const py = (t * 40 + i * 300) % vh;
       const px = rx + portal.w / 2 + Math.sin(t * 3 + i) * 8;
       ctx.globalAlpha = 0.6;
       ctx.fillStyle = '#6ab0d8';
@@ -447,7 +463,7 @@ function drawPortals(ctx, portals, camX, camY) {
     ctx.fillStyle = '#c0e8ff';
     ctx.font = 'bold 11px Cinzel, serif';
     ctx.textAlign = 'center';
-    ctx.fillText(portal.label, rx + portal.w / 2, ctx.canvas.height / 2);
+    ctx.fillText(portal.label, rx + portal.w / 2, vh / 2);
 
     ctx.restore();
   }

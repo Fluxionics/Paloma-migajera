@@ -110,14 +110,14 @@ function pxRect(c, x, y, w, h, color) {
 }
 
 // ---- Paloma: 30x28 sprite, contorno + poses por estado ----
-function genPigeonSprite(state, facing) {
+function genPigeonSprite(state, facing, wing2) {
   const c = makeCanvas(30, 28);
   const ctx = c.getContext('2d');
   const flip = facing < 0;
   const M = (x) => flip ? 30 - x : x;            // espejo horizontal
   const O = '#26263a';                           // contorno
 
-  const fly    = state === 'fly' || state === 'glide';
+  const fly    = state === 'fly' || state === 'glide' || state === 'fly2' || state === 'glide2';
   const attack = state === 'attack';
   const jump   = state === 'jump' || state === 'fall';
   const dash   = state === 'dash';
@@ -224,26 +224,29 @@ function genPigeonSprite(state, facing) {
   }
 
   // ---- Ala delantera según estado (variación de pose) ----
-  if (state === 'glide') {
-    // Ala extendida amplia, plumas individuales
+  if (state === 'glide' || state === 'glide2') {
+    // Ala extendida amplia, plumas individuales (baja al batir)
+    const lift = state === 'glide2' ? -2 : 0;
     ctx.fillStyle = O;
-    ctx.fillRect(M(13) - 3, 6, 13, 8);
+    ctx.fillRect(M(13) - 3, 6 + lift, 13, 8);
     ctx.fillStyle = '#c4cae8';
-    ctx.fillRect(M(14) - 3, 7, 11, 6);
+    ctx.fillRect(M(14) - 3, 7 + lift, 11, 6);
     for (let i = 0; i < 4; i++) {
       ctx.fillStyle = '#8a90c0';
-      ctx.fillRect(M(17) + 1 - 3, 8 + i, 6, 1);
+      ctx.fillRect(M(17) + 1 - 3, 8 + lift + i, 6, 1);
     }
     ctx.fillStyle = '#dcdef4';
-    ctx.fillRect(M(12) - 3, 9, 3, 3);
-    ctx.fillRect(M(24) - 3, 7, 2, 5);
-  } else if (state === 'fly') {
+    ctx.fillRect(M(12) - 3, 9 + lift, 3, 3);
+    ctx.fillRect(M(24) - 3, 7 + lift, 2, 5);
+  } else if (state === 'fly' || state === 'fly2') {
+    // Ala levantada (subida) o media (bajada)
+    const lift = state === 'fly2' ? 3 : 0;
     ctx.fillStyle = O;
-    ctx.fillRect(M(15) - 1, 6, 9, 7);
+    ctx.fillRect(M(15) - 1, 6 + lift, 9, 7);
     ctx.fillStyle = '#b8c0e4';
-    ctx.fillRect(M(16) - 1, 7, 7, 5);
+    ctx.fillRect(M(16) - 1, 7 + lift, 7, 5);
     ctx.fillStyle = 'rgba(255,255,255,0.2)';
-    ctx.fillRect(M(16) - 1, 7, 7, 1);
+    ctx.fillRect(M(16) - 1, 7 + lift, 7, 1);
   } else if (state === 'wallslide') {
     ctx.fillStyle = O;
     ctx.fillRect(M(15) - 1, 6, 6, 8);
@@ -393,6 +396,11 @@ function buildSprites() {
   states.forEach(st => {
     SPRITES[`pigeon_${st}_r`] = genPigeonSprite(st, 1);
     SPRITES[`pigeon_${st}_l`] = genPigeonSprite(st, -1);
+  });
+  // Frecuencia 2 del aleteo (alas en otra fase)
+  ['fly', 'glide'].forEach(st => {
+    SPRITES[`pigeon_${st}2_r`] = genPigeonSprite(st, 1, true);
+    SPRITES[`pigeon_${st}2_l`] = genPigeonSprite(st, -1, true);
   });
   SPRITES.gato      = genCatSprite(false);
   SPRITES.gato_agro = genCatSprite(true);

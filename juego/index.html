@@ -166,6 +166,9 @@
     <button class="pause-btn" onclick="goTo('../mapa/index.html')"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;margin-right:8px;"><rect x="1" y="1" width="14" height="14" rx="1"/><line x1="5" y1="1" x2="5" y2="15"/><line x1="11" y1="1" x2="11" y2="15"/></svg>Mapa</button>
     <button class="pause-btn" onclick="goTo('../ajustes/index.html')"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.3" style="vertical-align:middle;margin-right:8px;"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5L13 13M13 3l-1.5 1.5M4.5 11.5L3 13"/></svg>Ajustes</button>
     <div class="pause-sep"></div>
+    <button class="pause-btn" id="btn-sfx" onclick="toggleSfxBtn()"><svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M3 5h3l4-3v12l-4-3H3z"/><path d="M11 5.5s1.5 1 1.5 2.5-1.5 2.5-1.5 2.5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>SFX: ON</button>
+    <button class="pause-btn" id="btn-music" onclick="toggleMusicBtn()"><svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M4 3v9M4 3l8-1v9M12 2v9"/><circle cx="4" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="10" r="2" fill="currentColor"/></svg>Música: ON</button>
+    <div class="pause-sep"></div>
     <button class="pause-btn" onclick="saveAndExit()" style="color:var(--muted);font-size:0.6rem;"><svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M2 2h9l3 3v9H2z" opacity="0.7"/><rect x="4" y="8" width="8" height="5" fill="#080810" opacity="0.4"/><rect x="5" y="9" width="3" height="2" rx="0.5"/></svg>Guardar y salir</button>
   </div>
 
@@ -212,6 +215,7 @@
   <script src="entities.js"></script>
   <script src="physics.js"></script>
   <script src="renderer.js"></script>
+  <script src="audio.js"></script>
   <script>
   const canvas = document.getElementById('game-canvas');
   const ctx    = canvas.getContext('2d');
@@ -342,6 +346,7 @@
       G.loadProgress = 100;
       G.currentZone = zoneId;
       G.state = 'running';
+      PM_AUDIO.startMusic(zoneId);
       showZoneBanner(zoneId);
       updateHUD();
     }, 80);
@@ -375,10 +380,15 @@
     updateCooldowns(p, dt);
 
     if (action) {
-      if (action.action === 'jump') { spawnJumpFx(G.particles, p.x + p.w / 2, p.y + p.h, action.double, action.wallJump); }
-      if (action.action === 'dash') { spawnDashFx(G.particles, p.x + p.w / 2, p.y + p.h / 2, p.dashDir); }
-      if (action.action === 'attack') { doMeleeAttack(p, G.enemies, G.particles); }
-      if (action.action === 'palou') { firePalou(p, G.projectiles); }
+      if (action.action === 'jump') { spawnJumpFx(G.particles, p.x + p.w / 2, p.y + p.h, action.double, action.wallJump); PM_AUDIO.sfx[action.double ? 'doubleJump' : action.wallJump ? 'wallJump' : 'jump'](); }
+      if (action.action === 'dash') { spawnDashFx(G.particles, p.x + p.w / 2, p.y + p.h / 2, p.dashDir); PM_AUDIO.sfx.dash(); }
+      if (action.action === 'attack') { doMeleeAttack(p, G.enemies, G.particles); PM_AUDIO.sfx.attack(); }
+      if (action.action === 'palou') { firePalou(p, G.projectiles); PM_AUDIO.sfx.palou(); }
+    }
+
+    // Plumas en dash + planeo
+    if (p.dashing && Math.random() > 0.35) {
+      spawnFeatherFx(G.particles, p.x + p.w / 2, p.y + p.h / 2, p.dashDir || p.facing, 2);
     }
 
     // Wall slide particles
@@ -398,6 +408,7 @@
       e._doAtk = false;
       if (hurtPlayer(p, e.dmg * (e.diff?.dmgEnemigo || 1), G.particles)) {
         updateHUD();
+        PM_AUDIO.sfx.hurt();
         if (p.hp <= 0) killPlayer();
       }
     }
@@ -406,9 +417,10 @@
 
     const collected = collectMigajas(p, G.migajas);
     if (collected.length > 0) {
-      collected.forEach(m => {
+      collected.forEach((m, i) => {
         spawnPickupFx(G.particles, m.x, m.y, m.value);
         showPickupPopup(m.x - G.camera.x, m.y - G.camera.y, `+${m.value} migajas`);
+        if (i === 0) PM_AUDIO.sfx[m.value >= 5 ? 'collectBig' : 'collect']();
       });
       updateHUD();
     }
@@ -424,12 +436,14 @@
           saveData.migajas = p.migajas;
           setSave(saveData);
           showCpBanner();
+          PM_AUDIO.sfx.checkpoint();
         }
       }
     }
 
     for (const portal of G.portals) {
-      if (rectsOverlap(p.x, p.y, p.w, p.h, portal.x, 0, portal.w, G.map.h)) {
+      if (rectsOverlap(p.x, p.y, p.w, p.h, portal.x, portal.y || 0, portal.w, portal.h || G.map.h)) {
+        PM_AUDIO.sfx.portal();
         changeZone(portal.toZone);
         return;
       }
@@ -504,8 +518,8 @@
       // Paloma real (sprite procedural animado: bate las alas)
       const t = performance.now() / 1000;
       const bounce = Math.sin(t * 3) * 6;
-      const wing = Math.floor(t * 9) % 2;
-      const spr = sprite(wing === 0 ? 'pigeon_fly_r' : 'pigeon_glide_r') || sprite('pigeon_fly_r');
+      const wing = Math.floor(t * 9) % 3;
+      const spr = sprite(wing === 0 ? 'pigeon_fly_r' : wing === 1 ? 'pigeon_fly2_r' : 'pigeon_glide_r') || sprite('pigeon_fly_r');
       if (spr) drawSprite(ctx, spr, W / 2 - 17, H / 2 - 92 + bounce, 34, 32);
 
       // Sombra debajo de la paloma
@@ -547,7 +561,12 @@
     const cx = G.camera.x + screenShake.x;
     const cy = G.camera.y + screenShake.y;
 
-    ctx.drawImage(G.map.visual, -cx, -cy);
+    // Draw only the visible sub-rect of the map (big perf win)
+    const sx = Math.max(0, Math.floor(cx)), sy = Math.max(0, Math.floor(cy));
+    const sw = Math.min(MAP_W - sx, W + 1), sh = Math.min(MAP_H - sy, H + 1);
+    if (sw > 0 && sh > 0) {
+      ctx.drawImage(G.map.visual, sx, sy, sw, sh, sx - cx, sy - cy, sw, sh);
+    }
     drawPortals(ctx, G.portals, cx, cy);
     drawCheckpoints(ctx, G.checkpoints, cx, cy);
     drawNPCs(ctx, G.npcs, cx, cy, G.player.x, G.player.y);
@@ -560,7 +579,7 @@
 
     if (keys['F1']) {
       ctx.globalAlpha = 0.25;
-      ctx.drawImage(G.map.visual, -cx, -cy);
+      if (sw > 0 && sh > 0) ctx.drawImage(G.map.visual, sx, sy, sw, sh, sx - cx, sy - cy, sw, sh);
       ctx.globalAlpha = 1;
     }
   }
@@ -568,21 +587,25 @@
   // =============================================
   //  HUD
   // =============================================
+  let _lastHpMax = 0, _lastHp = -1, _lastMp = -1, _lastEnergy = -1, _lastMig = -1, _lastZone = '';
   function updateHUD() {
     const p = G.player;
     if (!p) return;
-    const hh = document.getElementById('hud-hearts');
-    hh.innerHTML = '';
-    for (let i = 0; i < p.hpMax; i++) {
-      const h = document.createElement('div');
-      h.className = 'heart' + (i >= p.hp ? ' empty' : '');
-      hh.appendChild(h);
+    if (p.hpMax !== _lastHpMax || p.hp !== _lastHp) {
+      _lastHpMax = p.hpMax; _lastHp = p.hp;
+      const hh = document.getElementById('hud-hearts');
+      hh.innerHTML = '';
+      for (let i = 0; i < p.hpMax; i++) {
+        const h = document.createElement('div');
+        h.className = 'heart' + (i >= p.hp ? ' empty' : '');
+        hh.appendChild(h);
+      }
     }
-    document.getElementById('hud-mp').style.width = (p.mp / p.mpMax * 100) + '%';
-    document.getElementById('hud-energy').style.width = (p.energy / p.energyMax * 100) + '%';
-    document.getElementById('hud-mig').textContent = p.migajas;
+    if (p.mp !== _lastMp) { _lastMp = p.mp; document.getElementById('hud-mp').style.width = (p.mp / p.mpMax * 100) + '%'; }
+    if (p.energy !== _lastEnergy) { _lastEnergy = p.energy; document.getElementById('hud-energy').style.width = (p.energy / p.energyMax * 100) + '%'; }
+    if (p.migajas !== _lastMig) { _lastMig = p.migajas; document.getElementById('hud-mig').textContent = p.migajas; }
     document.getElementById('hud-nivel').textContent = saveData.nivel;
-    document.getElementById('hud-zona').textContent = G.currentZone.replace('_', ' ').toUpperCase();
+    if (G.currentZone !== _lastZone) { _lastZone = G.currentZone; document.getElementById('hud-zona').textContent = G.currentZone.replace('_', ' ').toUpperCase(); }
     setCd('cd-z', p.atkTimer, ATK_DUR);
     setCd('cd-x', p.palouCooldown, PALOU_COOLDOWN);
     setCd('cd-sh', p.dashCooldown, DASH_COOLDOWN);
@@ -612,6 +635,33 @@
   // =============================================
   //  PAUSA / ESTADOS
   // =============================================
+  // =============================================
+  //  AUDIO INTEGRATION
+  // =============================================
+  function toggleSfxBtn() {
+    const on = PM_AUDIO.toggleSfx();
+    document.getElementById('btn-sfx').textContent = 'SFX: ' + (on ? 'ON' : 'OFF');
+  }
+  function toggleMusicBtn() {
+    const on = PM_AUDIO.toggleMusic();
+    document.getElementById('btn-music').textContent = 'Música: ' + (on ? 'ON' : 'OFF');
+  }
+  function syncAudioBtns() {
+    const bS = document.getElementById('btn-sfx');
+    const bM = document.getElementById('btn-music');
+    if (bS) bS.textContent = 'SFX: ' + (PM_AUDIO.sfxOn ? 'ON' : 'OFF');
+    if (bM) bM.textContent = 'Música: ' + (PM_AUDIO.musicOn ? 'ON' : 'OFF');
+  }
+  // Init audio on first user gesture
+  let _audioInited = false;
+  function ensureAudio() {
+    if (!_audioInited) { PM_AUDIO.init(); _audioInited = true; }
+    PM_AUDIO.resume();
+  }
+  document.addEventListener('keydown', ensureAudio, { once: false });
+  document.addEventListener('mousedown', ensureAudio, { once: false });
+  document.addEventListener('touchstart', ensureAudio, { once: false });
+
   function togglePause() {
     if (G.state === 'dead' || G.state === 'victory' || G.state === 'loading') return;
     if (G.state === 'running' || G.state === 'dialogue') {
@@ -619,6 +669,7 @@
       document.getElementById('dialogue-box').classList.remove('visible');
       G.state = 'paused';
       document.getElementById('screen-pause').classList.add('visible');
+      syncAudioBtns();
       document.getElementById('pause-stats').innerHTML = `
         <div class="pstat"><span class="pstat-val">${G.player.migajas}</span>Migajas</div>
         <div class="pstat"><span class="pstat-val">${saveData.muertes}</span>Muertes</div>
@@ -640,6 +691,7 @@
     saveData.muertes++;
     setSave(saveData);
     addScreenShake(12);
+    PM_AUDIO.sfx.death();
     document.getElementById('screen-death').classList.add('visible');
     document.getElementById('death-stats').textContent =
       `${saveData.muertes} muertes · ${G.player.migajas} migajas · ${fmtTime(saveData.tiempoJugado)} jugado`;
@@ -675,6 +727,7 @@
     const migGain = G.bossEnemy.migajas;
     G.player.migajas += migGain;
     addScreenShake(10);
+    PM_AUDIO.sfx.victory();
 
     if (G.bossEnemy.type === 'jefe_cuervo') {
       G.player.habilidades.dobleSalto = true;
@@ -761,12 +814,16 @@
       alcantarillas: 'Alcantarillas de Migas',
       parque_palomas: 'Parque de las Palomas',
       torre_reloj: 'Torre del Reloj',
+      bosque_encantado: 'Bosque Encantado',
+      tejado_gansos: 'Tejado de los Gansos',
     };
     const subs = {
-      ciudad_alta: 'Zona 1 de 4 — El tejado del mundo',
-      alcantarillas: 'Zona 2 de 4 — Las profundidades envenenadas',
-      parque_palomas: 'Zona 3 de 4 — El parque junto a la luna',
-      torre_reloj: 'Zona 4 de 4 — Donde el tiempo se detiene',
+      ciudad_alta: 'Zona 1 de 6 — El tejado del mundo',
+      alcantarillas: 'Zona 2 de 6 — Las profundidades envenenadas',
+      parque_palomas: 'Zona 3 de 6 — El parque junto a la luna',
+      torre_reloj: 'Zona 4 de 6 — Donde el tiempo se detiene',
+      bosque_encantado: 'Zona 5 de 6 — Donde los árboles susurran',
+      tejado_gansos: 'Zona 6 de 6 — El reino de los gansos',
     };
     document.getElementById('zb-name').textContent = names[zoneId] || zoneId;
     document.getElementById('zb-sub').textContent  = subs[zoneId] || '';

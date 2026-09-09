@@ -503,6 +503,8 @@ function doMeleeAttack(player, enemies, particles) {
     if (!e.alive) continue;
     if (rectsOverlap(ax, ay, atkW, atkH, e.x, e.y, e.w, e.h)) {
       damageEnemy(e, dmg, player, particles);
+      if (window.PM_AUDIO) window.PM_AUDIO.sfx.attackHit();
+      if (combo > 1 && window.PM_AUDIO) window.PM_AUDIO.sfx.combo(combo);
     }
   }
 }
@@ -713,6 +715,21 @@ function spawnDustFx(particles, x, y, dir) {
       vx: -dir * (Math.random() * 1.5 + 0.5),
       vy: -(Math.random() * 1.5 + 0.3),
       life: 200, maxLife: 200, color: '#a0a0b0', r: 1, sq: true,
+    });
+  }
+}
+
+// Estela de plumas de la paloma (dash / doble salto / picado)
+function spawnFeatherFx(particles, x, y, dir, n = 3) {
+  for (let i = 0; i < n; i++) {
+    particles.push({
+      x: x - dir * (Math.random() * 6 + 3),
+      y: y + (Math.random() - 0.5) * 8,
+      vx: -dir * (Math.random() * 1.2 + 0.4) + (Math.random() - 0.5) * 0.6,
+      vy: -(Math.random() * 0.8 + 0.3),
+      life: 380, maxLife: 380,
+      color: Math.random() > 0.6 ? '#e8ecff' : '#bcc4e8',
+      r: 1.6 + Math.random() * 0.8, sq: Math.random() > 0.5,
     });
   }
 }

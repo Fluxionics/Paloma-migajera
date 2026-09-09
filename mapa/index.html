@@ -219,14 +219,24 @@
       {
         id:'tejado_gansos',
         name:'Tejado de los Gansos',
-        desc:'Zona de acceso aún no descubierta. Los gansos guardan las migajas más grandes de la ciudad.',
-        enemies:'???',
-        boss:'???',
-        reward:'Planeo Silencioso',
-        rx:0.55, ry:0.08, rw:0.25, rh:0.25,
-        color:'#0a0a0a', borderColor:'#202020',
-        kind:'lock',
-        locked:true,
+        desc:'El último tejado de la ciudad, coronado por chimeneas, antenas y la torre de agua. Los gansos guardan aquí las migajas más doradas.',
+        enemies:'Cuervos, Gatos Grandes, Ratas Voladoras',
+        boss:'—',
+        reward:'Migajas de oro',
+        rx:0.15, ry:0.08, rw:0.28, rh:0.25,
+        color:'#241408', borderColor:'#5a3c1c',
+        kind:'rooftop',
+      },
+      {
+        id:'bosque_encantado',
+        name:'Bosque Encantado',
+        desc:'Un bosque nocturno al norte, lleno de hongos resplandecientes, luciérnagas y árboles que susurran.',
+        enemies:'Gatos, Cuervos, Luciérnagas',
+        boss:'—',
+        reward:'Zonas nuevas',
+        rx:0.36, ry:0.06, rw:0.28, rh:0.26,
+        color:'#0e1e2a', borderColor:'#20504a',
+        kind:'forest',
       },
       {
         id:'nido_halcon',
@@ -287,7 +297,10 @@
     function drawConnections(W,H,t) {
       const connections = [
         ['ciudad_alta','alcantarillas'],
-        ['ciudad_alta','tejado_gansos'],
+        ['ciudad_alta','parque_palomas'],
+        ['parque_palomas','torre_reloj'],
+        ['parque_palomas','bosque_encantado'],
+        ['bosque_encantado','tejado_gansos'],
         ['tejado_gansos','nido_halcon'],
       ];
       connections.forEach(([a,b]) => {
@@ -429,6 +442,28 @@
         ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx+3, cy+2); ctx.stroke();
         ctx.fillStyle = 'rgba(232,200,64,0.85)';
         ctx.fillRect(cx-6, cy+9, 12, 1.5);
+      } else if(z.kind === 'forest') {
+        // Árbol encantado con luciérnagas
+        ctx.fillStyle = '#5a3a2c';
+        ctx.fillRect(cx-1, cy-1, 3, 9);
+        ctx.fillStyle = '#205038';
+        ctx.beginPath(); ctx.arc(cx, cy-4, 6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx-4, cy-2, 4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx+5, cy-3, 4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(232,255,160,0.9)';
+        ctx.fillRect(cx-4, cy-6, 1.5, 1.5);
+        ctx.fillRect(cx+3, cy-5, 1.5, 1.5);
+        ctx.fillRect(cx-1, cy-9, 1.5, 1.5);
+      } else if(z.kind === 'rooftop') {
+        // Tejado inclinado con chimenea
+        ctx.fillStyle = '#c8c8e0';
+        ctx.beginPath();
+        ctx.moveTo(cx-8, cy+4); ctx.lineTo(cx+8, cy+4); ctx.lineTo(cx+4, cy-3); ctx.lineTo(cx-4, cy-3);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#a0a0c0';
+        ctx.fillRect(cx-1, cy-6, 4, 4);
+        ctx.fillStyle = 'rgba(232,200,64,0.85)';
+        ctx.fillRect(cx-7, cy+2, 14, 1.5);
       } else {
         // Edificios de la ciudad
         ctx.fillStyle = '#c8c8e0';

@@ -11,6 +11,7 @@ const MAP_H = 900;
 let BG_FONDO = null;
 let DECOR_PNG = null;
 let BG_BOSQUE = null;
+let bosqueLoading = false;
 (function loadAssets() {
   const img = new Image();
   img.onload = () => { BG_FONDO = img; };
@@ -18,10 +19,18 @@ let BG_BOSQUE = null;
   const dec = new Image();
   dec.onload = () => { DECOR_PNG = dec; };
   dec.src = '../decoracion.png';
-  const bosque = new Image();
-  bosque.onload = () => { BG_BOSQUE = bosque; };
-  bosque.src = '../bosque encantado.JPG';
 })();
+
+// La foto del bosque es pesada (~148KB) y solo sirve en 1 de 6 zonas:
+// se carga perezosamente la primera vez que entras al Bosque Encantado.
+function loadBosqueBg() {
+  if (BG_BOSQUE || bosqueLoading) return;
+  bosqueLoading = true;
+  const img = new Image();
+  img.onload = () => { BG_BOSQUE = img; };
+  img.onerror = () => { bosqueLoading = false; };
+  img.src = '../bosque encantado.JPG';
+}
 
 function buildZone(zoneId) {
   const vis = document.createElement('canvas');
@@ -320,6 +329,7 @@ const ZONES = {
   },
 
   bosque_encantado(v, c, W, H) {
+    loadBosqueBg();
     // Foto real del bosque encantado si está cargada
     if (BG_BOSQUE) {
       try {

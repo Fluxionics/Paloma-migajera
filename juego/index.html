@@ -121,6 +121,7 @@
     #boss-bar .boss-track{border-radius:4px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.8);}  </style>
 </head>
 <body>
+  <div id="boot-splash" style="position:fixed;inset:0;z-index:999;background:#06060f;color:#e8c840;font-family:Georgia,'Times New Roman',serif;display:flex;align-items:center;justify-content:center;font-size:18px;letter-spacing:8px;text-align:center;">PALOMA&nbsp;MIGAJERA</div>
   <canvas id="game-canvas"></canvas>
 
   <div id="hud">
@@ -380,7 +381,11 @@
     updateCooldowns(p, dt);
 
     if (action) {
-      if (action.action === 'jump') { spawnJumpFx(G.particles, p.x + p.w / 2, p.y + p.h, action.double, action.wallJump); PM_AUDIO.sfx[action.double ? 'doubleJump' : action.wallJump ? 'wallJump' : 'jump'](); }
+      if (action.action === 'jump') {
+        spawnJumpFx(G.particles, p.x + p.w / 2, p.y + p.h, action.double, action.wallJump);
+        PM_AUDIO.sfx[action.double ? 'doubleJump' : action.wallJump ? 'wallJump' : 'jump']();
+        if (action.double) window._gifFx = { name: 'Doble Salto.gif', until: performance.now() + 320 };
+      }
       if (action.action === 'dash') { spawnDashFx(G.particles, p.x + p.w / 2, p.y + p.h / 2, p.dashDir); PM_AUDIO.sfx.dash(); }
       if (action.action === 'attack') { doMeleeAttack(p, G.enemies, G.particles); PM_AUDIO.sfx.attack(); }
       if (action.action === 'palou') { firePalou(p, G.projectiles); PM_AUDIO.sfx.palou(); }
@@ -492,6 +497,8 @@
     ctx.clearRect(0, 0, W, H);
 
     if (G.state === 'loading') {
+      const bs = document.getElementById('boot-splash');
+      if (bs) bs.style.display = 'none';
       const grd = ctx.createLinearGradient(0, 0, 0, H);
       grd.addColorStop(0, '#06060f');
       grd.addColorStop(0.5, '#0b0b1a');
@@ -515,12 +522,17 @@
       ctx.fillStyle = 'rgba(255,255,255,0.14)';
       ctx.fillRect(W / 2 - 90, H / 2 - 140, 180, 1);
 
-      // Paloma real (sprite procedural animado: bate las alas)
+      // Paloma real: animación GIF de Franck si ya cargó, si no sprite procedural
       const t = performance.now() / 1000;
       const bounce = Math.sin(t * 3) * 6;
-      const wing = Math.floor(t * 9) % 3;
-      const spr = sprite(wing === 0 ? 'pigeon_fly_r' : wing === 1 ? 'pigeon_fly2_r' : 'pigeon_glide_r') || sprite('pigeon_fly_r');
-      if (spr) drawSprite(ctx, spr, W / 2 - 17, H / 2 - 92 + bounce, 34, 32);
+      const dg = window.__SPRITES && window.__SPRITES.getImg('Doble Salto.gif');
+      if (dg) {
+        drawSprite(ctx, dg, W / 2 - 28, H / 2 - 106 + bounce, 56, 56);
+      } else {
+        const wing = Math.floor(t * 9) % 3;
+        const spr = sprite(wing === 0 ? 'pigeon_fly_r' : wing === 1 ? 'pigeon_fly2_r' : 'pigeon_glide_r') || sprite('pigeon_fly_r');
+        if (spr) drawSprite(ctx, spr, W / 2 - 17, H / 2 - 92 + bounce, 34, 32);
+      }
 
       // Sombra debajo de la paloma
       ctx.save();

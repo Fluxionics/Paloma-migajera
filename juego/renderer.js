@@ -69,24 +69,56 @@ function drawPlayer(ctx, player, camX, camY) {
     if (Math.floor(t * 12) % 2 === 0) sprName = `pigeon_${st}2_${dir}`;
   }
   const spr = sprite(sprName);
+
+  // GIFs de la paloma (Franck): haduken al atacar, Doble Salto en doble salto
+  let gif = null;
+  if (st === 'attack') {
+    const hg = window.__SPRITES && window.__SPRITES.getImg('haduken.gif');
+    if (hg) gif = hg;
+  }
+  const gifFx = window._gifFx && performance.now() < window._gifFx.until ? window._gifFx : null;
+  if (!gif && gifFx) {
+    const g2 = window.__SPRITES && window.__SPRITES.getImg(gifFx.name);
+    if (g2) gif = g2;
+  }
+  if (gifFx && performance.now() >= gifFx.until) window._gifFx = null;
+
   let bodyShown = false;
-  if (spr) {
-    const sw = Math.max(22, player.w + 8);
-    const sh = Math.max(24, player.h + 12);
+  if (gif || spr) {
+    const isGif = !!gif;
+    const gifBig = gif === (window.__SPRITES && window.__SPRITES.getImg('haduken.gif'));
+    const sw = isGif ? (gifBig ? 60 : 48) : Math.max(22, player.w + 8);
+    const sh = isGif ? (gifBig ? 40 : 48) : Math.max(24, player.h + 12);
     ctx.save();
-    if (st === 'attack') {
+    if (isGif) {
+      // El GIF se dibuja girado según la dirección de la paloma
+      const dW = fw > 0 ? sw : -sw;
+      const walk = Math.sin(player.walkCycle * 1.6) * 1.5;
+      const lift = st === 'jump' ? -2 : st === 'fall' ? 3 : 0;
+      drawSprite(ctx, gif,
+        rx + player.w / 2 - dW / 2,
+        ry + player.h / 2 - sh / 2 + lift,
+        dW, sh);
+    } else if (st === 'attack') {
       const prog = Math.min(1, (player.attackFrame || 0) / (window.ATK_DUR || 260));
       const tilt = (fw > 0 ? 1 : -1) * -prog * 0.18;
       ctx.translate(rx + player.w / 2, ry + player.h / 2);
       ctx.rotate(tilt);
       ctx.translate(-(rx + player.w / 2), -(ry + player.h / 2));
+      const walk = Math.sin(player.walkCycle * 1.6) * 1.5;
+      const lift = st === 'jump' ? -2 : st === 'fall' ? 3 : 0;
+      drawSprite(ctx, spr,
+        rx + player.w / 2 - sw / 2,
+        ry + player.h / 2 - sh / 2 + lift,
+        sw, sh);
+    } else {
+      const walk = Math.sin(player.walkCycle * 1.6) * 1.5;
+      const lift = st === 'jump' ? -2 : st === 'fall' ? 3 : 0;
+      drawSprite(ctx, spr,
+        rx + player.w / 2 - sw / 2,
+        ry + player.h / 2 - sh / 2 + lift + (st === 'run' || st === 'walk' ? walk * 0.3 : 0),
+        sw, sh);
     }
-    const walk = Math.sin(player.walkCycle * 1.6) * 1.5;
-    const lift = st === 'jump' ? -2 : st === 'fall' ? 3 : 0;
-    drawSprite(ctx, spr,
-      rx + player.w / 2 - sw / 2,
-      ry + player.h / 2 - sh / 2 + lift + (st === 'run' || st === 'walk' ? walk * 0.3 : 0),
-      sw, sh);
     ctx.restore();
     bodyShown = true;
   }
@@ -266,7 +298,7 @@ function drawProjectiles(ctx, projs, camX, camY) {
       const haduken = window.__SPRITES && window.__SPRITES.getImg('haduken.gif');
       if (haduken) {
         ctx.globalAlpha = 0.95;
-        drawSprite(ctx, haduken, rx - 16 * p.dir, ry - 2, 32 * p.dir, 16);
+        drawSprite(ctx, haduken, rx - 24 * p.dir, ry - 4, 48 * p.dir, 31);
         ctx.globalAlpha = 1;
       } else if (palou) drawSprite(ctx, palou, rx - 10 * p.dir, ry - 1, 20 * p.dir, 10);
       else {

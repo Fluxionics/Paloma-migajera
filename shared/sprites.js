@@ -19,7 +19,10 @@ function resolveAsset(path) {
 }
 
 function loadAssets() {
-  const files = ['decoracion.png', 'fondo.jpg', 'gato.gif', 'haduken.gif', 'Doble Salto.gif'];
+  // Solo lo que usa el juego + el gif de la pantalla de carga.
+  // fondos & decoracion los carga map-engine; se evitó duplicar la descarga
+  // de decoracion.png (738KB) que ralentizaba el arranque.
+  const files = ['gato.gif', 'haduken.gif', 'Doble Salto.gif'];
   let loaded = 0;
   ASSETS.progress = 0;
   if (files.length === 0) { ASSETS.ready = true; notifyReady(); return; }

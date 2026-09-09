@@ -109,56 +109,166 @@ function pxRect(c, x, y, w, h, color) {
   ctx.fillRect(x, y, w, h);
 }
 
-// ---- Paloma: 24x24 sprite, 8 direcciones básicas de animación ----
+// ---- Paloma: 30x28 sprite, contorno + poses por estado ----
 function genPigeonSprite(state, facing) {
-  const c = makeCanvas(28, 26);
+  const c = makeCanvas(30, 28);
   const ctx = c.getContext('2d');
-  const f = facing;                    // 1 derecha, -1 izquierda
-  const flip = f < 0;
-  const M = (x) => flip ? 28 - x : x;  // espejo horizontal
+  const flip = facing < 0;
+  const M = (x) => flip ? 30 - x : x;            // espejo horizontal
+  const O = '#26263a';                           // contorno
 
-  pxRect(c, M(12) - 7, 20, 2, 5, PALETTE.feet);   // pata izq
-  pxRect(c, M(18) - 7, 20, 2, 5, PALETTE.feet);   // pata der
-  pxRect(c, M(12) - 8, 24, 4, 2, '#c09020');       // garra izq
-  pxRect(c, M(18) - 8, 24, 4, 2, '#c09020');       // garra der
+  const fly    = state === 'fly' || state === 'glide';
+  const attack = state === 'attack';
+  const jump   = state === 'jump' || state === 'fall';
+  const dash   = state === 'dash';
 
-  // Cola (animada según estado)
-  pxRect(c, M(3) - 0, 14, 6, 2, PALETTE.pigeonWingDark);
-  pxRect(c, M(4) - 0, 16, 5, 2, PALETTE.pigeonBody);
+  // ---- Silueta de contorno (detrás) ----
+  ctx.fillStyle = O;
+  ctx.fillRect(M(1) - 1, 12, 9, 6);              // cola
+  ctx.fillRect(M(13) - 1, 19, 6, 8);             // patas/garras
+  ctx.fillRect(M(7) - 1, 6, 18, 15);             // cuerpo
+  ctx.fillRect(M(11) - 1, -2, 15, 11);           // cabeza + cresta
+  ctx.fillRect(M(12) - 1, 5, 11, 3);             // nuca
 
-  // Cuerpo
-  pxRect(c, M(9) - 4, 8, 14, 12, PALETTE.pigeonBody);
-  pxRect(c, M(11) - 4, 10, 10, 9, PALETTE.pigeonBelly);
+  // ---- Cola (se levanta al volar / planear) ----
+  const tailLift = fly ? 1 : (jump ? -4 : 0);
+  ctx.fillStyle = '#7a80b4';
+  ctx.fillRect(M(2) - 1, 13 + tailLift, 7, 4);
+  ctx.fillStyle = '#5a6090';
+  ctx.fillRect(M(2) - 1, 13 + tailLift, 7, 1);
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.fillRect(M(2) - 1, 15 + tailLift, 7, 1);
 
-  // Ala izquierda (trasera)
-  pxRect(c, M(10) - 2, 10, 4, 8, PALETTE.pigeonWingDark);
-  if (state === 'fly' || state === 'glide') {
-    pxRect(c, M(8) - 2, 8, 3, 8, PALETTE.pigeonWingDark);
-  }
-
-  // Ala derecha (delantera)
-  if (state === 'glide') {
-    pxRect(c, M(20) - 4, 8, 4, 10, PALETTE.pigeonWing);
-    pxRect(c, M(22) - 4, 6, 3, 6, PALETTE.pigeonWing);
-    // plumas individuales
-    pxRect(c, M(24) - 4, 10, 2, 4, '#c8d0f0');
-  } else if (state === 'fly' || state === 'wallslide') {
-    pxRect(c, M(19) - 4, 8, 4, 9, PALETTE.pigeonWing);
+  // ---- Ala trasera (dibujada debajo del cuerpo) ----
+  if (fly) {
+    ctx.fillStyle = '#8a90c0';
+    ctx.fillRect(M(9) + 1, 7, 5, 8);
+  } else if (jump || state === 'wallslide') {
+    ctx.fillStyle = '#8a90c0';
+    ctx.fillRect(M(9) + 1, 8, 4, 8);
   } else {
-    pxRect(c, M(18) - 3, 10, 3, 6, PALETTE.pigeonWing);
+    ctx.fillStyle = '#8a90c0';
+    ctx.fillRect(M(9) + 1, 10, 4, 5);
   }
 
-  // Cabeza
-  pxRect(c, M(13) - 2, 2, 10, 8, PALETTE.pigeonBelly);
-  pxRect(c, M(12) - 2, 1, 12, 3, PALETTE.pigeonBody);
+  // ---- Patas (recogidas al volar/saltar) ----
+  if (fly || jump) {
+    ctx.fillStyle = '#e0a838';
+    ctx.fillRect(M(13) - 1, 20, 2, 3);
+    ctx.fillRect(M(19) - 1, 20, 2, 3);
+  } else {
+    ctx.fillStyle = '#e0a838';
+    ctx.fillRect(M(13) - 1, 20, 2, 5);
+    ctx.fillRect(M(19) - 1, 20, 2, 5);
+  }
+  ctx.fillStyle = '#c08020';
+  ctx.fillRect(M(12) - 1, 25, 4, 2);
+  ctx.fillRect(M(18) - 1, 25, 4, 2);
 
-  // Ojo
-  pxRect(c, M(18) - 1, 3, 3, 3, PALETTE.eye);
-  pxRect(c, M(19) - 1, 3, 1, 1, '#ffffff');  // brillo
+  // ---- Cuerpo con degradado ----
+  const bodyGrad = ctx.createLinearGradient(0, 8, 0, 20);
+  bodyGrad.addColorStop(0, '#f6f6ff');
+  bodyGrad.addColorStop(0.55, '#eaeaf8');
+  bodyGrad.addColorStop(1, '#c4c6e6');
+  ctx.fillStyle = bodyGrad;
+  ctx.fillRect(M(8) - 1, 7, 15, 13);
 
-  // Pico
-  pxRect(c, M(22) - 1, 3, 4, 2, PALETTE.beak);
-  pxRect(c, M(22) - 1, 5, 3, 2, PALETTE.beakDark);
+  // Sombra trasera
+  ctx.fillStyle = 'rgba(60,60,110,0.18)';
+  ctx.fillRect(M(8) - 1, 7, 5, 12);
+
+  // Iridiscencia del cuello (lo auténtico de las palomas)
+  ctx.fillStyle = 'rgba(40,130,100,0.55)';
+  ctx.fillRect(M(20) - 1, 8, 4, 3);
+  ctx.fillStyle = 'rgba(130,60,160,0.5)';
+  ctx.fillRect(M(21) - 1, 10, 3, 3);
+  ctx.fillStyle = 'rgba(30,110,140,0.4)';
+  ctx.fillRect(M(22) - 1, 11, 2, 2);
+
+  // ---- Cabeza ----
+  ctx.fillStyle = '#eef0ff';
+  ctx.fillRect(M(12) - 1, 1, 12, 7);
+  ctx.fillStyle = '#e2e2f6';
+  ctx.fillRect(M(11) - 1, 0, 9, 3);
+  // Cresta de plumas
+  ctx.fillStyle = '#d2d4ee';
+  ctx.fillRect(M(13) - 1, -2, 3, 3);
+  ctx.fillRect(M(16) - 1, -1, 2, 2);
+
+  // ---- Ojo con brillo ----
+  ctx.fillStyle = '#14141e';
+  ctx.fillRect(M(21) - 1, 2, 3, 3);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(M(22) - 1, 2, 1, 1);
+  ctx.fillStyle = 'rgba(40,40,80,0.5)';
+  ctx.fillRect(M(20) - 1, 1, 5, 1);
+
+  // ---- Pico ----
+  if (attack) {
+    // Pico abierto (pelea): mandíbulas separadas
+    ctx.fillStyle = '#e8c040';
+    ctx.fillRect(M(23) - 1, 2, 5, 2);
+    ctx.fillStyle = '#c09020';
+    ctx.fillRect(M(23) - 1, 6, 5, 2);
+    ctx.fillStyle = '#d8a828';
+    ctx.fillRect(M(23) - 1, 4, 4, 2);
+    ctx.fillStyle = 'rgba(60,30,10,0.5)';
+    ctx.fillRect(M(25) - 1, 3, 1, 4);
+  } else {
+    ctx.fillStyle = '#e8c040';
+    ctx.fillRect(M(23) - 1, 2, 6, 2);
+    ctx.fillStyle = '#c09020';
+    ctx.fillRect(M(23) - 1, 4, 5, 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.fillRect(M(23) - 1, 2, 2, 1);
+  }
+
+  // ---- Ala delantera según estado (variación de pose) ----
+  if (state === 'glide') {
+    // Ala extendida amplia, plumas individuales
+    ctx.fillStyle = O;
+    ctx.fillRect(M(13) - 3, 6, 13, 8);
+    ctx.fillStyle = '#c4cae8';
+    ctx.fillRect(M(14) - 3, 7, 11, 6);
+    for (let i = 0; i < 4; i++) {
+      ctx.fillStyle = '#8a90c0';
+      ctx.fillRect(M(17) + 1 - 3, 8 + i, 6, 1);
+    }
+    ctx.fillStyle = '#dcdef4';
+    ctx.fillRect(M(12) - 3, 9, 3, 3);
+    ctx.fillRect(M(24) - 3, 7, 2, 5);
+  } else if (state === 'fly') {
+    ctx.fillStyle = O;
+    ctx.fillRect(M(15) - 1, 6, 9, 7);
+    ctx.fillStyle = '#b8c0e4';
+    ctx.fillRect(M(16) - 1, 7, 7, 5);
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillRect(M(16) - 1, 7, 7, 1);
+  } else if (state === 'wallslide') {
+    ctx.fillStyle = O;
+    ctx.fillRect(M(15) - 1, 6, 6, 8);
+    ctx.fillStyle = '#b8c0e4';
+    ctx.fillRect(M(16) - 1, 7, 4, 6);
+  } else if (jump) {
+    ctx.fillStyle = O;
+    ctx.fillRect(M(14) - 1, 5, 6, 8);
+    ctx.fillStyle = '#c0c8ea';
+    ctx.fillRect(M(15) - 1, 6, 4, 6);
+  } else if (dash) {
+    // Ala barrida hacia atrás (sensación de velocidad)
+    ctx.fillStyle = O;
+    ctx.fillRect(M(5) - 1, 8, 9, 5);
+    ctx.fillStyle = '#b8c0e4';
+    ctx.fillRect(M(6) - 1, 9, 7, 3);
+  } else {
+    // Ala plegada con sombra interna
+    ctx.fillStyle = O;
+    ctx.fillRect(M(14) - 1, 10, 6, 7);
+    ctx.fillStyle = '#bec6e8';
+    ctx.fillRect(M(15) - 1, 11, 4, 5);
+    ctx.fillStyle = 'rgba(90,95,140,0.35)';
+    ctx.fillRect(M(15) - 1, 13, 4, 1);
+  }
 
   return c;
 }

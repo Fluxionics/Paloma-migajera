@@ -65,8 +65,8 @@ function drawPlayer(ctx, player, camX, camY) {
   const spr = sprite(`pigeon_${st}_${fw > 0 ? 'r' : 'l'}`);
   let bodyShown = false;
   if (spr) {
-    const sw = Math.max(18, player.w + 6);
-    const sh = Math.max(20, player.h + 10);
+    const sw = Math.max(22, player.w + 8);
+    const sh = Math.max(24, player.h + 12);
     ctx.save();
     if (st === 'attack') {
       const prog = Math.min(1, (player.attackFrame || 0) / (window.ATK_DUR || 260));

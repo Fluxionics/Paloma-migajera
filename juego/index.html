@@ -18,28 +18,32 @@
     #game-canvas{display:block;position:fixed;top:0;left:0;image-rendering:pixelated;image-rendering:crisp-edges;}
 
     /* HUD */
-    #hud{position:fixed;top:0;left:0;right:0;z-index:40;padding:12px 16px;background:linear-gradient(180deg,rgba(0,0,0,0.75) 0%,transparent 100%);pointer-events:none;display:flex;align-items:flex-start;gap:14px;}
-    .hud-left{display:flex;flex-direction:column;gap:6px;min-width:170px;}
-    .hud-hearts{display:flex;gap:4px;flex-wrap:wrap;max-width:130px;}
-    .heart{width:14px;height:14px;background:var(--blood);clip-path:polygon(50% 0%,100% 28%,100% 68%,50% 100%,0% 68%,0% 28%);transition:background 0.2s;flex-shrink:0;}
-    .heart.empty{background:#2a1010;}
-    .hud-bar-row{display:flex;align-items:center;gap:6px;}
+    #hud{position:fixed;top:0;left:0;right:0;z-index:40;padding:14px 18px;background:linear-gradient(180deg,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.35) 60%,transparent 100%);pointer-events:none;display:flex;align-items:flex-start;gap:16px;}
+    .hud-left,.hud-right{background:linear-gradient(180deg,rgba(10,10,22,0.7),rgba(10,10,22,0.25));border:1px solid rgba(255,255,255,0.07);border-bottom-color:rgba(232,200,64,0.18);border-radius:10px;padding:9px 12px;backdrop-filter:blur(2px);}
+    .hud-left{display:flex;flex-direction:column;gap:7px;min-width:180px;}
+    .hud-hearts{display:flex;gap:4px;flex-wrap:wrap;max-width:132px;}
+    .heart{width:16px;height:15px;background:linear-gradient(180deg,#ff8a7a 0%,#e0524c 45%,#b02430 100%);clip-path:polygon(50% 0%,100% 28%,100% 68%,50% 100%,0% 68%,0% 28%);filter:drop-shadow(0 0 3px rgba(224,82,76,0.55));transition:transform 0.2s,background 0.2s;flex-shrink:0;}
+    .heart.empty{background:#221018;filter:none;transform:scale(0.92);}
+    .hud-bar-row{display:flex;align-items:center;gap:7px;}
     .hud-bar-lbl{font-family:var(--font-title);font-size:0.5rem;letter-spacing:0.12em;color:var(--muted);width:14px;text-align:right;}
-    .hud-bar-track{width:105px;height:5px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.08);overflow:hidden;}
-    .hud-bar-fill{height:100%;transition:width 0.3s ease;}
-    .mp-fill{background:linear-gradient(90deg,#185888,#30a0d8);}
-    .energy-fill{background:linear-gradient(90deg,#886010,var(--gold));}
+    .hud-bar-track{width:112px;height:6px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.12);border-radius:3px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,0.8);}
+    .hud-bar-fill{height:100%;border-radius:2px;position:relative;transition:width 0.3s ease;overflow:hidden;}
+    .hud-bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.4),rgba(255,255,255,0.06) 40%,transparent 55%);}
+    .mp-fill{background:linear-gradient(90deg,#185888,#30a0d8,#6ac0e8);}
+    .energy-fill{background:linear-gradient(90deg,#886010,var(--gold),#ffe880);}
 
     .hud-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:var(--font-title);}
-    .hud-zona{font-size:0.55rem;letter-spacing:0.22em;color:var(--muted);text-transform:uppercase;}
-    .hud-migajas{font-size:0.78rem;letter-spacing:0.1em;color:var(--gold);}
+    .hud-zona{font-size:0.55rem;letter-spacing:0.22em;color:var(--muted);text-transform:uppercase;text-shadow:0 0 12px rgba(232,200,64,0.15);}
+    .hud-migajas{font-size:0.8rem;letter-spacing:0.1em;color:var(--gold);text-shadow:0 0 10px rgba(232,200,64,0.35);}
 
-    .hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+    .hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
     .hud-abilities{display:flex;gap:5px;}
-    .ab-slot{width:32px;height:32px;background:rgba(12,12,22,0.85);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.8rem;position:relative;}
-    .ab-cd{position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:0.45rem;color:var(--muted);}
-    .ab-key{position:absolute;bottom:1px;right:3px;font-family:var(--font-title);font-size:0.38rem;color:var(--muted);}
-    .hud-nivel{font-family:var(--font-title);font-size:0.55rem;letter-spacing:0.12em;color:var(--muted);}
+    .ab-slot{width:34px;height:34px;background:linear-gradient(180deg,rgba(20,20,34,0.9),rgba(8,8,16,0.9));border:1px solid var(--border);border-radius:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:0.8rem;position:relative;}
+    .ab-slot.ready{border-color:rgba(232,200,64,0.45);box-shadow:0 0 8px rgba(232,200,64,0.15),inset 0 1px 0 rgba(255,255,255,0.06);}
+    .ab-cd{position:absolute;inset:0;border-radius:7px;background:rgba(0,0,0,0.78);display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:0.5rem;color:var(--muted);}
+    .ab-key{position:absolute;bottom:1px;right:4px;font-family:var(--font-title);font-size:0.4rem;color:var(--muted);}
+    .hud-nivel{font-family:var(--font-title);font-size:0.56rem;letter-spacing:0.12em;color:var(--muted);}
+    .hud-nivel b{color:var(--gold);font-weight:700;}
 
     /* Combo indicator */
     .combo-display{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:45;pointer-events:none;font-family:var(--font-title);font-size:0.7rem;letter-spacing:0.2em;color:var(--gold);opacity:0;transition:opacity 0.3s;}
@@ -105,7 +109,16 @@
     /* Screen transition */
     #screen-transition{position:fixed;inset:0;z-index:200;background:#000;opacity:0;pointer-events:none;transition:opacity 0.6s ease;}
     #screen-transition.active{opacity:1;}
-  </style>
+
+    /* Viñeta + scanlines (capas de atmósfera) */
+    #vignette{position:fixed;inset:0;z-index:35;pointer-events:none;background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,0.5) 100%);}
+    #scanlines{position:fixed;inset:0;z-index:36;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,0.02) 0 1px,transparent 1px 3px);mix-blend-mode:overlay;}
+
+    /* Pausa / muerte / victoria refinados */
+    .pause-btn{border-radius:6px;letter-spacing:0.2em;}
+    #screen-pause .pause-title{text-shadow:0 0 40px rgba(232,200,64,0.25);}
+    #screen-victory .victory-reward{border-radius:10px;box-shadow:0 0 24px rgba(232,200,64,0.12) inset;}
+    #boss-bar .boss-track{border-radius:4px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.8);}  </style>
 </head>
 <body>
   <canvas id="game-canvas"></canvas>
@@ -127,7 +140,7 @@
       <div class="hud-migajas" style="display:flex;align-items:center;justify-content:center;gap:5px;"><svg viewBox="0 0 16 16" width="13" height="13"><ellipse cx="8" cy="9" rx="7" ry="5" fill="#e8c840"/><ellipse cx="8" cy="8" rx="6" ry="4" fill="#f0d860"/><ellipse cx="7" cy="7" rx="2" ry="1.5" fill="#fff8a0" opacity="0.5"/></svg> <span id="hud-mig">0</span></div>
     </div>
     <div class="hud-right">
-      <div class="hud-nivel">Nv.<span id="hud-nivel">1</span></div>
+      <div class="hud-nivel">Nv.<b id="hud-nivel">1</b></div>
       <div class="hud-abilities">
         <div class="ab-slot" style="color:#e8e8ff;"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><rect x="7" y="1" width="2" height="8"/><rect x="4" y="8" width="8" height="2"/><rect x="7" y="10" width="2" height="5"/></svg><span class="ab-key">Z</span><div class="ab-cd" id="cd-z" style="display:none">–</div></div>
         <div class="ab-slot" style="color:#6ab0d8;"><svg viewBox="0 0 16 16" width="15" height="15"><circle cx="8" cy="8" r="5" fill="#6ab0d8" opacity="0.6"/><circle cx="8" cy="8" r="3" fill="#c0e8ff"/><circle cx="8" cy="8" r="1.5" fill="#fff"/></svg><span class="ab-key">X</span><div class="ab-cd" id="cd-x" style="display:none">–</div></div>
@@ -184,9 +197,11 @@
 
   <div id="zone-banner">
     <div class="zb-line" id="zb-name">Ciudad Alta</div>
-    <div class="zb-sub" id="zb-sub">Zona 1 de 3</div>
+    <div class="zb-sub" id="zb-sub">Zona 1 de 4</div>
   </div>
 
+  <div id="vignette"></div>
+  <div id="scanlines"></div>
   <div id="screen-transition"></div>
 
   <script src="../shared/utils.js"></script>
@@ -293,7 +308,7 @@
       const cpData = (ZONE_CHECKPOINTS[zoneId] || []).find(c => c.lit) || { x: saveData.checkpoint?.x || 240 };
       G.player.x = cpData.x;
       G.player.y = 0;
-      for (let ty = 0; ty < G.map.h; ty++) {
+      for (let ty = 0, guard = 0; ty < G.map.h && guard++ < 900; ty++) {
         if (isSolid(G.map.colData, G.player.x + G.player.w / 2, ty)) {
           G.player.y = ty - G.player.h - 2;
           break;
@@ -308,17 +323,17 @@
       G.checkpoints = (ZONE_CHECKPOINTS[zoneId] || []).map(cp => ({ ...cp, y: 0 }));
 
       G.checkpoints.forEach(cp => {
-        for (let ty = 0; ty < G.map.h; ty++) {
+        for (let ty = 0, guard = 0; ty < G.map.h && guard++ < 900; ty++) {
           if (isSolid(G.map.colData, cp.x + 3, ty)) { cp.y = ty - 54; break; }
         }
       });
       G.npcs.forEach(npc => {
-        for (let ty = 0; ty < G.map.h; ty++) {
+        for (let ty = 0, guard = 0; ty < G.map.h && guard++ < 900; ty++) {
           if (isSolid(G.map.colData, npc.x + npc.w / 2, ty)) { npc.y = ty - npc.h; break; }
         }
       });
       G.enemies.forEach(e => {
-        for (let ty = 0; ty < G.map.h; ty++) {
+        for (let ty = 0, guard = 0; ty < G.map.h && guard++ < 900; ty++) {
           if (isSolid(G.map.colData, e.x + e.w / 2, ty)) { e.y = ty - e.h; break; }
         }
         if (e.isBoss) G.bossEnemy = e;
@@ -464,41 +479,65 @@
 
     if (G.state === 'loading') {
       const grd = ctx.createLinearGradient(0, 0, 0, H);
-      grd.addColorStop(0, '#080810');
-      grd.addColorStop(1, '#0c0c18');
+      grd.addColorStop(0, '#06060f');
+      grd.addColorStop(0.5, '#0b0b1a');
+      grd.addColorStop(1, '#0d0d20');
       ctx.fillStyle = grd;
       ctx.fillRect(0, 0, W, H);
 
-      // Loading pigeon icon (dibujado, sin emoji)
+      // Estrellas
+      for (let i = 0; i < 60; i++) {
+        const sx = (Math.sin(i * 127.1) * 0.5 + 0.5) * W;
+        const sy = (Math.sin(i * 311.7) * 0.5 + 0.5) * H * 0.7;
+        ctx.fillStyle = `rgba(255,255,255,${0.05 + (Math.sin(i * 7.3) * 0.5 + 0.5) * 0.2})`;
+        ctx.fillRect(sx, sy, 2, 2);
+      }
+
+      // Título
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(232,200,64,0.7)';
+      ctx.font = 'bold 30px Cinzel, serif';
+      ctx.fillText('PALOMA MIGAJERA', W / 2, H / 2 - 150);
+      ctx.fillStyle = 'rgba(255,255,255,0.14)';
+      ctx.fillRect(W / 2 - 90, H / 2 - 140, 180, 1);
+
+      // Paloma real (sprite procedural animado: bate las alas)
       const t = performance.now() / 1000;
-      const bounce = Math.sin(t * 3) * 5;
-      const lx = W / 2, ly = H / 2 - 30 + bounce;
+      const bounce = Math.sin(t * 3) * 6;
+      const wing = Math.floor(t * 9) % 2;
+      const spr = sprite(wing === 0 ? 'pigeon_fly_r' : 'pigeon_glide_r') || sprite('pigeon_fly_r');
+      if (spr) drawSprite(ctx, spr, W / 2 - 17, H / 2 - 92 + bounce, 34, 32);
+
+      // Sombra debajo de la paloma
       ctx.save();
-      ctx.translate(lx, ly);
-      ctx.fillStyle = 'rgba(232,200,64,0.9)';
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.beginPath();
-      ctx.ellipse(0, 8, 9, 12, 0, 0, Math.PI * 2);
+      ctx.ellipse(W / 2, H / 2 - 52, 26, 4, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(0, -1, 7, 8, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.beginPath();
-      ctx.arc(4, -3, 1.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#e0b030';
-      ctx.fillRect(8, -2, 4, 3);
       ctx.restore();
 
-      ctx.fillStyle = 'rgba(232,200,64,0.8)';
+      ctx.fillStyle = 'rgba(232,200,64,0.85)';
       ctx.font = 'bold 12px Cinzel, serif';
-      ctx.fillText('Cargando zona...', W / 2, H / 2 + 15);
+      ctx.fillText('Cargando zona...', W / 2, H / 2 + 40);
 
-      const barW = 220;
-      ctx.fillStyle = '#1a1a28';
-      ctx.fillRect(W / 2 - barW / 2, H / 2 + 30, barW, 4);
-      ctx.fillStyle = '#e8c840';
-      ctx.fillRect(W / 2 - barW / 2, H / 2 + 30, barW * G.loadProgress / 100, 4);
+      // Barra con degradado y brillo
+      const barW = 260;
+      const bx = W / 2 - barW / 2;
+      const by = H / 2 + 52;
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      ctx.fillRect(bx - 1, by - 1, barW + 2, 9);
+      const p = Math.max(0.02, G.loadProgress / 100);
+      const barGrad = ctx.createLinearGradient(bx, 0, bx + barW, 0);
+      barGrad.addColorStop(0, '#f0d860');
+      barGrad.addColorStop(1, '#e0a820');
+      ctx.fillStyle = barGrad;
+      ctx.fillRect(bx, by, barW * p, 7);
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.fillRect(bx, by, barW * p, 2);
+      ctx.fillStyle = 'rgba(176,176,208,0.65)';
+      ctx.font = 'italic 12px "IM Fell English", serif';
+      ctx.fillText('Z atacar · X palomaduken · ⇧ dash · ESC pausa', W / 2, H / 2 + 82);
+      ctx.textAlign = 'left';
       return;
     }
 
@@ -551,8 +590,15 @@
 
   function setCd(id, val, max) {
     const el = document.getElementById(id);
-    if (val > 0) { el.style.display = 'flex'; el.textContent = (val / 1000).toFixed(1); }
-    else el.style.display = 'none';
+    const slot = el ? el.parentElement : null;
+    if (val > 0) {
+      el.style.display = 'flex';
+      el.textContent = (val / 1000).toFixed(1);
+      if (slot) slot.classList.remove('ready');
+    } else {
+      el.style.display = 'none';
+      if (slot) slot.classList.add('ready');
+    }
   }
 
   function updateBossBar() {
@@ -710,8 +756,18 @@
   //  BANNERS / POPUPS
   // =============================================
   function showZoneBanner(zoneId) {
-    const names = { ciudad_alta: 'Ciudad Alta', alcantarillas: 'Alcantarillas de Migas' };
-    const subs  = { ciudad_alta: 'Zona 1 — El tejado del mundo', alcantarillas: 'Zona 2 — Las profundidades' };
+    const names = {
+      ciudad_alta: 'Ciudad Alta',
+      alcantarillas: 'Alcantarillas de Migas',
+      parque_palomas: 'Parque de las Palomas',
+      torre_reloj: 'Torre del Reloj',
+    };
+    const subs = {
+      ciudad_alta: 'Zona 1 de 4 — El tejado del mundo',
+      alcantarillas: 'Zona 2 de 4 — Las profundidades envenenadas',
+      parque_palomas: 'Zona 3 de 4 — El parque junto a la luna',
+      torre_reloj: 'Zona 4 de 4 — Donde el tiempo se detiene',
+    };
     document.getElementById('zb-name').textContent = names[zoneId] || zoneId;
     document.getElementById('zb-sub').textContent  = subs[zoneId] || '';
     const banner = document.getElementById('zone-banner');

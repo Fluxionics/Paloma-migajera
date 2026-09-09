@@ -207,6 +207,112 @@ const ZONES = {
 
     c.fillStyle = '#fff';
     drawAlcantarillaCollisions(c, W, H);
+  },
+
+  parque_palomas(v, c, W, H) {
+    // Cielo nocturno verdiazul
+    const sky = v.createLinearGradient(0, 0, 0, H * 0.7);
+    sky.addColorStop(0, '#04121f');
+    sky.addColorStop(0.4, '#0a2333');
+    sky.addColorStop(0.7, '#123a3a');
+    sky.addColorStop(1, '#0c2a2a');
+    v.fillStyle = sky;
+    v.fillRect(0, 0, W, H);
+
+    // Estrellas frías
+    for (let i = 0; i < 120; i++) {
+      const sx = pseudoRand(i * 29, W);
+      const sy = pseudoRand(i * 17, H * 0.35);
+      v.fillStyle = `rgba(200,240,255,${0.2 + pseudoRand(i * 7, 0.4)})`;
+      v.beginPath(); v.arc(sx, sy, pseudoRand(i * 3, 1.4) + 0.2, 0, Math.PI * 2); v.fill();
+    }
+
+    // Luna baja y fría
+    v.save();
+    const moonGrad = v.createRadialGradient(W * 0.18, H * 0.14, 5, W * 0.18, H * 0.14, 70);
+    moonGrad.addColorStop(0, 'rgba(210,235,255,0.14)');
+    moonGrad.addColorStop(1, 'transparent');
+    v.fillStyle = moonGrad;
+    v.beginPath(); v.arc(W * 0.18, H * 0.14, 70, 0, Math.PI * 2); v.fill();
+    v.fillStyle = 'rgba(215,235,255,0.9)';
+    v.beginPath(); v.arc(W * 0.18, H * 0.14, 26, 0, Math.PI * 2); v.fill();
+    v.fillStyle = 'rgba(180,205,230,0.5)';
+    v.beginPath(); v.arc(W * 0.18 - 6, H * 0.13, 5, 0, Math.PI * 2); v.fill();
+    v.beginPath(); v.arc(W * 0.18 + 8, H * 0.16, 3.5, 0, Math.PI * 2); v.fill();
+    v.restore();
+
+    // Árboles de fondo (siluetas)
+    for (let ti = 0; ti < 14; ti++) {
+      const tx = pseudoRand(ti * 53, W);
+      const tr = pseudoRand(ti * 17, 46) + 22;
+      const ty = H * 0.62 + pseudoRand(ti * 9, H * 0.1);
+      v.fillStyle = ti % 3 === 0 ? 'rgba(4,26,30,0.55)' : 'rgba(6,32,36,0.5)';
+      v.beginPath();
+      v.arc(tx, ty, tr, 0, Math.PI * 2);
+      v.arc(tx - tr * 0.7, ty + tr * 0.4, tr * 0.6, 0, Math.PI * 2);
+      v.arc(tx + tr * 0.7, ty + tr * 0.4, tr * 0.6, 0, Math.PI * 2);
+      v.fill();
+    }
+
+    // Neblina del parque
+    v.save();
+    tiledFog(v, W, H * 0.55, 'rgba(120,200,200,0.03)');
+    v.restore();
+
+    drawParqueVisuals(v, W, H);
+
+    c.fillStyle = '#fff';
+    drawParqueCollisions(c, W, H);
+  },
+
+  torre_reloj(v, c, W, H) {
+    // Interior de la torre: mampostería cálida
+    const wall = v.createLinearGradient(0, 0, 0, H);
+    wall.addColorStop(0, '#1a1208');
+    wall.addColorStop(0.4, '#241a0e');
+    wall.addColorStop(0.7, '#1e160c');
+    wall.addColorStop(1, '#120c06');
+    v.fillStyle = wall;
+    v.fillRect(0, 0, W, H);
+
+    // Ladrillo tenue
+    v.fillStyle = 'rgba(255,220,160,0.025)';
+    for (let bx = 0; bx < W; bx += 44) {
+      for (let by = 0; by < H; by += 18) {
+        v.fillRect(bx + (by % 36 === 0 ? 22 : 0), by, 40, 14);
+      }
+    }
+
+    // Luz de farol interior (cálida)
+    const lamp = v.createRadialGradient(W * 0.5, H * 0.25, 0, W * 0.5, H * 0.25, H * 0.5);
+    lamp.addColorStop(0, 'rgba(230,150,70,0.10)');
+    lamp.addColorStop(1, 'transparent');
+    v.fillStyle = lamp;
+    v.fillRect(0, 0, W, H);
+
+    // Gran esfera del reloj en la pared posterior
+    drawClockFace(v, W, H);
+
+    // Engranajes de fondo
+    for (let gi = 0; gi < 9; gi++) {
+      const gx = pseudoRand(gi * 71, W);
+      const gy = pseudoRand(gi * 37, H * 0.5) + H * 0.12;
+      const gr = pseudoRand(gi * 13, 26) + 14;
+      drawGear(v, gx, gy, gr, 'rgba(200,160,90,0.05)');
+    }
+
+    // Polvo flotante estático
+    for (let i = 0; i < 60; i++) {
+      const dx = pseudoRand(i * 43, W);
+      const dy = pseudoRand(i * 27, H);
+      v.fillStyle = `rgba(255,220,170,${pseudoRand(i * 5, 0.06) + 0.01})`;
+      v.fillRect(dx, dy, 2, 2);
+    }
+
+    drawTorreVisuals(v, W, H);
+
+    c.fillStyle = '#fff';
+    drawTorreCollisions(c, W, H);
   }
 };
 
@@ -578,3 +684,422 @@ const ALCANTARILLA_PLATS = [
   { x: 1100, y: 640, w: 130, h: 12 },
   { x: 1350, y: 700, w: 100, h: 12 },
 ];
+
+// =============================================
+//  PARQUE DE LAS PALOMAS
+// =============================================
+const PARQUE_PLATS = [
+  { x: 0,  y: 740, w: 80, h: 14, kind: 'stone' },
+  { x: 0,  y: 640, w: 60, h: 12, kind: 'branch' },
+  { x: 40, y: 760, w: 150, h: 14, kind: 'stone' },
+  { x: 260, y: 700, w: 120, h: 14, kind: 'branch' },
+  { x: 430, y: 760, w: 110, h: 14, kind: 'stone' },
+  { x: 590, y: 660, w: 150, h: 14, kind: 'wood' },
+  { x: 770, y: 710, w: 100, h: 14, kind: 'branch' },
+  { x: 910, y: 630, w: 90, h: 14, kind: 'branch' },
+  { x: 1040, y: 560, w: 120, h: 16, kind: 'gazebo' },
+  { x: 1220, y: 620, w: 110, h: 14, kind: 'branch' },
+  { x: 1380, y: 700, w: 150, h: 14, kind: 'stone' },
+  { x: 1580, y: 640, w: 100, h: 14, kind: 'wood' },
+  { x: 1720, y: 560, w: 90, h: 14, kind: 'branch' },
+  { x: 1860, y: 620, w: 130, h: 14, kind: 'stone' },
+  { x: 2040, y: 540, w: 90, h: 14, kind: 'wood' },
+  { x: 2180, y: 600, w: 110, h: 14, kind: 'branch' },
+  { x: 2340, y: 520, w: 130, h: 16, kind: 'gazebo' },
+  { x: 2520, y: 580, w: 100, h: 14, kind: 'branch' },
+  { x: 2680, y: 640, w: 140, h: 14, kind: 'stone' },
+  { x: 2880, y: 600, w: 100, h: 14, kind: 'wood' },
+  { x: 3020, y: 660, w: 140, h: 14, kind: 'stone' },
+  { x: 3120, y: 740, w: 80, h: 14, kind: 'stone' },
+  { x: 3120, y: 640, w: 60, h: 12, kind: 'branch' },
+  // Saltos altos
+  { x: 760, y: 500, w: 60, h: 12, kind: 'branch' },
+  { x: 1300, y: 470, w: 60, h: 12, kind: 'branch' },
+  { x: 2100, y: 440, w: 60, h: 12, kind: 'branch' },
+  { x: 2700, y: 440, w: 60, h: 12, kind: 'branch' },
+];
+
+function tiledFog(ctx, w, yBottom, color) {
+  ctx.globalAlpha = 0.6;
+  for (let y = yBottom - 44; y < yBottom; y += 14) {
+    ctx.fillStyle = color;
+    for (let x = 0; x < w; x += 110) {
+      const wv = 70 + pseudoRand(x + y, 60);
+      ctx.beginPath();
+      ctx.ellipse(x, y, wv, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawParqueVisuals(ctx, W, H) {
+  const ground = H - 60;
+
+  // ---- Suelo: sendero de tierra + césped a la luz de la luna ----
+  const floorGrad = ctx.createLinearGradient(0, ground, 0, H);
+  floorGrad.addColorStop(0, '#141a10');
+  floorGrad.addColorStop(0.5, '#0e120a');
+  floorGrad.addColorStop(1, '#080a06');
+  ctx.fillStyle = floorGrad;
+  ctx.fillRect(0, ground, W, 60);
+  ctx.fillStyle = '#1e3a28';
+  ctx.fillRect(0, ground - 16, W, 18);
+  ctx.fillStyle = '#254a30';
+  ctx.fillRect(0, ground - 16, W, 3);
+  ctx.fillStyle = 'rgba(180,220,190,0.06)';
+  ctx.fillRect(0, ground - 16, W, 1);
+
+  // Briznas de hierba
+  for (let i = 0; i < 260; i++) {
+    const hx = pseudoRand(i * 13, W);
+    const hh = pseudoRand(i * 27, 5) + 2;
+    ctx.fillStyle = `rgba(40,90,50,${pseudoRand(i * 7, 0.3) + 0.15})`;
+    ctx.fillRect(hx, ground - hh, 2, hh);
+  }
+
+  // ---- Plataformas ----
+  PARQUE_PLATS.forEach(p => {
+    if (p.kind === 'wood') {
+      const pGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+      pGrad.addColorStop(0, '#4a3820');
+      pGrad.addColorStop(1, '#2c2010');
+      ctx.fillStyle = pGrad;
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle = '#5a4526';
+      ctx.fillRect(p.x, p.y, p.w, 3);
+      ctx.fillStyle = '#1e1608';
+      for (let bx = p.x + 8; bx < p.x + p.w; bx += 13) ctx.fillRect(bx, p.y + 4, 1, p.h - 4);
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      for (let bx = p.x + 4; bx < p.x + p.w; bx += 13) ctx.fillRect(bx, p.y + 3, 1, p.h - 3);
+      ctx.fillStyle = '#556060';
+      ctx.fillRect(p.x + 4, p.y + 2, 2, 2);
+    } else if (p.kind === 'branch') {
+      // Rama gruesa de árbol
+      const bGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+      bGrad.addColorStop(0, '#3c2c14');
+      bGrad.addColorStop(0.5, '#33240e');
+      bGrad.addColorStop(1, '#221708');
+      ctx.fillStyle = bGrad;
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle = '#4a3a1c';
+      // Moño de hojas en cada extremo
+      [p.x, p.x + p.w].forEach(ex => {
+        ctx.fillStyle = 'rgba(30,80,50,0.85)';
+        ctx.beginPath(); ctx.arc(ex, p.y, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ex + 5, p.y + 3, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(60,120,70,0.4)';
+        ctx.beginPath(); ctx.arc(ex - 3, p.y - 3, 5, 0, Math.PI * 2); ctx.fill();
+      });
+    } else if (p.kind === 'gazebo') {
+      // Cubierta de madera del templete
+      const dGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+      dGrad.addColorStop(0, '#5a4222');
+      dGrad.addColorStop(1, '#382808');
+      ctx.fillStyle = dGrad;
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle = '#6b5230';
+      ctx.fillRect(p.x, p.y, p.w, 3);
+      for (let bx = p.x + 10; bx < p.x + p.w; bx += 16) ctx.fillRect(bx, p.y + 5, 1, p.h - 5);
+      // Columnas
+      ctx.fillStyle = '#2c2414';
+      ctx.fillRect(p.x, p.y - 46, 6, 46);
+      ctx.fillRect(p.x + p.w - 6, p.y - 46, 6, 46);
+      // Techo a dos aguas
+      ctx.fillStyle = '#1a1c10';
+      ctx.beginPath();
+      ctx.moveTo(p.x - 8, p.y - 46);
+      ctx.lineTo(p.x + p.w / 2, p.y - 74);
+      ctx.lineTo(p.x + p.w + 8, p.y - 46);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#2a3018';
+      ctx.fillRect(p.x - 8, p.y - 48, p.w + 16, 3);
+    } else {
+      // Piedra pulida del parque
+      const sGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+      sGrad.addColorStop(0, '#3a3c30');
+      sGrad.addColorStop(1, '#262820');
+      ctx.fillStyle = sGrad;
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle = '#4a4c3e';
+      ctx.fillRect(p.x, p.y, p.w, 3);
+      ctx.fillStyle = 'rgba(120,160,120,0.15)';
+      for (let bx = p.x + 12; bx < p.x + p.w; bx += 26) ctx.fillRect(bx, p.y, 3, 3);
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.fillRect(p.x, p.y + p.h, p.w, 3);
+    }
+  });
+
+  // ---- Farolas del parque (luz cálida) ----
+  const farolas = [150, 900, 1600, 2300, 2900];
+  farolas.forEach(fx => {
+    const fy = ground - 4;
+    ctx.fillStyle = '#101008';
+    ctx.fillRect(fx - 4, fy - 90, 7, 86);
+    ctx.fillStyle = '#1a1a10';
+    ctx.fillRect(fx - 6, fy - 4, 12, 4);
+    ctx.fillStyle = '#201c10';
+    ctx.fillRect(fx - 8, fy - 92, 15, 8);
+    ctx.save();
+    ctx.shadowColor = '#f0d080';
+    ctx.shadowBlur = 26;
+    ctx.fillStyle = '#f0d080';
+    ctx.beginPath(); ctx.arc(fx, fy - 84, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    const lGrad = ctx.createRadialGradient(fx, fy - 84, 0, fx, fy - 84, 90);
+    lGrad.addColorStop(0, 'rgba(240,208,128,0.12)');
+    lGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = lGrad;
+    ctx.beginPath(); ctx.arc(fx, fy - 84, 90, 0, Math.PI * 2); ctx.fill();
+  });
+
+  // ---- Fuente central ----
+  const fwx = 520, fwy = ground - 2;
+  const waterGrad = ctx.createRadialGradient(fwx, fwy, 0, fwx, fwy, 70);
+  waterGrad.addColorStop(0, 'rgba(90,180,200,0.22)');
+  waterGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = waterGrad;
+  ctx.beginPath(); ctx.arc(fwx, fwy, 70, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#3c443a';
+  ctx.beginPath(); ctx.ellipse(fwx, fwy, 46, 10, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#4a544a';
+  ctx.beginPath(); ctx.ellipse(fwx, fwy, 46, 10, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = '#304034';
+  ctx.fillRect(fwx - 5, fwy - 26, 10, 26);
+  ctx.save();
+  ctx.shadowColor = '#60c0d0';
+  ctx.shadowBlur = 14;
+  ctx.fillStyle = '#bfefff';
+  ctx.beginPath(); ctx.arc(fwx, fwy - 30, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // ---- Bancas del parque ----
+  const bancas = [400, 1250, 1950, 2500];
+  bancas.forEach(bx => {
+    ctx.fillStyle = '#2c2414';
+    ctx.fillRect(bx, ground - 16, 30, 3);
+    ctx.fillRect(bx + 4, ground - 16, 3, 14);
+    ctx.fillRect(bx + 23, ground - 16, 3, 14);
+    ctx.fillStyle = '#3a2c18';
+    ctx.fillRect(bx, ground - 20, 30, 3);
+  });
+}
+
+function drawParqueCollisions(ctx, W, H) {
+  const ground = H - 60;
+  ctx.fillRect(0, ground, W, 60);
+  PARQUE_PLATS.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
+}
+
+// =============================================
+//  TORRE DEL RELOJ
+// =============================================
+const TORRE_PLATS = [
+  { x: 0,  y: 720, w: 60, h: 14, kind: 'steel' },
+  { x: 3140, y: 720, w: 60, h: 14, kind: 'steel' },
+  { x: 60, y: 780, w: 150, h: 14, kind: 'grate' },
+  { x: 300, y: 680, w: 100, h: 14, kind: 'steel' },
+  { x: 500, y: 600, w: 90, h: 14, kind: 'beam' },
+  { x: 700, y: 760, w: 170, h: 14, kind: 'grate' },
+  { x: 760, y: 520, w: 80, h: 14, kind: 'gear' },
+  { x: 920, y: 640, w: 90, h: 14, kind: 'steel' },
+  { x: 1120, y: 700, w: 140, h: 14, kind: 'grate' },
+  { x: 1300, y: 560, w: 100, h: 14, kind: 'steel' },
+  { x: 1480, y: 640, w: 120, h: 14, kind: 'beam' },
+  { x: 1660, y: 520, w: 90, h: 14, kind: 'grate' },
+  { x: 1840, y: 600, w: 140, h: 14, kind: 'steel' },
+  { x: 2020, y: 480, w: 100, h: 14, kind: 'beam' },
+  { x: 2200, y: 580, w: 110, h: 14, kind: 'grate' },
+  { x: 2360, y: 480, w: 90, h: 14, kind: 'gear' },
+  { x: 2540, y: 560, w: 120, h: 14, kind: 'steel' },
+  { x: 2720, y: 460, w: 110, h: 14, kind: 'beam' },
+  { x: 2900, y: 560, w: 140, h: 14, kind: 'grate' },
+  { x: 3060, y: 620, w: 120, h: 14, kind: 'steel' },
+  { x: 150, y: 480, w: 60, h: 12, kind: 'beam' },
+  { x: 880, y: 450, w: 60, h: 12, kind: 'gear' },
+  { x: 1860, y: 380, w: 60, h: 12, kind: 'beam' },
+  { x: 2700, y: 360, w: 60, h: 12, kind: 'gear' },
+];
+
+function drawGear(ctx, x, y, r, color) {
+  const teeth = 8;
+  ctx.fillStyle = color;
+  for (let t = 0; t < teeth; t++) {
+    const a = (t / teeth) * Math.PI * 2;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(a);
+    ctx.fillRect(r * 0.78, -r * 0.16, r * 0.3, r * 0.32);
+    ctx.restore();
+  }
+  ctx.beginPath();
+  ctx.arc(x, y, r * 0.85, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.arc(x, y, r * 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, r * 0.18, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawClockFace(ctx, W, H) {
+  const cx = W * 0.46, cy = H * 0.26, R = 120;
+  // Halo nocturno del reloj
+  const halo = ctx.createRadialGradient(cx, cy, 10, cx, cy, R * 2);
+  halo.addColorStop(0, 'rgba(250,200,110,0.18)');
+  halo.addColorStop(1, 'transparent');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx, cy, R * 2, 0, Math.PI * 2); ctx.fill();
+
+  // Marco de bronce
+  ctx.fillStyle = '#2e2210';
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#4a3a1c';
+  ctx.beginPath(); ctx.arc(cx, cy, R - 8, 0, Math.PI * 2); ctx.fill();
+
+  // Esfera
+  const face = ctx.createRadialGradient(cx, cy, 0, cx, cy, R - 12);
+  face.addColorStop(0, '#f4e8c8');
+  face.addColorStop(1, '#d8c8a0');
+  ctx.fillStyle = face;
+  ctx.beginPath(); ctx.arc(cx, cy, R - 12, 0, Math.PI * 2); ctx.fill();
+
+  // Marcas horarias (roman strikes)
+  ctx.fillStyle = '#3a2c18';
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+    const ox = Math.cos(a) * (R - 22);
+    const oy = Math.sin(a) * (R - 22);
+    ctx.fillRect(cx + ox - 2, cy + oy - 2, 4, 4);
+  }
+
+  // Manecillas estáticas (12:36)
+  ctx.save();
+  ctx.strokeStyle = '#181008';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - 58); ctx.stroke();
+  ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 44, cy + 30); ctx.stroke();
+  ctx.fillStyle = '#181008';
+  ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // Soporte de hierro
+  ctx.fillStyle = '#241c10';
+  ctx.fillRect(cx - 40, cy + R - 14, 80, 70);
+  ctx.fillStyle = '#382c18';
+  ctx.fillRect(cx - 40, cy + R - 14, 80, 6);
+}
+
+function drawTorreVisuals(ctx, W, H) {
+  const ground = H - 60;
+
+  // ---- Suelo de tablones de madera ----
+  const floorGrad = ctx.createLinearGradient(0, ground, 0, H);
+  floorGrad.addColorStop(0, '#3a2a14');
+  floorGrad.addColorStop(1, '#1c1408');
+  ctx.fillStyle = floorGrad;
+  ctx.fillRect(0, ground, W, 60);
+  ctx.fillStyle = '#4a361c';
+  ctx.fillRect(0, ground, W, 4);
+  for (let bx = 0; bx < W; bx += 60) {
+    ctx.fillStyle = '#221808';
+    ctx.fillRect(bx, ground + 4, 2, 56);
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    ctx.fillRect(bx + 2, ground + 4, 1, 56);
+  }
+
+  // ---- Plataformas ----
+  TORRE_PLATS.forEach(p => {
+    if (p.kind === 'steel') {
+      ctx.fillStyle = '#353a42';
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle = '#4c545e';
+      ctx.fillRect(p.x, p.y, p.w, 3);
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillRect(p.x, p.y, p.w, 1);
+      ctx.fillStyle = '#263038';
+      for (let bx = p.x + 8; bx < p.x + p.w; bx += 20) ctx.fillRect(bx, p.y + p.h - 4, 4, 2);
+    } else if (p.kind === 'grate') {
+      ctx.fillStyle = '#262a30';
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle = '#3c444c';
+      ctx.fillRect(p.x, p.y, p.w, 3);
+      ctx.fillStyle = '#101418';
+      for (let bx = p.x + 6; bx < p.x + p.w; bx += 14) {
+        ctx.fillRect(bx, p.y + 5, 5, 3);
+        ctx.fillRect(bx, p.y + 10, 5, 2);
+      }
+    } else if (p.kind === 'beam') {
+      ctx.fillStyle = '#33240e';
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle = '#4a3418';
+      ctx.fillRect(p.x, p.y, p.w, 3);
+      ctx.fillStyle = '#221708';
+      for (let bx = p.x + 10; bx < p.x + p.w; bx += 16) ctx.fillRect(bx, p.y + 4, 1, p.h - 4);
+      ctx.fillStyle = '#5a4a32';
+      ctx.fillRect(p.x, p.y + p.h - 3, p.w, 3);
+      // Bandas metálicas
+      ctx.fillStyle = '#606870';
+      ctx.fillRect(p.x + 8, p.y - 2, 5, p.h + 4);
+      ctx.fillRect(p.x + p.w - 13, p.y - 2, 5, p.h + 4);
+    } else {
+      // Plataforma-engranaje
+      ctx.fillStyle = '#4a3014';
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle = '#6a4a1c';
+      ctx.fillRect(p.x, p.y, p.w, 3);
+      for (let bx = p.x + 6; bx < p.x + p.w; bx += 20) {
+        ctx.fillStyle = '#3c2810';
+        ctx.fillRect(bx, p.y + 4, 13, 2);
+      }
+      // Dientes simulados
+      ctx.fillStyle = `rgba(120,90,40,${pseudoRand(p.x, 0.15) + 0.1})`;
+      for (let bx = p.x; bx < p.x + p.w; bx += 16) {
+        ctx.fillRect(bx, p.y - 3, 6, 3);
+        ctx.fillRect(bx + 8, p.y + p.h, 6, 3);
+      }
+    }
+  });
+
+  // ---- Cadenas colgando del techo ----
+  const chains = [{ x: 720, top: 0, len: 190 }, { x: 700 + 30, top: 0, len: 190 }, { x: 1830, top: 0, len: 220 }, { x: 1860, top: 0, len: 220 }];
+  chains.forEach(ch => {
+    ctx.fillStyle = '#454a52';
+    for (let cy = ch.top; cy < ch.top + ch.len; cy += 8) {
+      ctx.fillRect(ch.x - 3, cy, 6, 4);
+    }
+    ctx.fillStyle = '#2c3038';
+    ctx.fillRect(ch.x - 6, ch.top, 12, 8);
+  });
+
+  // ---- Maquinaria trasera (engranajes grandes) ----
+  drawGear(ctx, W * 0.16, H * 0.72, 70, 'rgba(140,100,50,0.10)');
+  drawGear(ctx, W * 0.9, H * 0.65, 55, 'rgba(120,90,45,0.08)');
+
+  // ---- Campanas gemelas arriba ----
+  const bells = [W * 0.3, W * 0.7];
+  bells.forEach(bx => {
+    ctx.fillStyle = 'rgba(120,92,52,0.2)';
+    ctx.beginPath();
+    ctx.moveTo(bx - 16, 40);
+    ctx.quadraticCurveTo(bx, 58, bx + 16, 40);
+    ctx.lineTo(bx + 13, 84);
+    ctx.lineTo(bx - 13, 84);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgba(70,52,30,0.5)';
+    ctx.fillRect(bx - 3, 40, 6, 10);
+  });
+}
+
+function drawTorreCollisions(ctx, W, H) {
+  const ground = H - 60;
+  ctx.fillRect(0, ground, W, 60);
+  TORRE_PLATS.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
+}

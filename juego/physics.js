@@ -207,6 +207,7 @@ function physicsPlayer(player, colData, dt, input) {
 
   // Update afterimages
   if (player.afterimages) {
+    if (player.afterimages.length > 20) player.afterimages.splice(0, player.afterimages.length - 20);
     for (let i = player.afterimages.length - 1; i >= 0; i--) {
       player.afterimages[i].alpha -= 0.04;
       if (player.afterimages[i].alpha <= 0) player.afterimages.splice(i, 1);
@@ -274,17 +275,22 @@ function resolvePlayerMap(player, colData, mapW, mapH) {
   }
 }
 
+// Límite de seguridad anti-bucles infinitos en la resolución de colisiones
+const RESOLVE_GUARD = 60;
+
 function resolveAxisX(player, colData) {
   const steps = 4;
   for (let i = 0; i <= steps; i++) {
     const ty = player.y + (i / steps) * player.h;
     if (player.vx > 0 && isSolid(colData, player.x + player.w, ty)) {
-      while (isSolid(colData, player.x + player.w, player.y + player.h * 0.5)) player.x--;
+      let g = 0;
+      while (isSolid(colData, player.x + player.w, player.y + player.h * 0.5) && g++ < RESOLVE_GUARD) player.x--;
       player.vx = 0;
       return;
     }
     if (player.vx < 0 && isSolid(colData, player.x, ty)) {
-      while (isSolid(colData, player.x, player.y + player.h * 0.5)) player.x++;
+      let g = 0;
+      while (isSolid(colData, player.x, player.y + player.h * 0.5) && g++ < RESOLVE_GUARD) player.x++;
       player.vx = 0;
       return;
     }
@@ -297,7 +303,8 @@ function resolveAxisY(player, colData, mapH) {
     for (let i = 0; i <= steps; i++) {
       const tx = player.x + (i / steps) * player.w;
       if (isSolid(colData, tx, player.y + player.h)) {
-        while (isSolid(colData, tx, player.y + player.h)) player.y--;
+        let g = 0;
+        while (isSolid(colData, tx, player.y + player.h) && g++ < RESOLVE_GUARD) player.y--;
         if (player.isPounding) addScreenShake(5);
         player.vy = 0;
         player.onGround = true;
@@ -309,13 +316,14 @@ function resolveAxisY(player, colData, mapH) {
     for (let i = 0; i <= steps; i++) {
       const tx = player.x + (i / steps) * player.w;
       if (isSolid(colData, tx, player.y)) {
-        while (isSolid(colData, tx, player.y)) player.y++;
+        let g = 0;
+        while (isSolid(colData, tx, player.y) && g++ < RESOLVE_GUARD) player.y++;
         player.vy = 0;
         return;
       }
     }
   }
-  if (player.y > mapH + 50) player.y = mapH + 200;
+  if (player.y > mapH + 50) player.y = mapH + 150;
 }
 
 // =============================================
@@ -369,14 +377,18 @@ function physicsEnemies(enemies, colData, mapW, mapH, dt) {
     for (let i = 0; i <= steps; i++) {
       const tx = e.x + (i / steps) * e.w;
       if (isSolid(colData, tx, e.y + e.h)) {
-        while (isSolid(colData, tx, e.y + e.h)) e.y--;
+        let g = 0;
+        while (isSolid(colData, tx, e.y + e.h) && g++ < RESOLVE_GUARD) e.y--;
         e.vy = 0;
         e.onGround = true;
         break;
       }
     }
 
-    if (e.y > mapH) { e.y = 0; }
+    if (e.y > mapH + 40) {
+      e.y = 0;
+      e.vy = 0;
+    }
 
     // Animation timer
     e.animTimer = (e.animTimer || 0) + dt;
@@ -706,6 +718,7 @@ function spawnDustFx(particles, x, y, dir) {
 }
 
 function updateParticles(particles, dt) {
+  if (particles.length > 900) particles.splice(0, particles.length - 900);
   for (const p of particles) {
     p.x += p.vx;
     p.y += p.vy;

@@ -156,6 +156,31 @@ const ZONE_ENEMIES = {
     // Boss de alcantarillas
     { type: 'jefe_rata', x: 1500, dir: -1, patrolMin: 1400, patrolMax: 1580 },
   ],
+  parque_palomas: [
+    { type: 'rata', x: 300, dir: 1, patrolMin: 220, patrolMax: 480 },
+    { type: 'gato', x: 650, dir: -1, patrolMin: 520, patrolMax: 780 },
+    { type: 'gato', x: 950, dir: 1, patrolMin: 850, patrolMax: 1150 },
+    { type: 'cuervo', x: 1200, dir: -1, patrolMin: 1100, patrolMax: 1350 },
+    { type: 'rata', x: 1500, dir: 1, patrolMin: 1400, patrolMax: 1650 },
+    { type: 'gato_grande', x: 1850, dir: -1, patrolMin: 1750, patrolMax: 2000 },
+    { type: 'cuervo', x: 2100, dir: 1, patrolMin: 2000, patrolMax: 2300 },
+    { type: 'gato', x: 2450, dir: -1, patrolMin: 2350, patrolMax: 2600 },
+    { type: 'rata_voladora', x: 2700, dir: 1, patrolMin: 2600, patrolMax: 2850 },
+    { type: 'rata', x: 3000, dir: -1, patrolMin: 2900, patrolMax: 3120 },
+  ],
+  torre_reloj: [
+    { type: 'rata', x: 300, dir: 1, patrolMin: 180, patrolMax: 400 },
+    { type: 'rata_voladora', x: 520, dir: -1, patrolMin: 420, patrolMax: 650 },
+    { type: 'cuervo', x: 800, dir: 1, patrolMin: 700, patrolMax: 980 },
+    { type: 'gato_grande', x: 1100, dir: -1, patrolMin: 1000, patrolMax: 1250 },
+    { type: 'rata', x: 1350, dir: 1, patrolMin: 1250, patrolMax: 1520 },
+    { type: 'rata_voladora', x: 1650, dir: -1, patrolMin: 1550, patrolMax: 1800 },
+    { type: 'cuervo', x: 1950, dir: 1, patrolMin: 1850, patrolMax: 2100 },
+    { type: 'gato', x: 2250, dir: -1, patrolMin: 2150, patrolMax: 2420 },
+    { type: 'rata_voladora', x: 2500, dir: 1, patrolMin: 2400, patrolMax: 2680 },
+    { type: 'gato_grande', x: 2800, dir: -1, patrolMin: 2700, patrolMax: 2980 },
+    { type: 'cuervo', x: 3050, dir: 1, patrolMin: 2980, patrolMax: 3140 },
+  ],
 };
 
 // =============================================
@@ -202,6 +227,50 @@ const ZONE_MIGAJAS = {
     [1120, 620, 2], [1140, 620, 3],
     [250, 140, 5], [600, 360, 5], [900, 580, 5],
   ],
+  parque_palomas: [
+    [70, 742, 1], [90, 742, 1], [110, 742, 1],
+    [300, 686, 1], [320, 686, 1],
+    [455, 745, 2], [475, 745, 2],
+    [640, 646, 1], [660, 646, 1], [680, 646, 2],
+    [800, 696, 1], [820, 696, 1],
+    [940, 616, 2], [960, 616, 2],
+    [1090, 544, 3], [1110, 544, 3],
+    [1260, 606, 2], [1280, 606, 2],
+    [1410, 686, 1], [1430, 686, 1], [1460, 686, 1],
+    [1615, 626, 2], [1635, 626, 2],
+    [1745, 546, 3],
+    [1885, 606, 2], [1910, 606, 2],
+    [2065, 526, 3],
+    [2210, 586, 2], [2230, 586, 2],
+    [2395, 506, 3],
+    [2550, 566, 2], [2570, 566, 2],
+    [2710, 626, 1], [2730, 626, 1],
+    [2910, 586, 2], [2930, 586, 2],
+    [3050, 646, 1],
+    [790, 486, 5], [1330, 456, 5], [2130, 426, 5], [2730, 426, 5],
+    [300, 820, 1], [700, 820, 1], [1150, 820, 1], [1600, 820, 1],
+    [2050, 820, 1], [2500, 820, 1], [2950, 820, 1],
+  ],
+  torre_reloj: [
+    [110, 766, 1], [130, 766, 1], [160, 766, 1],
+    [340, 666, 1], [360, 666, 1],
+    [530, 586, 2], [550, 586, 2],
+    [770, 746, 2], [790, 746, 2],
+    [950, 626, 1], [970, 626, 1],
+    [1150, 686, 2], [1170, 686, 2], [1190, 686, 2],
+    [1330, 546, 1], [1350, 546, 1],
+    [1520, 626, 2], [1540, 626, 2],
+    [1690, 506, 3],
+    [1870, 586, 1], [1890, 586, 1], [1910, 586, 1],
+    [2050, 466, 3],
+    [2230, 566, 2], [2240, 566, 2],
+    [2390, 466, 3],
+    [2570, 546, 2], [2590, 546, 2],
+    [2750, 446, 3],
+    [2930, 546, 1], [2950, 546, 1],
+    [3090, 606, 1],
+    [180, 466, 5], [910, 436, 5], [1890, 366, 5], [2730, 346, 5],
+  ],
 };
 
 // =============================================
@@ -238,6 +307,32 @@ const ZONE_NPCS = {
       dIdx: 0,
     },
   ],
+  parque_palomas: [
+    {
+      x: 180, y: 0, w: 14, h: 18, color: '#c8a040', name: 'Ganso del Estanque',
+      dialogues: [
+        'Bienvenido al Parque de las Palomas. Aquí los gatos son menos, pero más astutos.',
+        'La fuente tiene migajas antiguas... he visto palomas robar pan de aquí toda la vida.',
+        'Al este se alza la Torre del Reloj. El Relojero mide cada segundo, y cada trampa.',
+        'Dicen que los que trepan hasta el campanario son tocados por el reloj y aprenden a planear.',
+        'Si el cielo se vuelve frío y las estrellas tiemblan... es que la luna te está observando.',
+      ],
+      dIdx: 0,
+    },
+  ],
+  torre_reloj: [
+    {
+      x: 120, y: 0, w: 14, h: 18, color: '#c07040', name: 'Relojero Loco',
+      dialogues: [
+        '¡Tic-tac! ¿Traes llaves? No. Las llaves no sirven aquí. ¡El tiempo no tiene cerradura!',
+        'Mis engranajes guardan secretos. Sube, sube, ¡pero no tropieces con las cadenas!',
+        'La gran esfera marca las doce y media... para siempre. El reloj también puede caer.',
+        'Las ratas voladoras adoran el polvo de aquí. Huelen las migajas antes de verlas.',
+        'Cuida tus alas: aquí arriba el aire sabe a latón y a madera vieja.',
+      ],
+      dIdx: 0,
+    },
+  ],
 };
 
 // =============================================
@@ -246,9 +341,19 @@ const ZONE_NPCS = {
 const ZONE_PORTALS = {
   ciudad_alta: [
     { x: 3150, y: 0, w: 40, h: 900, toZone: 'alcantarillas', label: 'Alcantarillas →' },
+    { x: -1, y: 0, w: 40, h: 900, toZone: 'parque_palomas', label: '← Parque de las Palomas' },
   ],
   alcantarillas: [
     { x: 0, y: 0, w: 40, h: 900, toZone: 'ciudad_alta', label: '← Ciudad Alta' },
+    { x: 3150, y: 0, w: 40, h: 900, toZone: 'parque_palomas', label: 'Parque de las Palomas →' },
+  ],
+  parque_palomas: [
+    { x: 0, y: 0, w: 40, h: 900, toZone: 'ciudad_alta', label: '← Ciudad Alta' },
+    { x: 3150, y: 0, w: 40, h: 900, toZone: 'torre_reloj', label: 'Torre del Reloj →' },
+  ],
+  torre_reloj: [
+    { x: 0, y: 0, w: 40, h: 900, toZone: 'parque_palomas', label: '← Parque de las Palomas' },
+    { x: 3150, y: 0, w: 40, h: 900, toZone: 'alcantarillas', label: 'Alcantarillas →' },
   ],
 };
 
@@ -266,5 +371,17 @@ const ZONE_CHECKPOINTS = {
     { x: 200, y: 0, id: 'cp_alc_1', lit: true },
     { x: 750, y: 0, id: 'cp_alc_2', lit: false },
     { x: 1300, y: 0, id: 'cp_alc_3', lit: false },
+  ],
+  parque_palomas: [
+    { x: 260, y: 0, id: 'cp_parque_1', lit: true },
+    { x: 950, y: 0, id: 'cp_parque_2', lit: false },
+    { x: 1700, y: 0, id: 'cp_parque_3', lit: false },
+    { x: 2450, y: 0, id: 'cp_parque_4', lit: false },
+  ],
+  torre_reloj: [
+    { x: 260, y: 0, id: 'cp_torre_1', lit: true },
+    { x: 900, y: 0, id: 'cp_torre_2', lit: false },
+    { x: 1600, y: 0, id: 'cp_torre_3', lit: false },
+    { x: 2400, y: 0, id: 'cp_torre_4', lit: false },
   ],
 };

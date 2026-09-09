@@ -195,6 +195,28 @@
         kind:'sewer',
       },
       {
+        id:'parque_palomas',
+        name:'Parque de las Palomas',
+        desc:'Un parque nocturno al oeste de la ciudad. Fuentes, arboledas y un templete a la luz de la luna.',
+        enemies:'Gatos, Ratas Voladoras, Cuervos',
+        boss:'—',
+        reward:'Zonas nuevas',
+        rx:0.16, ry:0.66, rw:0.3, rh:0.28,
+        color:'#0a1e1a', borderColor:'#205038',
+        kind:'park',
+      },
+      {
+        id:'torre_reloj',
+        name:'Torre del Reloj',
+        desc:'El interior de una torre infinita de mampostería. Engranajes, cadenas y el tiempo detenido.',
+        enemies:'Ratas Voladoras, Cuervos, Gatos Grandes',
+        boss:'—',
+        reward:'Zonas nuevas',
+        rx:0.58, ry:0.72, rw:0.28, rh:0.22,
+        color:'#1a1408', borderColor:'#5a3c1c',
+        kind:'tower',
+      },
+      {
         id:'tejado_gansos',
         name:'Tejado de los Gansos',
         desc:'Zona de acceso aún no descubierta. Los gansos guardan las migajas más grandes de la ciudad.',
@@ -385,6 +407,28 @@
         ctx.beginPath(); ctx.moveTo(cx-6, cy+3); ctx.lineTo(cx+6, cy+3); ctx.stroke();
         ctx.strokeStyle = 'rgba(64,160,112,0.5)';
         ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy-7); ctx.stroke();
+      } else if(z.kind === 'park') {
+        // Árbol de parque
+        ctx.fillStyle = '#3a5a40';
+        ctx.fillRect(cx-1, cy-1, 3, 9);
+        ctx.fillStyle = '#2a3a30';
+        ctx.beginPath(); ctx.arc(cx, cy-4, 6, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(232,200,64,0.8)';
+        ctx.fillRect(cx-4, cy+6, 9, 2);
+        ctx.fillRect(cx-5, cy+6, 2, 2);
+      } else if(z.kind === 'tower') {
+        // Torre del reloj (esfera pequeña)
+        ctx.fillStyle = '#d8c8a0';
+        ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#a09060';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2); ctx.stroke();
+        ctx.fillStyle = '#5c4a2c';
+        ctx.fillRect(cx-5, cy+5, 10, 4);
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy-4); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx+3, cy+2); ctx.stroke();
+        ctx.fillStyle = 'rgba(232,200,64,0.85)';
+        ctx.fillRect(cx-6, cy+9, 12, 1.5);
       } else {
         // Edificios de la ciudad
         ctx.fillStyle = '#c8c8e0';

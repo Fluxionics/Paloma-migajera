@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Habilidades — Paloma Migajera</title>
   <link rel="stylesheet" href="../shared/global.css">
   <style>
@@ -256,6 +256,20 @@
       letter-spacing: 0.1em;
       color: var(--text-dim);
       text-align: center;
+    }
+
+    @media (max-width:760px) {
+      .hab-layout { padding: 24px 14px calc(60px + env(safe-area-inset-bottom)); }
+      .hab-header { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 24px; }
+      .hab-title { font-size: 1.5rem; }
+      .hab-sub { font-size: 0.82rem; }
+      .tabs { width: 100%; overflow-x: auto; scrollbar-width: none; }
+      .tabs::-webkit-scrollbar { display: none; }
+      .tab-btn { padding: 12px 14px; white-space: nowrap; font-size: 0.6rem; }
+      .mov-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+      .mov-card { padding: 16px; }
+      .active-grid { grid-template-columns: 1fr; gap: 10px; }
+      .amuleto-layout { grid-template-columns: 1fr; gap: 14px; }
     }
   </style>
 </head>

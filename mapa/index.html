@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Mapa — Paloma Migajera</title>
   <link rel="stylesheet" href="../shared/global.css">
   <style>
@@ -88,6 +88,17 @@
       border-top:1px solid var(--border);
     }
     .map-hint { font-family:var(--font-title); font-size:.55rem; letter-spacing:.15em; color:var(--muted); }
+
+    @media (max-width:760px){
+      body{overflow:auto;}
+      .map-layout{grid-template-rows:auto minmax(0,44vh) auto auto;grid-template-columns:1fr;}
+      .map-canvas-wrap{border-right:none;border-bottom:1px solid var(--border);}
+      .map-info{max-height:52vh;}
+      .map-header{padding:calc(10px + env(safe-area-inset-top)) 12px 10px;flex-wrap:wrap;gap:8px;}
+      .map-header-sub{display:none;}
+      .map-footer{padding:10px 12px calc(10px + env(safe-area-inset-bottom));flex-wrap:wrap;}
+      .map-hint{font-size:.5rem;}
+    }
   </style>
 </head>
 <body>

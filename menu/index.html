@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Paloma Migajera</title>
   <link rel="stylesheet" href="../shared/global.css">
   <style>
@@ -190,6 +190,28 @@
     }
     .credits-title { font-family:var(--font-title); font-size:1.3rem; letter-spacing:.2em; color:var(--gold); margin-bottom:20px; }
     .credits-body  { font-size:.95rem; color:var(--text-dim); line-height:1.85; margin-bottom:26px; }
+
+    @media (max-width:820px){
+      .menu-root{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:26px 14px 48px;}
+      .menu-root{padding-top:calc(26px + env(safe-area-inset-top));}
+      .logo-pigeon{font-size:3.4rem;}
+      .logo-pigeon svg{width:52px;height:52px;}
+      .logo-title{font-size:clamp(1.5rem,6vw,2.4rem);letter-spacing:.1em;}
+      .logo-tagline{font-size:.85rem;margin-bottom:24px;}
+      .nav-wrap{flex-direction:column;align-items:stretch;gap:12px;width:100%;max-width:400px;}
+      .nav-col{min-width:0;width:100%;}
+      .nav-btn{padding:14px 18px;}
+      .info-panel{width:100%;}
+      .sub-screen{padding:0 4px;}
+      .sub-back{margin-bottom:22px;}
+      .sub-title{font-size:1.4rem;}
+      .sub-subtitle{margin-bottom:24px;}
+      .diff-grid{grid-template-columns:1fr;}
+      .cs-stats{grid-template-columns:1fr;}
+      .cs-stat{padding:8px 0;}
+      .version{bottom:calc(10px + env(safe-area-inset-bottom));left:auto;}
+      .credits-box{padding:36px 24px;max-width:100%;margin:24px;max-height:86vh;overflow-y:auto;}
+    }
   </style>
 </head>
 <body>

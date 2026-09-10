@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <title>Paloma Migajera</title>
   <link rel="icon" href="data:,">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
@@ -113,7 +113,59 @@
     .pause-btn{border-radius:6px;letter-spacing:0.2em;}
     #screen-pause .pause-title{text-shadow:0 0 40px rgba(232,200,64,0.25);}
     #screen-victory .victory-reward{border-radius:10px;box-shadow:0 0 24px rgba(232,200,64,0.12) inset;}
-    #boss-bar .boss-track{border-radius:4px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.8);}  </style>
+    #boss-bar .boss-track{border-radius:4px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.8);}
+
+    #touch-controls{position:fixed;inset:0;z-index:60;pointer-events:none;display:none;}
+    #touch-controls.show{display:block;}
+    #joy-zone{position:absolute;left:calc(18px + env(safe-area-inset-left));bottom:calc(26px + env(safe-area-inset-bottom));width:136px;height:136px;border-radius:50%;pointer-events:auto;touch-action:none;background:radial-gradient(circle,rgba(255,255,255,0.05),rgba(255,255,255,0.015));border:1px solid rgba(255,255,255,0.06);}
+    #joy-base{position:absolute;left:50%;top:50%;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;background:radial-gradient(circle,rgba(232,200,64,0.09),rgba(232,200,64,0.03));border:1px solid rgba(232,200,64,0.18);}
+    #joy-knob{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,0.5),rgba(232,200,64,0.55) 70%);box-shadow:0 0 14px rgba(232,200,64,0.35);will-change:transform;}
+    #t-btns{position:absolute;right:calc(18px + env(safe-area-inset-right));bottom:calc(26px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:none;}
+    .t-row{display:flex;gap:8px;pointer-events:none;}
+    .t-btn{font-family:var(--font-title);font-size:0.55rem;font-weight:700;letter-spacing:0.08em;color:#e8e8ff;background:rgba(12,12,22,0.55);border:1px solid rgba(255,255,255,0.14);border-radius:50%;width:58px;height:58px;display:flex;align-items:center;justify-content:center;pointer-events:auto;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform 0.06s,background 0.12s,border-color 0.12s;}
+    .t-btn.sm{width:50px;height:50px;font-size:0.48rem;}
+    .t-btn.lg{width:72px;height:72px;font-size:0.62rem;background:rgba(232,200,64,0.12);border-color:rgba(232,200,64,0.35);color:#ffe880;box-shadow:0 0 16px rgba(232,200,64,0.14);}
+    .t-btn.pressed{transform:scale(0.88);background:rgba(232,200,64,0.35);border-color:rgba(232,200,64,0.65);}
+    .t-btn:focus{outline:none;}
+    #btn-pause-touch{position:fixed;top:calc(10px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));z-index:70;width:42px;height:42px;border-radius:8px;pointer-events:auto;display:none;align-items:center;justify-content:center;background:rgba(12,12,22,0.6);border:1px solid rgba(255,255,255,0.14);color:var(--text-hi);padding:0;cursor:pointer;}
+    #btn-pause-touch.show{display:flex;}
+
+    html,body,#game-canvas,#hud,.game-overlay{touch-action:none;}
+    #game-canvas{-webkit-user-select:none;user-select:none;}
+    body{-webkit-touch-callout:none;overscroll-behavior:none;}
+    .game-overlay{overflow-y:auto;}
+
+    @media (max-width:760px),(pointer:coarse){
+      #hud{padding:calc(8px + env(safe-area-inset-top)) 10px 8px;gap:8px;}
+      .hud-left{min-width:0;padding:6px 8px;gap:5px;}
+      .hud-bar-track{width:min(30vw,110px);height:5px;}
+      .heart{width:13px;height:12px;}
+      .hud-center{gap:3px;}
+      .hud-zona{font-size:0.5rem;}
+      .hud-migajas{font-size:0.72rem;}
+      .hud-right{gap:4px;}
+      .ab-slot{width:30px;height:30px;font-size:0.7rem;border-radius:7px;}
+      .ab-key{font-size:0.34rem;}
+      .hud-nivel{font-size:0.5rem;}
+      #zone-banner{top:calc(62px + env(safe-area-inset-top));}
+      #zone-banner .zb-line{font-size:0.95rem;letter-spacing:0.22em;}
+      #zone-banner .zb-sub{font-size:0.75rem;}
+      #boss-bar{bottom:calc(152px + env(safe-area-inset-bottom));}
+      #dialogue-box{bottom:calc(170px + env(safe-area-inset-bottom));padding:14px 16px;}
+      .pause-btn{min-width:min(280px,82vw);}
+      .pause-title{font-size:1.7rem;margin-bottom:18px;}
+      .pause-stats{flex-wrap:wrap;justify-content:center;gap:12px;}
+      .combo-display{top:calc(58px + env(safe-area-inset-top));}
+    }
+    @media (max-height:430px){
+      #touch-controls #joy-zone{width:102px;height:102px;}
+      #touch-controls #joy-base{width:78px;height:78px;margin:-39px 0 0 -39px;}
+      #touch-controls #joy-knob{width:36px;height:36px;margin:-18px 0 0 -18px;}
+      #t-btns .t-btn{width:48px;height:48px;font-size:0.46rem;}
+      #t-btns .t-btn.sm{width:42px;height:42px;}
+      #t-btns .t-btn.lg{width:58px;height:58px;}
+    }
+  </style>
 </head>
 <body>
   <div id="boot-splash" style="position:fixed;inset:0;z-index:999;background:#06060f;color:#e8c840;font-family:Georgia,'Times New Roman',serif;display:flex;align-items:center;justify-content:center;font-size:18px;letter-spacing:8px;text-align:center;">PALOMA&nbsp;MIGAJERA</div>
@@ -203,6 +255,21 @@
   <div id="scanlines"></div>
   <div id="screen-transition"></div>
 
+  <button id="btn-pause-touch" onclick="togglePause()" aria-label="Pausa"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></svg></button>
+
+  <div id="touch-controls">
+    <div id="joy-zone"><div id="joy-base"><div id="joy-knob"></div></div></div>
+    <div id="t-btns">
+      <div class="t-row">
+        <button class="t-btn sm" data-act="dash">DASH</button>
+        <button class="t-btn sm" data-act="down">BAJA</button>
+        <button class="t-btn sm" data-act="esp">ESP</button>
+      </div>
+      <button class="t-btn" data-act="atk">ATAQUE</button>
+      <button class="t-btn lg" data-act="jump">SALTO</button>
+    </div>
+  </div>
+
   <script src="../shared/utils.js"></script>
   <script src="../shared/icons.js"></script>
   <script src="../shared/svg-system.js"></script>
@@ -216,8 +283,14 @@
   <script>
   const canvas = document.getElementById('game-canvas');
   const ctx    = canvas.getContext('2d');
-  let W, H;
-  function resizeCanvas() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  let W, H, DPR = 1;
+  function resizeCanvas() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width  = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
@@ -261,23 +334,98 @@
   });
   window.addEventListener('keyup', e => { keys[e.code] = false; justR[e.code] = true; });
 
+  const touchIn = { active:false, pid:null, dx:0, jump:false, atk:false, dash:false, esp:false, down:false, jJump:false, jAtk:false, jDash:false, jEsp:false };
+  const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  const JOY_R = 40;
+  const joy = document.getElementById('joy-zone');
+  const joyKnob = document.getElementById('joy-knob');
+  let joyDown = null;
+  if (joy) {
+    joy.addEventListener('pointerdown', e => {
+      if (joyDown !== null) return;
+      joyDown = { pid: e.pointerId, sx: e.clientX, sy: e.clientY };
+      if (joy.setPointerCapture) joy.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    joy.addEventListener('pointermove', e => {
+      if (!joyDown || e.pointerId !== joyDown.pid) return;
+      let dx = (e.clientX - joyDown.sx) / JOY_R;
+      let dy = (e.clientY - joyDown.sy) / JOY_R;
+      const len = Math.hypot(dx, dy);
+      if (len > 1) { dx /= len; dy /= len; }
+      touchIn.dx = dx;
+      joyKnob.style.transform = 'translate(' + (dx * JOY_R) + 'px,' + (dy * JOY_R) + 'px)';
+    });
+    const endJoy = e => {
+      if (!joyDown || e.pointerId !== joyDown.pid) return;
+      joyDown = null;
+      touchIn.dx = 0;
+      joyKnob.style.transform = '';
+    };
+    joy.addEventListener('pointerup', endJoy);
+    joy.addEventListener('pointercancel', endJoy);
+  }
+  document.querySelectorAll('.t-btn').forEach(btn => {
+    const press = e => {
+      e.preventDefault();
+      const a = btn.dataset.act;
+      if (a === 'jump')   { touchIn.jump = true;  touchIn.jJump = true; }
+      if (a === 'atk')    { touchIn.atk  = true;  touchIn.jAtk  = true; }
+      if (a === 'dash')   { touchIn.dash = true;  touchIn.jDash = true; }
+      if (a === 'esp')    { touchIn.esp  = true;  touchIn.jEsp  = true; }
+      if (a === 'down')   { touchIn.down = true; }
+      btn.classList.add('pressed');
+    };
+    const release = () => {
+      const a = btn.dataset.act;
+      if (a === 'jump') touchIn.jump = false;
+      if (a === 'atk')  touchIn.atk  = false;
+      if (a === 'dash') touchIn.dash = false;
+      if (a === 'esp')  touchIn.esp  = false;
+      if (a === 'down') touchIn.down = false;
+      btn.classList.remove('pressed');
+    };
+    btn.addEventListener('pointerdown', press);
+    btn.addEventListener('pointerup', release);
+    btn.addEventListener('pointercancel', release);
+    btn.addEventListener('pointerleave', release);
+  });
+  function showTouchUI() {
+    document.getElementById('touch-controls').classList.add('show');
+    document.getElementById('btn-pause-touch').classList.add('show');
+    const dh = document.querySelector('.dlg-hint');
+    if (dh) dh.textContent = 'Toca para continuar';
+  }
+  if (hasTouch) showTouchUI();
+  document.addEventListener('touchstart', () => { if (!hasTouch) showTouchUI(); }, { once: true });
+  document.addEventListener('pointerup', e => {
+    if (!hasTouch || G.state !== 'dialogue') return;
+    const t = e.target;
+    if (!t || typeof t.closest !== 'function') { advanceDialogue(); return; }
+    if (t.closest('.t-btn') || t.closest('#joy-zone') || t.id === 'btn-pause-touch') return;
+    advanceDialogue();
+  });
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
   function getInput() {
     const cfg = getCfg().controles;
-    return {
-      izq: keys[cfg.izq] || keys['ArrowLeft'] || keys['KeyA'],
-      der: keys[cfg.der] || keys['ArrowRight'] || keys['KeyD'],
-      saltar: keys[cfg.saltar] || keys['Space'] || keys['KeyW'],
-      dash: keys[cfg.dash] || keys['ShiftLeft'] || keys['ShiftRight'],
-      ataque: keys[cfg.ataque] || keys['KeyZ'],
-      especial: keys[cfg.especial] || keys['KeyX'],
-      abajo: keys[cfg.abajo] || keys['ArrowDown'] || keys['KeyS'],
+    const out = {
+      izq: keys[cfg.izq] || keys['ArrowLeft'] || keys['KeyA'] || touchIn.dx < -0.25,
+      der: keys[cfg.der] || keys['ArrowRight'] || keys['KeyD'] || touchIn.dx > 0.25,
+      saltar: keys[cfg.saltar] || keys['Space'] || keys['KeyW'] || touchIn.jump,
+      dash: keys[cfg.dash] || keys['ShiftLeft'] || keys['ShiftRight'] || touchIn.dash,
+      ataque: keys[cfg.ataque] || keys['KeyZ'] || touchIn.atk,
+      especial: keys[cfg.especial] || keys['KeyX'] || touchIn.esp,
+      abajo: keys[cfg.abajo] || keys['ArrowDown'] || keys['KeyS'] || touchIn.down,
       justPressed: {
-        saltar: justP[cfg.saltar] || justP['Space'] || justP['KeyW'],
-        dash: justP[cfg.dash] || justP['ShiftLeft'] || justP['ShiftRight'],
-        ataque: justP[cfg.ataque] || justP['KeyZ'],
-        especial: justP[cfg.especial] || justP['KeyX'],
+        saltar: justP[cfg.saltar] || justP['Space'] || justP['KeyW'] || touchIn.jJump,
+        dash: justP[cfg.dash] || justP['ShiftLeft'] || justP['ShiftRight'] || touchIn.jDash,
+        ataque: justP[cfg.ataque] || justP['KeyZ'] || touchIn.jAtk,
+        especial: justP[cfg.especial] || justP['KeyX'] || touchIn.jEsp,
       },
     };
+    touchIn.jJump = touchIn.jAtk = touchIn.jDash = touchIn.jEsp = false;
+    return out;
   }
 
   function loadZone(zoneId) {
@@ -541,7 +689,7 @@
       ctx.fillRect(bx, by, barW * p, 2);
       ctx.fillStyle = 'rgba(176,176,208,0.65)';
       ctx.font = 'italic 12px "IM Fell English", serif';
-      ctx.fillText('Z atacar · X palomaduken · ⇧ dash · ESC pausa', W / 2, H / 2 + 82);
+      ctx.fillText(hasTouch ? 'Joystick para moverte · SALTO · ATAQUE · DASH · ESPECIAL' : 'Z atacar · X palomaduken · ⇧ dash · ESC pausa', W / 2, H / 2 + 82);
       ctx.textAlign = 'left';
       return;
     }
@@ -840,7 +988,7 @@
     loadZone(saveData.zona || 'ciudad_alta');
     requestAnimationFrame(loop);
     setTimeout(() => {
-      toast('Z atacar · X Palomaduken · ⇧ Dash · ESC pausa', 'info', 5000);
+      toast(hasTouch ? 'Usa el joystick para moverte y los botones para atacar y saltar. Pausa arriba a la derecha.' : 'Z atacar · X Palomaduken · ⇧ Dash · ESC pausa', 'info', 5000);
     }, 1200);
   });
   </script>

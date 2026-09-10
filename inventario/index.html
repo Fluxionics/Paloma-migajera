@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Inventario — Paloma Migajera</title>
   <link rel="stylesheet" href="../shared/global.css">
   <style>
@@ -195,6 +195,19 @@
       padding: 40px;
       font-style: italic;
       color: var(--text-dim);
+    }
+
+    @media (max-width:760px) {
+      .inv-layout { padding: 24px 14px calc(60px + env(safe-area-inset-bottom)); }
+      .inv-header { flex-wrap: wrap; gap: 14px; }
+      .inv-title { font-size: 1.5rem; }
+      .inv-body { grid-template-columns: 1fr; }
+      .detail-panel { position: static; order: -1; padding: 18px 16px; }
+      .inv-categories { overflow-x: auto; scrollbar-width: none; }
+      .inv-categories::-webkit-scrollbar { display: none; }
+      .cat-btn { white-space: nowrap; padding: 11px 14px; }
+      .items-grid { grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); }
+      .capacity-bar { margin-top: 6px; }
     }
   </style>
 </head>

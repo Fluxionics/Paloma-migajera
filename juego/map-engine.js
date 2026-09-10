@@ -154,6 +154,11 @@ const ZONES = {
     v.fillRect(0, H * 0.35, W, H * 0.2);
     v.restore();
 
+    // Additional decorative elements
+    drawClouds(v, W, H);
+    drawDistantLights(v, W, H);
+    drawSmog(v, W, H);
+
     if (DECOR_PNG) {
       try {
         v.save();
@@ -199,6 +204,11 @@ const ZONES = {
       const my = pseudoRand(i * 23, H * 0.3) + H * 0.1;
       v.fillRect(mx, my, pseudoRand(i * 7, 40) + 20, pseudoRand(i * 11, 8) + 4);
     }
+
+    // Additional sewer effects
+    drawWaterDrips(v, W, H);
+    drawSewerMoss(v, W, H);
+    drawPipes(v, W, H);
 
     drawAlcantarillaVisuals(v, W, H);
 
@@ -252,6 +262,11 @@ const ZONES = {
     tiledFog(v, W, H * 0.55, 'rgba(120,200,200,0.03)');
     v.restore();
 
+    // Additional park effects
+    drawParkBench(v, W, H);
+    drawFountain(v, W, H);
+    drawFireflies(v, W, H);
+
     drawParqueVisuals(v, W, H);
 
     c.fillStyle = '#fff';
@@ -297,6 +312,11 @@ const ZONES = {
       v.fillRect(dx, dy, 2, 2);
     }
 
+    // Additional clock tower effects
+    drawClockHands(v, W, H);
+    drawPendulum(v, W, H);
+    drawClockMechanism(v, W, H);
+
     drawTorreVisuals(v, W, H);
 
     c.fillStyle = '#fff';
@@ -327,6 +347,11 @@ const ZONES = {
     moonGlow.addColorStop(1, 'transparent');
     v.fillStyle = moonGlow;
     v.fillRect(0, 0, W, H);
+
+    // Additional forest effects
+    drawGlowingMushrooms(v, W, H);
+    drawMagicParticles(v, W, H);
+    drawAncientTrees(v, W, H);
 
     drawBosqueVisuals(v, W, H);
 
@@ -372,6 +397,12 @@ const ZONES = {
     v.fill();
     v.globalAlpha = 1;
     v.restore();
+
+    // Additional rooftop effects
+    drawSunriseGlow(v, W, H);
+    drawRooftopDetails(v, W, H);
+    drawDistantCity(v, W, H);
+    drawGeeseSilhouettes(v, W, H);
 
     drawTejadoVisuals(v, W, H);
 
@@ -598,6 +629,532 @@ function drawUrbanDetails(ctx, W, H) {
     ctx.moveTo(x1, ground - 120 + pseudoRand(i, 30));
     ctx.quadraticCurveTo((x1 + x2) / 2, ground - 90 + pseudoRand(i * 3, 40), x2, ground - 130 + pseudoRand(i * 5, 30));
     ctx.stroke();
+  }
+}
+
+function drawClouds(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.08;
+  for (let i = 0; i < 8; i++) {
+    const cx = pseudoRand(i * 47, W);
+    const cy = pseudoRand(i * 23, H * 0.25);
+    const cw = pseudoRand(i * 31, 80) + 40;
+    const ch = pseudoRand(i * 17, 20) + 10;
+    
+    ctx.fillStyle = '#607090';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, cw, ch, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#506080';
+    ctx.beginPath();
+    ctx.ellipse(cx - cw * 0.3, cy + ch * 0.2, cw * 0.6, ch * 0.7, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawDistantLights(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.03;
+  for (let i = 0; i < 25; i++) {
+    const lx = pseudoRand(i * 53, W);
+    const ly = pseudoRand(i * 29, H * 0.4);
+    const color = i % 3 === 0 ? '#ff8040' : (i % 3 === 1 ? '#4080ff' : '#40ff80');
+    
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(lx, ly, pseudoRand(i * 11, 3) + 1, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawSmog(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.05;
+  const smogGrad = ctx.createLinearGradient(0, H * 0.5, 0, H);
+  smogGrad.addColorStop(0, 'transparent');
+  smogGrad.addColorStop(0.3, '#303040');
+  smogGrad.addColorStop(0.7, '#404050');
+  smogGrad.addColorStop(1, '#505060');
+  ctx.fillStyle = smogGrad;
+  ctx.fillRect(0, H * 0.5, W, H * 0.5);
+  ctx.restore();
+}
+
+function drawWaterDrips(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.15;
+  for (let i = 0; i < 20; i++) {
+    const wx = pseudoRand(i * 37, W);
+    const wy = pseudoRand(i * 43, H * 0.6);
+    const wh = pseudoRand(i * 19, 30) + 10;
+    
+    ctx.fillStyle = '#204030';
+    ctx.fillRect(wx, wy, 2, wh);
+    
+    ctx.fillStyle = '#305040';
+    ctx.fillRect(wx + 1, wy + wh - 5, 2, 5);
+  }
+  ctx.restore();
+}
+
+function drawSewerMoss(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.1;
+  for (let i = 0; i < 15; i++) {
+    const mx = pseudoRand(i * 41, W);
+    const my = pseudoRand(i * 29, H * 0.7) + H * 0.2;
+    const ms = pseudoRand(i * 13, 25) + 15;
+    
+    ctx.fillStyle = '#2a4020';
+    ctx.beginPath();
+    ctx.arc(mx, my, ms, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#3a5030';
+    ctx.beginPath();
+    ctx.arc(mx + ms * 0.3, my + ms * 0.2, ms * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawPipes(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.2;
+  for (let i = 0; i < 12; i++) {
+    const px = pseudoRand(i * 47, W);
+    const py = pseudoRand(i * 31, H * 0.4);
+    const pl = pseudoRand(i * 17, 60) + 30;
+    const pt = pseudoRand(i * 23, 8) + 4;
+    
+    ctx.fillStyle = '#1a1a20';
+    ctx.fillRect(px, py, pl, pt);
+    
+    ctx.fillStyle = '#2a2a30';
+    ctx.fillRect(px, py, pl, 2);
+    
+    ctx.fillStyle = '#3a3a40';
+    ctx.fillRect(px + pl - 10, py - 2, 10, pt + 4);
+  }
+  ctx.restore();
+}
+
+function drawParkBench(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.15;
+  const benchPositions = [300, 900, 1500, 2100, 2700];
+  benchPositions.forEach(bx => {
+    ctx.fillStyle = '#2a2010';
+    ctx.fillRect(bx, H - 70, 40, 8);
+    ctx.fillRect(bx + 5, H - 62, 4, 15);
+    ctx.fillRect(bx + 31, H - 62, 4, 15);
+    
+    ctx.fillStyle = '#3a2818';
+    ctx.fillRect(bx, H - 70, 40, 2);
+  });
+  ctx.restore();
+}
+
+function drawFountain(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.12;
+  const fx = W * 0.5;
+  const fy = H - 50;
+  
+  ctx.fillStyle = '#1a2a30';
+  ctx.beginPath();
+  ctx.ellipse(fx, fy, 40, 15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.fillStyle = '#2a3a40';
+  ctx.beginPath();
+  ctx.ellipse(fx, fy - 5, 30, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.fillStyle = '#3a4a50';
+  ctx.beginPath();
+  ctx.ellipse(fx, fy - 8, 20, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.restore();
+}
+
+function drawFireflies(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.2;
+  for (let i = 0; i < 15; i++) {
+    const fx = pseudoRand(i * 41, W);
+    const fy = pseudoRand(i * 37, H * 0.6);
+    const color = i % 2 === 0 ? '#c0f080' : '#80f0c0';
+    
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(fx, fy, 2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.1;
+    ctx.beginPath();
+    ctx.arc(fx, fy, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 0.2;
+  }
+  ctx.restore();
+}
+
+function drawClockHands(ctx, W, H) {
+  ctx.save();
+  const cx = W * 0.5;
+  const cy = H * 0.25;
+  
+  ctx.strokeStyle = '#2a1a0a';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + 20, cy + 30);
+  ctx.stroke();
+  
+  ctx.strokeStyle = '#1a0a00';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx - 15, cy + 25);
+  ctx.stroke();
+  
+  ctx.fillStyle = '#3a2a1a';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.restore();
+}
+
+function drawPendulum(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.1;
+  const px = W * 0.5;
+  const py = H * 0.35;
+  
+  ctx.fillStyle = '#2a1a0a';
+  ctx.fillRect(px - 2, py, 4, 40);
+  
+  ctx.fillStyle = '#3a2a1a';
+  ctx.beginPath();
+  ctx.arc(px, py + 40, 8, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.restore();
+}
+
+function drawClockMechanism(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.08;
+  
+  for (let i = 0; i < 8; i++) {
+    const mx = pseudoRand(i * 43, W);
+    const my = pseudoRand(i * 29, H * 0.3);
+    const mr = pseudoRand(i * 17, 15) + 8;
+    
+    ctx.fillStyle = '#2a1a0a';
+    ctx.beginPath();
+    ctx.arc(mx, my, mr, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#3a2a1a';
+    ctx.beginPath();
+    ctx.arc(mx, my, mr * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  ctx.restore();
+}
+
+function drawGlowingMushrooms(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.15;
+  const mushroomColors = ['#80c040', '#c08040', '#40c080', '#8040c0'];
+  
+  for (let i = 0; i < 18; i++) {
+    const mx = pseudoRand(i * 41, W);
+    const my = pseudoRand(i * 37, H * 0.7) + H * 0.15;
+    const color = mushroomColors[i % mushroomColors.length];
+    
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.ellipse(mx, my, 6, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.08;
+    ctx.beginPath();
+    ctx.arc(mx, my - 2, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 0.15;
+  }
+  ctx.restore();
+}
+
+function drawMagicParticles(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.1;
+  const magicColors = ['#c080ff', '#80ffc0', '#ffc080', '#80c0ff'];
+  
+  for (let i = 0; i < 25; i++) {
+    const px = pseudoRand(i * 47, W);
+    const py = pseudoRand(i * 31, H * 0.6);
+    const color = magicColors[i % magicColors.length];
+    
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawAncientTrees(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.12;
+  
+  for (let i = 0; i < 6; i++) {
+    const tx = pseudoRand(i * 59, W);
+    const ty = pseudoRand(i * 43, H * 0.6) + H * 0.2;
+    const th = pseudoRand(i * 23, 80) + 40;
+    const tw = pseudoRand(i * 17, 20) + 10;
+    
+    ctx.fillStyle = '#1a0a10';
+    ctx.fillRect(tx, ty, tw, th);
+    
+    ctx.fillStyle = '#2a1a20';
+    ctx.fillRect(tx + 2, ty, tw - 4, th * 0.3);
+    
+    ctx.fillStyle = '#3a2a30';
+    ctx.beginPath();
+    ctx.arc(tx + tw/2, ty, tw * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawSunriseGlow(ctx, W, H) {
+  ctx.save();
+  const sunriseGrad = ctx.createLinearGradient(0, H * 0.1, 0, H * 0.4);
+  sunriseGrad.addColorStop(0, 'rgba(255, 154, 48, 0.15)');
+  sunriseGrad.addColorStop(0.5, 'rgba(255, 100, 50, 0.08)');
+  sunriseGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = sunriseGrad;
+  ctx.fillRect(0, H * 0.1, W, H * 0.3);
+  ctx.restore();
+}
+
+function drawRooftopDetails(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.1;
+  
+  // Chimneys
+  for (let i = 0; i < 8; i++) {
+    const cx = pseudoRand(i * 41, W);
+    const cy = pseudoRand(i * 37, H * 0.4);
+    const ch = pseudoRand(i * 19, 25) + 15;
+    const cw = pseudoRand(i * 13, 12) + 8;
+    
+    ctx.fillStyle = '#1a1008';
+    ctx.fillRect(cx, cy, cw, ch);
+    
+    ctx.fillStyle = '#2a1810';
+    ctx.fillRect(cx + 2, cy, cw - 4, 5);
+  }
+  
+  // Antennas
+  for (let i = 0; i < 5; i++) {
+    const ax = pseudoRand(i * 53, W);
+    const ay = pseudoRand(i * 29, H * 0.3);
+    const ah = pseudoRand(i * 17, 30) + 20;
+    
+    ctx.fillStyle = '#1a1008';
+    ctx.fillRect(ax, ay, 2, ah);
+    
+    ctx.fillStyle = '#2a1810';
+    ctx.fillRect(ax - 1, ay, 4, 5);
+  }
+  
+  ctx.restore();
+}
+
+function drawDistantCity(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.05;
+  
+  for (let i = 0; i < 12; i++) {
+    const dx = pseudoRand(i * 47, W);
+    const dy = H * 0.5 + pseudoRand(i * 23, H * 0.2);
+    const dh = pseudoRand(i * 19, 40) + 20;
+    const dw = pseudoRand(i * 13, 15) + 10;
+    
+    ctx.fillStyle = '#1a1008';
+    ctx.fillRect(dx, dy, dw, dh);
+    
+    // Windows
+    ctx.fillStyle = '#2a1810';
+    for (let wy = dy + 10; wy < dy + dh - 5; wy += 12) {
+      for (let wx = dx + 3; wx < dx + dw - 3; wx += 8) {
+        if (pseudoRand(wx + wy, 1) > 0.4) {
+          ctx.fillRect(wx, wy, 4, 6);
+        }
+      }
+    }
+  }
+  
+  ctx.restore();
+}
+
+function drawGeeseSilhouettes(ctx, W, H) {
+  ctx.save();
+  ctx.globalAlpha = 0.08;
+  
+  for (let i = 0; i < 6; i++) {
+    const gx = pseudoRand(i * 43, W);
+    const gy = pseudoRand(i * 31, H * 0.2);
+    const gs = pseudoRand(i * 17, 8) + 5;
+    
+    ctx.fillStyle = '#1a1008';
+    // Simple goose silhouette
+    ctx.beginPath();
+    ctx.moveTo(gx, gy);
+    ctx.lineTo(gx + gs, gy + gs * 0.3);
+    ctx.lineTo(gx + gs * 2, gy);
+    ctx.lineTo(gx + gs * 1.5, gy - gs * 0.2);
+    ctx.lineTo(gx + gs, gy);
+    ctx.fill();
+  }
+  
+  ctx.restore();
+}
+
+// Missing functions that are referenced in the zone definitions
+function drawAlcantarillaVisuals(ctx, W, H) {
+  // Placeholder for sewer visuals
+  ctx.fillStyle = '#1a1a10';
+  ctx.fillRect(0, H - 60, W, 60);
+}
+
+function drawAlcantarillaCollisions(ctx, W, H) {
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, H - 60, W, 60);
+}
+
+function drawParqueVisuals(ctx, W, H) {
+  // Placeholder for park visuals
+  ctx.fillStyle = '#0a1a10';
+  ctx.fillRect(0, H - 60, W, 60);
+}
+
+function drawParqueCollisions(ctx, W, H) {
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, H - 60, W, 60);
+}
+
+function drawTorreVisuals(ctx, W, H) {
+  // Placeholder for tower visuals
+  ctx.fillStyle = '#1a1008';
+  ctx.fillRect(0, H - 60, W, 60);
+}
+
+function drawTorreCollisions(ctx, W, H) {
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, H - 60, W, 60);
+}
+
+function drawBosqueVisuals(ctx, W, H) {
+  // Placeholder for forest visuals
+  ctx.fillStyle = '#0a0a10';
+  ctx.fillRect(0, H - 60, W, 60);
+}
+
+function drawBosqueCollisions(ctx, W, H) {
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, H - 60, W, 60);
+}
+
+function drawTejadoVisuals(ctx, W, H) {
+  // Placeholder for rooftop visuals
+  ctx.fillStyle = '#1a1008';
+  ctx.fillRect(0, H - 60, W, 60);
+}
+
+function drawTejadoCollisions(ctx, W, H) {
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, H - 60, W, 60);
+}
+
+function drawClockFace(ctx, W, H) {
+  ctx.save();
+  const cx = W * 0.5;
+  const cy = H * 0.25;
+  
+  ctx.fillStyle = '#2a1a0a';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 40, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.fillStyle = '#3a2a1a';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 35, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Clock numbers
+  ctx.fillStyle = '#4a3a2a';
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * 30 - 90) * Math.PI / 180;
+    const nx = cx + Math.cos(angle) * 28;
+    const ny = cy + Math.sin(angle) * 28;
+    ctx.beginPath();
+    ctx.arc(nx, ny, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  ctx.restore();
+}
+
+function drawGear(ctx, x, y, radius, color) {
+  ctx.save();
+  ctx.fillStyle = color;
+  
+  // Main gear body
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Gear teeth
+  const teeth = 8;
+  for (let i = 0; i < teeth; i++) {
+    const angle = (i * 360 / teeth) * Math.PI / 180;
+    const tx = x + Math.cos(angle) * (radius + 3);
+    const ty = y + Math.sin(angle) * (radius + 3);
+    ctx.beginPath();
+    ctx.arc(tx, ty, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  // Center hole
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.arc(x, y, radius * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.restore();
+}
+
+function tiledFog(ctx, W, H, color) {
+  ctx.fillStyle = color;
+  const tileSize = 64;
+  for (let x = 0; x < W; x += tileSize) {
+    for (let y = 0; y < H; y += tileSize) {
+      ctx.fillRect(x, y, tileSize, tileSize);
+    }
   }
 }
 

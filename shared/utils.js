@@ -35,8 +35,8 @@ function defaultSave() {
 
 function defaultCfg() {
   return {
-    audio:    { musica: 70, efectos: 80, ambiente: 50 },
-    graficos: { calidad: 'media', particulas: true, vsync: true },
+    audio:    { musica: 70, efectos: 80, ambiente: 50, maestro: 100, calidad: 'alta' },
+    graficos: { calidad: 'media', particulas: true, vsync: true, brillo: 100, contraste: 100, sombras: true, antialiasing: true },
     controles: {
       izq:    'ArrowLeft',
       der:    'ArrowRight',
@@ -48,8 +48,11 @@ function defaultCfg() {
       pausa:  'Escape',
       mapa:   'KeyM',
       inv:    'KeyI',
+      habilidad: 'KeyC',
+      screenshot: 'F12',
     },
-    juego: { autoGuardar: true, tutoriales: true, subtitulos: true, idioma: 'es' },
+    juego: { autoGuardar: true, tutoriales: true, subtitulos: true, idioma: 'es', camaraSuave: true, mostrarFPS: false, developerMode: false },
+    accesibilidad: { altoContraste: false, daltonismo: false, textoGrande: false, reducirMovimiento: false },
   };
 }
 

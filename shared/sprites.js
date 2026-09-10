@@ -4,6 +4,7 @@ const ASSETS = {
   ready: false,
   progress: 0,
   listeners: [],
+  useSVG: true,
 };
 
 function resolveAsset(path) {
@@ -95,7 +96,14 @@ function pxRect(c, x, y, w, h, color) {
   ctx.fillRect(x, y, w, h);
 }
 
-function genPigeonSprite(state, facing, wing2) {
+function genPigeonSprite(state, facing, wing2, animFrame = 0) {
+  if (ASSETS.useSVG && window.SVG_SYSTEM) {
+    const svg = window.SVG_SYSTEM.getSVG('pigeon', state, facing);
+    if (svg) {
+      return window.SVG_SYSTEM.svgToCanvas(svg, 30, 28);
+    }
+  }
+  
   const c = makeCanvas(30, 28);
   const ctx = c.getContext('2d');
   const flip = facing < 0;
@@ -106,6 +114,9 @@ function genPigeonSprite(state, facing, wing2) {
   const attack = state === 'attack';
   const jump   = state === 'jump' || state === 'fall';
   const dash   = state === 'dash';
+  const hurt   = state === 'hurt';
+  const climb  = state === 'climb';
+  const pickup = state === 'pickup';
 
   ctx.fillStyle = O;
   ctx.fillRect(M(1) - 1, 12, 9, 6);
@@ -179,6 +190,26 @@ function genPigeonSprite(state, facing, wing2) {
   ctx.fillStyle = 'rgba(40,40,80,0.5)';
   ctx.fillRect(M(20) - 1, 1, 5, 1);
 
+  // Hurt state - red flash
+  if (hurt) {
+    ctx.fillStyle = 'rgba(255,0,0,0.3)';
+    ctx.fillRect(M(8) - 1, 7, 15, 13);
+  }
+  
+  // Pickup state - reaching forward
+  if (pickup) {
+    ctx.fillStyle = '#e8c040';
+    ctx.fillRect(M(23) - 1, 4, 4, 2);
+    ctx.fillStyle = '#c09020';
+    ctx.fillRect(M(23) - 1, 6, 3, 2);
+  }
+  
+  // Climb state - clinging
+  if (climb) {
+    ctx.fillStyle = '#8a90c0';
+    ctx.fillRect(M(9) + 1, 9, 4, 7);
+  }
+
   if (attack) {
 
     ctx.fillStyle = '#e8c040';
@@ -250,7 +281,14 @@ function genPigeonSprite(state, facing, wing2) {
   return c;
 }
 
-function genCatSprite(aggro) {
+function genCatSprite(aggro, hurt = false) {
+  if (ASSETS.useSVG && window.SVG_SYSTEM) {
+    const svg = window.SVG_SYSTEM.getSVG('cat', aggro);
+    if (svg) {
+      return window.SVG_SYSTEM.svgToCanvas(svg, 28, 24);
+    }
+  }
+  
   const c = makeCanvas(28, 24);
   const body = aggro ? '#808070' : PALETTE.cat;
   const head = aggro ? '#a0a090' : PALETTE.catHead;
@@ -278,10 +316,24 @@ function genCatSprite(aggro) {
     ctx_stroke(c, 6, 6, 1, 8, '#ff4040');
     ctx_stroke(c, 22, 7, 1, 6, '#ff4040');
   }
+  
+  if (hurt) {
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = 'rgba(255,0,0,0.3)';
+    ctx.fillRect(6, 8, 16, 14);
+  }
+  
   return c;
 }
 
-function genRatSprite() {
+function genRatSprite(hurt = false) {
+  if (ASSETS.useSVG && window.SVG_SYSTEM) {
+    const svg = window.SVG_SYSTEM.getSVG('rat');
+    if (svg) {
+      return window.SVG_SYSTEM.svgToCanvas(svg, 20, 16);
+    }
+  }
+  
   const c = makeCanvas(20, 16);
 
   pxRect(c, 1, 8, 5, 2, PALETTE.ratTail);
@@ -299,10 +351,24 @@ function genRatSprite() {
   pxRect(c, 19, 4, 2, 2, PALETTE.ratEye);
 
   pxRect(c, 18, 7, 2, 1, '#fff');
+  
+  if (hurt) {
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = 'rgba(255,0,0,0.3)';
+    ctx.fillRect(4, 4, 12, 10);
+  }
+  
   return c;
 }
 
-function genCrowSprite(aggro) {
+function genCrowSprite(aggro, hurt = false) {
+  if (ASSETS.useSVG && window.SVG_SYSTEM) {
+    const svg = window.SVG_SYSTEM.getSVG('crow', aggro);
+    if (svg) {
+      return window.SVG_SYSTEM.svgToCanvas(svg, 26, 24);
+    }
+  }
+  
   const c = makeCanvas(26, 24);
 
   pxRect(c, 3, 6, 6, 10, PALETTE.crowWing);
@@ -323,6 +389,13 @@ function genCrowSprite(aggro) {
 
   const eye = aggro ? PALETTE.crowEyeAggro : PALETTE.crowEye;
   pxRect(c, 11, 2, 3, 3, eye);
+  
+  if (hurt) {
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = 'rgba(255,0,0,0.3)';
+    ctx.fillRect(6, 4, 14, 16);
+  }
+  
   return c;
 }
 
@@ -356,7 +429,7 @@ function ctx_stroke(c, x, y, w, h, color) {
 const SPRITES = {};
 
 function buildSprites() {
-  const states = ['idle', 'walk', 'run', 'jump', 'fall', 'glide', 'fly', 'wallslide', 'dash', 'attack'];
+  const states = ['idle', 'walk', 'run', 'jump', 'fall', 'glide', 'fly', 'wallslide', 'dash', 'attack', 'hurt', 'climb', 'pickup'];
   states.forEach(st => {
     SPRITES[`pigeon_${st}_r`] = genPigeonSprite(st, 1);
     SPRITES[`pigeon_${st}_l`] = genPigeonSprite(st, -1);
@@ -366,8 +439,21 @@ function buildSprites() {
     SPRITES[`pigeon_${st}2_r`] = genPigeonSprite(st, 1, true);
     SPRITES[`pigeon_${st}2_l`] = genPigeonSprite(st, -1, true);
   });
+  
+  // Animation frames for walking
+  for (let i = 0; i < 4; i++) {
+    SPRITES[`pigeon_walk_${i}_r`] = genPigeonSprite('walk', 1, false, i);
+    SPRITES[`pigeon_walk_${i}_l`] = genPigeonSprite('walk', -1, false, i);
+  }
+  
+  // Animation frames for flying
+  for (let i = 0; i < 3; i++) {
+    SPRITES[`pigeon_fly_anim_${i}_r`] = genPigeonSprite('fly', 1, false, i);
+    SPRITES[`pigeon_fly_anim_${i}_l`] = genPigeonSprite('fly', -1, false, i);
+  }
   SPRITES.gato      = genCatSprite(false);
   SPRITES.gato_agro = genCatSprite(true);
+  SPRITES.gato_hurt  = genCatSprite(false, true);
   SPRITES.gato_grande = (() => {
     const g = genCatSprite(false);
     const big = makeCanvas(36, 30);
@@ -375,7 +461,15 @@ function buildSprites() {
     ctx.drawImage(g, 0, 0, g.width, g.height, 0, 0, 36, 30);
     return big;
   })();
+  SPRITES.gato_grande_agro = (() => {
+    const g = genCatSprite(true);
+    const big = makeCanvas(36, 30);
+    const ctx = big.getContext('2d');
+    ctx.drawImage(g, 0, 0, g.width, g.height, 0, 0, 36, 30);
+    return big;
+  })();
   SPRITES.rata      = genRatSprite();
+  SPRITES.rata_hurt  = genRatSprite(true);
   SPRITES.rata_voladora = (() => {
     const r = genRatSprite();
     const c = makeCanvas(24, 20);
@@ -388,8 +482,22 @@ function buildSprites() {
     ctx.fillRect(18, 0, 4, 4);
     return c;
   })();
+  SPRITES.rata_voladora_hurt = (() => {
+    const r = genRatSprite(true);
+    const c = makeCanvas(24, 20);
+    const ctx = c.getContext('2d');
+    ctx.drawImage(r, 0, 0, r.width, r.height, 2, 2, 18, 14);
+    ctx.fillStyle = '#4a2a3a';
+    ctx.fillRect(0, 4, 6, 4);
+    ctx.fillRect(4, 0, 4, 4);
+    ctx.fillRect(18, 4, 6, 4);
+    ctx.fillRect(18, 0, 4, 4);
+    return c;
+  })();
   SPRITES.cuervo    = genCrowSprite(false);
   SPRITES.cuervo_agro  = genCrowSprite(true);
+  SPRITES.cuervo_hurt   = genCrowSprite(false, true);
+  SPRITES.cuervo_agro_hurt = genCrowSprite(true, true);
   SPRITES.jefe_cuervo = (() => {
     const c = makeCanvas(60, 50);
     const ctx = c.getContext('2d');
@@ -411,6 +519,41 @@ function buildSprites() {
     ctx.fillRect(24, 28, 16, 5);
     ctx.fillStyle = '#a07018';
     ctx.fillRect(25, 33, 14, 3);
+    
+    // Aura effect
+    ctx.fillStyle = 'rgba(192, 64, 255, 0.1)';
+    ctx.beginPath();
+    ctx.arc(30, 25, 28, 0, Math.PI * 2);
+    ctx.fill();
+    
+    return c;
+  })();
+  SPRITES.jefe_cuervo_hurt = (() => {
+    const c = makeCanvas(60, 50);
+    const ctx = c.getContext('2d');
+    const bg = genCrowSprite(true, true);
+    ctx.drawImage(bg, 0, 0, bg.width, bg.height, 4, 6, 52, 42);
+
+    for (let i = 0; i < 7; i++) {
+      pxRect(c, 10 + i * 6, 10 - i + 2, 3, 10 + i % 3, PALETTE.bossCrown[i % 2]);
+    }
+
+    ctx.fillStyle = PALETTE.bossEye;
+    ctx.fillRect(16, 16, 6, 6);
+    ctx.fillRect(40, 16, 6, 6);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(18, 18, 2, 2);
+    ctx.fillRect(42, 18, 2, 2);
+
+    ctx.fillStyle = '#c09020';
+    ctx.fillRect(24, 28, 16, 5);
+    ctx.fillStyle = '#a07018';
+    ctx.fillRect(25, 33, 14, 3);
+    
+    // Red flash for hurt
+    ctx.fillStyle = 'rgba(255,0,0,0.2)';
+    ctx.fillRect(4, 6, 52, 42);
+    
     return c;
   })();
   SPRITES.jefe_rata = (() => {
@@ -445,6 +588,52 @@ function buildSprites() {
     ctx.fillStyle = '#2a1808';
     ctx.fillRect(2, 22, 5, 3);
     ctx.fillRect(2, 26, 5, 3);
+    
+    // Aura effect
+    ctx.fillStyle = 'rgba(255, 48, 48, 0.1)';
+    ctx.beginPath();
+    ctx.arc(24, 20, 22, 0, Math.PI * 2);
+    ctx.fill();
+    
+    return c;
+  })();
+  SPRITES.jefe_rata_hurt = (() => {
+    const c = makeCanvas(48, 40);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#2a1a0c';
+    ctx.fillRect(4, 12, 36, 22);
+    ctx.fillStyle = '#3a2814';
+    ctx.fillRect(6, 16, 30, 17);
+
+    ctx.fillStyle = '#382410';
+    ctx.fillRect(8, 4, 28, 12);
+
+    ctx.fillStyle = '#4a3018';
+    ctx.fillRect(4, 0, 6, 6);
+    ctx.fillRect(34, 0, 6, 6);
+    ctx.fillStyle = '#c06060';
+    ctx.fillRect(5, 1, 4, 3);
+    ctx.fillRect(35, 1, 4, 3);
+
+    ctx.fillStyle = '#ff3030';
+    ctx.fillRect(14, 7, 4, 4);
+    ctx.fillRect(26, 7, 4, 4);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(15, 7, 2, 2);
+    ctx.fillRect(27, 7, 2, 2);
+
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(18, 13, 3, 3);
+    ctx.fillRect(25, 13, 3, 3);
+
+    ctx.fillStyle = '#2a1808';
+    ctx.fillRect(2, 22, 5, 3);
+    ctx.fillRect(2, 26, 5, 3);
+    
+    // Red flash for hurt
+    ctx.fillStyle = 'rgba(255,0,0,0.2)';
+    ctx.fillRect(4, 4, 40, 30);
+    
     return c;
   })();
 
@@ -466,6 +655,12 @@ function buildSprites() {
   })();
 
   SPRITES.migaja = (() => {
+    if (ASSETS.useSVG && window.SVG_SYSTEM) {
+      const svg = window.SVG_SYSTEM.getSVG('migaja', 1);
+      if (svg) {
+        return window.SVG_SYSTEM.svgToCanvas(svg, 8, 8);
+      }
+    }
     const c = makeCanvas(8, 8);
     pxRect(c, 1, 2, 6, 4, '#c09028');
     pxRect(c, 2, 3, 5, 3, '#e8c840');
@@ -473,6 +668,12 @@ function buildSprites() {
     return c;
   })();
   SPRITES.migaja2 = (() => {
+    if (ASSETS.useSVG && window.SVG_SYSTEM) {
+      const svg = window.SVG_SYSTEM.getSVG('migaja', 2);
+      if (svg) {
+        return window.SVG_SYSTEM.svgToCanvas(svg, 10, 10);
+      }
+    }
     const c = makeCanvas(10, 10);
     pxRect(c, 1, 2, 8, 6, '#c09028');
     pxRect(c, 2, 3, 7, 5, '#e8c840');
@@ -480,6 +681,12 @@ function buildSprites() {
     return c;
   })();
   SPRITES.migaja5 = (() => {
+    if (ASSETS.useSVG && window.SVG_SYSTEM) {
+      const svg = window.SVG_SYSTEM.getSVG('migaja', 5);
+      if (svg) {
+        return window.SVG_SYSTEM.svgToCanvas(svg, 12, 12);
+      }
+    }
     const c = makeCanvas(12, 12);
     pxRect(c, 1, 2, 10, 8, '#b08020');
     pxRect(c, 2, 3, 9, 7, '#ffe060');

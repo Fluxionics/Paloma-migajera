@@ -1,7 +1,8 @@
 const PM_AUDIO = (() => {
-  let ctx = null, masterGain = null, sfxGain = null, musicGain = null;
-  let sfxOn = true, musicOn = true, volume = 0.5;
+  let ctx = null, masterGain = null, sfxGain = null, musicGain = null, ambientGain = null;
+  let sfxOn = true, musicOn = true, ambientOn = true, volume = 0.5;
   let currentMusic = null, currentZone = null;
+  let ambientInterval = null;
 
   function init() {
     if (ctx) return;
@@ -16,11 +17,15 @@ const PM_AUDIO = (() => {
       musicGain = ctx.createGain();
       musicGain.gain.value = 0.25;
       musicGain.connect(masterGain);
+      ambientGain = ctx.createGain();
+      ambientGain.gain.value = 0.15;
+      ambientGain.connect(masterGain);
 
       try {
         const s = JSON.parse(localStorage.getItem('pm_audio') || '{}');
         if (s.sfx === false) { sfxOn = false; sfxGain.gain.value = 0; }
         if (s.music === false) { musicOn = false; musicGain.gain.value = 0; }
+        if (s.ambient === false) { ambientOn = false; ambientGain.gain.value = 0; }
         if (typeof s.vol === 'number') { volume = s.vol; masterGain.gain.value = volume; }
       } catch {}
     } catch {}
@@ -29,7 +34,7 @@ const PM_AUDIO = (() => {
   function resume() { if (ctx && ctx.state === 'suspended') ctx.resume(); }
 
   function savePrefs() {
-    try { localStorage.setItem('pm_audio', JSON.stringify({ sfx: sfxOn, music: musicOn, vol: volume })); } catch {}
+    try { localStorage.setItem('pm_audio', JSON.stringify({ sfx: sfxOn, music: musicOn, ambient: ambientOn, vol: volume })); } catch {}
   }
 
   function toggleSfx() {
@@ -46,9 +51,34 @@ const PM_AUDIO = (() => {
     return musicOn;
   }
 
+  function toggleAmbient() {
+    ambientOn = !ambientOn;
+    if (ambientGain) ambientGain.gain.value = ambientOn ? 0.15 : 0;
+    savePrefs();
+    return ambientOn;
+  }
+
   function setVolume(v) {
     volume = Math.max(0, Math.min(1, v));
     if (masterGain) masterGain.gain.value = volume;
+    savePrefs();
+  }
+
+  function setSfxVolume(v) {
+    const vol = Math.max(0, Math.min(1, v));
+    if (sfxGain) sfxGain.gain.value = sfxOn ? vol * 0.6 : 0;
+    savePrefs();
+  }
+
+  function setMusicVolume(v) {
+    const vol = Math.max(0, Math.min(1, v));
+    if (musicGain) musicGain.gain.value = musicOn ? vol * 0.25 : 0;
+    savePrefs();
+  }
+
+  function setAmbientVolume(v) {
+    const vol = Math.max(0, Math.min(1, v));
+    if (ambientGain) ambientGain.gain.value = ambientOn ? vol * 0.15 : 0;
     savePrefs();
   }
 
@@ -122,6 +152,19 @@ const PM_AUDIO = (() => {
     },
     menuSelect() { sweep(500, 800, 0.06, 'sine', 0.08); },
     menuConfirm() { sweep(600, 1200, 0.1, 'sine', 0.1); },
+    land() { sweep(600, 200, 0.08, 'sine', 0.08); playNoise(0.05, 0.04); },
+    glide() { sweep(300, 450, 0.15, 'sine', 0.06); },
+    wallSlide() { playNoise(0.03, 0.02); },
+    enemyHit() { sweep(700, 300, 0.1, 'square', 0.1); playNoise(0.06, 0.05); },
+    enemyDeath() { sweep(500, 150, 0.2, 'sawtooth', 0.12); sweep(400, 100, 0.15, 'square', 0.08); },
+    bossSpawn() { sweep(200, 600, 0.4, 'sawtooth', 0.15); playNoise(0.2, 0.08); },
+    levelUp() { sweep(600, 1200, 0.15, 'sine', 0.12); sweep(800, 1600, 0.12, 'triangle', 0.1); setTimeout(() => sweep(1000, 2000, 0.2, 'sine', 0.14), 150); },
+    unlockSkill() { sweep(500, 1000, 0.2, 'sine', 0.12); sweep(700, 1400, 0.15, 'triangle', 0.1); sweep(900, 1800, 0.25, 'sine', 0.1); },
+    step() { playNoise(0.02, 0.015); },
+    chainClimb() { playNoise(0.03, 0.02); },
+    wind() { sweep(200, 400, 0.5, 'sine', 0.04); },
+    heal() { sweep(400, 800, 0.15, 'sine', 0.1); sweep(600, 1000, 0.1, 'triangle', 0.08); },
+    pickup() { sweep(800, 1200, 0.1, 'sine', 0.1); playTone(1000, 0.05, 'triangle', 0.06); },
   };
 
   const ZONE_SCALES = {
@@ -142,7 +185,104 @@ const PM_AUDIO = (() => {
 
   function stopMusic() {
     if (musicInterval) { clearInterval(musicInterval); musicInterval = null; }
+    if (ambientInterval) { clearInterval(ambientInterval); ambientInterval = null; }
     currentZone = null;
+  }
+
+  function startAmbient(zoneId) {
+    if (!ctx || !ambientOn || currentZone === zoneId) return;
+    resume();
+    if (ambientInterval) { clearInterval(ambientInterval); ambientInterval = null; }
+    
+    const ambientSounds = {
+      ciudad_alta: { wind: true, distantTraffic: true, birds: false },
+      alcantarillas: { wind: false, water: true, rats: true },
+      parque_palomas: { wind: true, birds: true, water: true },
+      torre_reloj: { wind: true, gears: true, clock: true },
+      bosque_encantado: { wind: true, magic: true, creatures: true },
+      tejado_gansos: { wind: true, geese: true, distantCity: true },
+    };
+    
+    const ambient = ambientSounds[zoneId] || ambientSounds.ciudad_alta;
+    let ambientStep = 0;
+    
+    ambientInterval = setInterval(() => {
+      if (!ctx || !ambientOn || ctx.state !== 'running') return;
+      const t = ctx.currentTime;
+      
+      if (ambient.wind && Math.random() > 0.7) {
+        const windFreq = 150 + Math.random() * 100;
+        const windOsc = ctx.createOscillator();
+        const windGain = ctx.createGain();
+        windOsc.type = 'sine';
+        windOsc.frequency.value = windFreq;
+        windGain.gain.setValueAtTime(0, t);
+        windGain.gain.linearRampToValueAtTime(0.03, t + 0.5);
+        windGain.gain.linearRampToValueAtTime(0, t + 1.5);
+        windOsc.connect(windGain).connect(ambientGain);
+        windOsc.start(t);
+        windOsc.stop(t + 1.5);
+      }
+      
+      if (ambient.water && Math.random() > 0.8) {
+        const waterOsc = ctx.createOscillator();
+        const waterGain = ctx.createGain();
+        waterOsc.type = 'sine';
+        waterOsc.frequency.value = 200 + Math.random() * 50;
+        waterGain.gain.setValueAtTime(0, t);
+        waterGain.gain.linearRampToValueAtTime(0.02, t + 0.3);
+        waterGain.gain.linearRampToValueAtTime(0, t + 0.8);
+        waterOsc.connect(waterGain).connect(ambientGain);
+        waterOsc.start(t);
+        waterOsc.stop(t + 0.8);
+      }
+      
+      if (ambient.birds && Math.random() > 0.85) {
+        const birdFreq = 800 + Math.random() * 400;
+        const birdOsc = ctx.createOscillator();
+        const birdGain = ctx.createGain();
+        birdOsc.type = 'sine';
+        birdOsc.frequency.setValueAtTime(birdFreq, t);
+        birdOsc.frequency.linearRampToValueAtTime(birdFreq * 1.2, t + 0.1);
+        birdOsc.frequency.linearRampToValueAtTime(birdFreq * 0.8, t + 0.2);
+        birdGain.gain.setValueAtTime(0.01, t);
+        birdGain.gain.linearRampToValueAtTime(0.02, t + 0.1);
+        birdGain.gain.linearRampToValueAtTime(0, t + 0.3);
+        birdOsc.connect(birdGain).connect(ambientGain);
+        birdOsc.start(t);
+        birdOsc.stop(t + 0.3);
+      }
+      
+      if (ambient.gears && Math.random() > 0.9) {
+        const gearOsc = ctx.createOscillator();
+        const gearGain = ctx.createGain();
+        gearOsc.type = 'sawtooth';
+        gearOsc.frequency.value = 100 + Math.random() * 50;
+        gearGain.gain.setValueAtTime(0, t);
+        gearGain.gain.linearRampToValueAtTime(0.015, t + 0.1);
+        gearGain.gain.linearRampToValueAtTime(0, t + 0.3);
+        gearOsc.connect(gearGain).connect(ambientGain);
+        gearOsc.start(t);
+        gearOsc.stop(t + 0.3);
+      }
+      
+      if (ambient.magic && Math.random() > 0.88) {
+        const magicOsc = ctx.createOscillator();
+        const magicGain = ctx.createGain();
+        magicOsc.type = 'sine';
+        magicOsc.frequency.setValueAtTime(400, t);
+        magicOsc.frequency.linearRampToValueAtTime(600, t + 0.2);
+        magicOsc.frequency.linearRampToValueAtTime(400, t + 0.4);
+        magicGain.gain.setValueAtTime(0, t);
+        magicGain.gain.linearRampToValueAtTime(0.025, t + 0.2);
+        magicGain.gain.linearRampToValueAtTime(0, t + 0.5);
+        magicOsc.connect(magicGain).connect(ambientGain);
+        magicOsc.start(t);
+        magicOsc.stop(t + 0.5);
+      }
+      
+      ambientStep++;
+    }, 200);
   }
 
   function startMusic(zoneId) {
@@ -207,6 +347,8 @@ const PM_AUDIO = (() => {
 
       step++;
     }, beatMs / 4);
+    
+    startAmbient(zoneId);
   }
 
   return {
@@ -217,9 +359,14 @@ const PM_AUDIO = (() => {
     stopMusic,
     toggleSfx,
     toggleMusic,
+    toggleAmbient,
     setVolume,
+    setSfxVolume,
+    setMusicVolume,
+    setAmbientVolume,
     get sfxOn() { return sfxOn; },
     get musicOn() { return musicOn; },
+    get ambientOn() { return ambientOn; },
   };
 })();
 
